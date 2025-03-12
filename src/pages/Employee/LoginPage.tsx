@@ -1,11 +1,14 @@
 import React from 'react'
 import HelloWorld from '../../components/HelloWorld'
+import Template from './Template'
 
 function LoginPage() {
     return (
-        <div>
-            <HelloWorld />
-        </div>
+        <Template>
+            <div>
+                <p>teste</p>
+            </div>
+        </Template>
     )
 }
 

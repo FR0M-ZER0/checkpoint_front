@@ -29,6 +29,7 @@
   padding: 0;
 }
 
+/* Estilos padrões */
 body {
   font-family: "Inter", sans-serif;
   color: var(--main-black-color);
@@ -41,4 +42,13 @@ h1, h2, h3, h4, h5, h6 {
 
 input {
   display: block;
+}
+
+/* Cores */
+.main-func-color {
+  background-color: var(--main-func-color);
+}
+
+.main-white-text {
+  color: var(--main-white-color);
 }
