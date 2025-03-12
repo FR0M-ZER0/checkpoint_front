@@ -23,12 +23,6 @@
   --main-button-text: #3F4E82;
 }
 
-/* Reset */
-* {
-  margin: 0;
-  padding: 0;
-}
-
 /* Estilos padrões */
 body {
   font-family: "Inter", sans-serif;

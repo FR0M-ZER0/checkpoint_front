@@ -1,15 +1,21 @@
 import React from 'react'
-import HelloWorld from '../../components/HelloWorld'
-import Template from './Template'
+import TemplateWithFilter from './TemplateWithFilter'
 
 function LoginPage() {
-    return (
-        <Template>
-            <div>
-                <p>teste</p>
-            </div>
-        </Template>
-    )
+	return (
+		<TemplateWithFilter filter={
+			<div>
+				<p>oi</p>
+				
+			</div>
+		}>
+			<div>
+				<p>
+					hello world
+				</p>
+			</div>
+		</TemplateWithFilter>
+	)
 }
 
 export default LoginPage

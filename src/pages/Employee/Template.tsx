@@ -8,9 +8,11 @@ type templateProps = {
 
 function Template({ children }: templateProps) {
     return (
-        <div className='min-h-screen min-w-screen flex flex-col items-center'>
+        <div className='min-h-screen min-w-screen'>
             <TopBar/>
-            { children }
+            <div className='w-[90%] flex flex-col items-center' style={{margin: "0 auto"}}>
+                { children }
+            </div>
             <BottomBar/>
         </div>
     )
