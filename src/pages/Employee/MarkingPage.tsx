@@ -51,7 +51,7 @@ function MarkingPage() {
                 <div className='mt-4' onClick={openModal}>
                     <PointCard
                         icon={
-                            <i class="fa-solid fa-battery-full text-6xl"></i>
+                            <i className="fa-solid fa-battery-full text-6xl"></i>
                         }
                         period='Retomada'
                         time='13:00'
@@ -62,7 +62,7 @@ function MarkingPage() {
                 <div className='mt-4' onClick={openModal}>
                     <PointCard
                         icon={
-                            <i class="fa-solid fa-door-closed text-6xl"></i>
+                            <i className="fa-solid fa-door-closed text-6xl"></i>
                         }
                         period='Saída'
                         time='18:00'
