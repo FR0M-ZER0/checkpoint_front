@@ -6,6 +6,7 @@
   --main-red-color: #E3170A;
   --main-white-color: #EDEDED;
   --main-func-color: #33357D;
+  --sec-func-color: #7D3333;
   --main-green-color: #12E382;
   --main-yellow-color: #EBEB28;
   --main-blue-color: #3286F3;
@@ -40,6 +41,10 @@ input {
 /* Cores */
 .main-func-color {
   background-color: var(--main-func-color);
+}
+
+.sec-func-color {
+  background-color: var(--sec-func-color);
 }
 
 .main-green-color {
