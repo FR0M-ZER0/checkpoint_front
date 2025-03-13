@@ -1,11 +1,14 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import TemplateWithFilter from './TemplateWithFilter'
 import Clock from '../../components/Clock'
 import PointCard from '../../components/PointCard'
 import Modal from '../../components/Modal'
+import { formatDate } from '../../utils/formatter'
 
 function MarkingPage() {
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+    const [dayName, setDayName] = useState<string>('')
+    const d: Date = new Date()
 
     const closeModal = (): void => {
         setIsModalVisible(false)
@@ -15,12 +18,20 @@ function MarkingPage() {
         setIsModalVisible(true)
     }
 
+    useEffect(() => {
+        const diasDaSemana = [
+            'domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 
+            'quinta-feira', 'sexta-feira', 'sábado'
+        ]        
+        setDayName(diasDaSemana[d.getDay()])
+    }, [])
+
     return (
         <TemplateWithFilter
             filter={
                 <div className='flex w-full flex-col text-center justify-center'>
-                    <p className='font-light'>01/01/2021</p>
-                    <p className='text-xl'>Quarta-feira</p>
+                    <p className='font-light'>{ formatDate(d) }</p>
+                    <p className='text-xl'>{ dayName }</p>
                 </div>
             }
         >
