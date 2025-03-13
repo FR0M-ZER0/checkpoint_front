@@ -38,7 +38,7 @@ input {
   display: block;
 }
 
-/* Cores */
+/* Cores de background */
 .main-func-color {
   background-color: var(--main-func-color);
 }
@@ -63,8 +63,85 @@ input {
   background-color: var(--main-red-color);
 }
 
+.main-white-color {
+  background-color: var(--main-white-color);
+}
+
+.light-blue-color {
+  background-color: var(--light-blue-color);
+}
+
+.main-orange-color {
+  background-color: var(--main-orange-color);
+}
+
+.dark-blue-color {
+  background-color: var(--dark-blue-color);
+}
+
+.dark-green-color {
+  background-color: var(--dark-green-color);
+}
+
+.main-gray-color {
+  background-color: var(--main-gray-color);
+}
+
+/* Cores de texto */
 .main-white-text {
   color: var(--main-white-color);
+}
+
+.main-black-text {
+  color: var(--main-black-color);
+}
+
+.main-red-text {
+  color: var(--main-red-color);
+}
+
+.main-blue-text {
+  color: var(--main-blue-color);
+}
+
+.main-green-text {
+  color: var(--main-green-color);
+}
+
+.main-yellow-text {
+  color: var(--main-yellow-color);
+}
+
+.main-orange-text {
+  color: var(--main-orange-color);
+}
+
+.main-gray-text {
+  color: var(--main-gray-color);
+}
+
+.sec-func-color-text {
+  color: var(--sec-func-color);
+}
+
+.main-func-color-text {
+  color: var(--main-func-color);
+}
+
+.light-blue-text {
+  color: var(--light-blue-color);
+}
+
+.dark-blue-text {
+  color: var(--dark-blue-color);
+}
+
+.dark-green-text {
+  color: var(--dark-green-color);
+}
+
+.main-button-text {
+  color: var(--main-button-text);
 }
 
 .quicksand {
