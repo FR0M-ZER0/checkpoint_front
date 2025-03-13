@@ -9,7 +9,7 @@ type templateWithFilterProp = {
 function TemplateWithFilter({ children, filter }: templateWithFilterProp) {
     return (
         <Template>
-            <div className='mt-4'>
+            <div className='mt-4 w-full'>
                 { filter }
             </div>
             { children }
