@@ -10,6 +10,7 @@
   --main-green-color: #12E382;
   --main-yellow-color: #EBEB28;
   --main-blue-color: #3286F3;
+  --light-gray-color: #6A6A6A;
 
   /* Cores do calendário */
   --light-blue-color: #0075F2;
@@ -21,6 +22,11 @@
   /* Cores do botão de solicitação */
   --main-gray-color: #BCC6E9;
   --main-button-text: #3F4E82;
+
+  /* Cores dos botões de ajuste de ponto */
+  --btn-blue: #0CA2FF;
+  --btn-red: #DB0A0A;
+  --gray-line: #C9C9C9;
 }
 
 /* Estilos padrões */
@@ -87,6 +93,22 @@ input {
   background-color: var(--main-gray-color);
 }
 
+.light-gray-color {
+  background-color: var(--light-gray-color);
+}
+
+.btn-blue-color {
+  background-color: var(--btn-blue);
+}
+
+.btn-red-color {
+  background-color: var(--btn-red);
+}
+
+.gray-line-color {
+  background-color: var(--gray-line);
+}
+
 /* Cores de texto */
 .main-white-text {
   color: var(--main-white-color);
@@ -142,6 +164,10 @@ input {
 
 .main-button-text {
   color: var(--main-button-text);
+}
+
+.light-gray-text {
+  color: var(--light-gray-color);
 }
 
 .quicksand {
