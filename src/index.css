@@ -45,6 +45,10 @@ input {
 }
 
 /* Cores de background */
+.main-background-color {
+  background-color: var(--main-background-color);
+}
+
 .main-func-color {
   background-color: var(--main-func-color);
 }

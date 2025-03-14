@@ -1,11 +1,24 @@
-import React from 'react'
+import React, { useState } from 'react'
 import TemplateWithFilter from './TemplateWithFilter'
 import DateFilter from '../../components/DateFilter'
 import HoursState from '../../components/HoursState'
 import PointButton from '../../components/PointButton'
 import SquareButton from '../../components/SquareButton'
+import Modal from '../../components/Modal'
 
 function DayPage() {
+    const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+    const [modalType, setModalType] = useState<string>('')
+
+    const openModal = (type: string): void => {
+        setIsModalVisible(true)
+        setModalType(type)
+    }
+
+    const closeModal = (): void => {
+        setIsModalVisible(false)
+    }
+
     return (
         <TemplateWithFilter filter={
             <DateFilter/>
@@ -35,7 +48,7 @@ function DayPage() {
                         </div>
 
                         <div className='flex'>
-                            <div className='h-[64px] w-[64px]'>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit')}>
                                 <SquareButton
                                     text='Edição'
                                     icon={
@@ -44,7 +57,7 @@ function DayPage() {
                                     color='btn-blue-color'
                                 />
                             </div>
-                            <div className='h-[64px] w-[64px]'>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete')}>
                                 <SquareButton
                                     text='Exclusão'
                                     icon={
@@ -75,7 +88,7 @@ function DayPage() {
                         </div>
 
                         <div className='flex'>
-                            <div className='h-[64px] w-[64px]'>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit')}>
                                 <SquareButton
                                     text='Edição'
                                     icon={
@@ -84,7 +97,7 @@ function DayPage() {
                                     color='btn-blue-color'
                                 />
                             </div>
-                            <div className='h-[64px] w-[64px]'>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete')}>
                                 <SquareButton
                                     text='Exclusão'
                                     icon={
@@ -115,7 +128,7 @@ function DayPage() {
                         </div>
 
                         <div className='flex'>
-                            <div className='h-[64px] w-[64px]'>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit')}>
                                 <SquareButton
                                     text='Edição'
                                     icon={
@@ -124,7 +137,7 @@ function DayPage() {
                                     color='btn-blue-color'
                                 />
                             </div>
-                            <div className='h-[64px] w-[64px]'>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete')}>
                                 <SquareButton
                                     text='Exclusão'
                                     icon={
@@ -150,7 +163,7 @@ function DayPage() {
                         </div>
 
                         <div className='flex'>
-                            <div className='h-[64px] w-[64px]'>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit')}>
                                 <SquareButton
                                     text='Edição'
                                     icon={
@@ -159,7 +172,7 @@ function DayPage() {
                                     color='btn-blue-color'
                                 />
                             </div>
-                            <div className='h-[64px] w-[64px]'>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete')}>
                                 <SquareButton
                                     text='Exclusão'
                                     icon={
@@ -173,7 +186,28 @@ function DayPage() {
                     
                 </div>
             </main>
-            
+
+            {
+                isModalVisible &&
+                <Modal title={`Solicitar ${modalType === 'edit' ? 'ajuste' : 'exclusão'}`} onClose={closeModal}>
+                    <form action="">
+                        <div className='mb-[60px]'>
+                            <label htmlFor="observation">Observação</label>
+                            <textarea name="observation" rows={5} className='main-background-color block w-full p-2 rounded'></textarea>
+                        </div>
+
+                        <div className='text-white'>
+                            <button className='main-func-color px-8 py-2 rounded-lg mr-4 cursor-pointer'>
+                                Confirmar
+                            </button>
+
+                            <button className='sec-func-color px-8 py-2 rounded-lg cursor-pointer'>
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </Modal>
+            }
         </TemplateWithFilter>
     )
 }
