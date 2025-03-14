@@ -15,7 +15,7 @@ function BottomBar() {
                 </Link>
             </span>
             <span>
-                <Link to={'/'}>
+                <Link to={'/dia'}>
                     <i className="fa-solid fa-clock text-2xl"></i>
                 </Link>
             </span>
