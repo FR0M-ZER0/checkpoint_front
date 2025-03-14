@@ -1,4 +1,4 @@
-const formatDate = (val) => {
+const formatDate = (val: Date): string => {
     return new Date(val).toLocaleDateString('pt-BR')
 }
 
