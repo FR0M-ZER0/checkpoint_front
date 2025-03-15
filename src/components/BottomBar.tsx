@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router'
+import OptionsPage from '../pages/Employee/OptionsPage'
 
 function BottomBar() {
     return (
@@ -25,9 +26,7 @@ function BottomBar() {
                 </Link>
             </span>
             <span>
-                <Link to={'/'}>
-                    <i className="fa-solid fa-bars text-2xl"></i>
-                </Link>
+                <i className="fa-solid fa-bars text-2xl cursor-pointer"></i>
             </span>
         </nav>
     )
