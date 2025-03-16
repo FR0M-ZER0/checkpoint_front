@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router'
 // Páginas
 import LoginPage from './pages/Employee/LoginPage'
 import MarkingPage from './pages/Employee/MarkingPage'
+import DayPage from './pages/Employee/DayPage'
 
 function App() {
 	/**
@@ -15,6 +16,9 @@ function App() {
 			</Routes>
 			<Routes>
 				<Route path="/" element={<MarkingPage />} />
+			</Routes>
+			<Routes>
+				<Route path="/dia" element={<DayPage />} />
 			</Routes>
 		</BrowserRouter>
 	)
