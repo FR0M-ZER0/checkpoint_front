@@ -4,21 +4,16 @@ import { BrowserRouter, Routes, Route } from 'react-router'
 import LoginPage from './pages/Employee/LoginPage'
 import MarkingPage from './pages/Employee/MarkingPage'
 import DayPage from './pages/Employee/DayPage'
+import Ferias from './pages/Ferias/Ferias'
 
 function App() {
-	/**
-	 * Rotas
-	 */
 	return (
 		<BrowserRouter>
 			<Routes>
 				<Route path="/login" element={<LoginPage />} />
-			</Routes>
-			<Routes>
 				<Route path="/" element={<MarkingPage />} />
-			</Routes>
-			<Routes>
 				<Route path="/dia" element={<DayPage />} />
+				<Route path="/ferias" element={<Ferias />} />
 			</Routes>
 		</BrowserRouter>
 	)
