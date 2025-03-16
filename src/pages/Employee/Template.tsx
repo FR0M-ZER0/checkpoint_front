@@ -8,7 +8,7 @@ type templateProps = {
 
 function Template({ children }: templateProps) {
     return (
-        <div className='min-h-screen min-w-screen'>
+        <div className='min-w-screen' style={{ minHeight: 'calc(100vh + 162px)' }}>
             <TopBar/>
             <div className='w-[90%] flex flex-col items-center' style={{margin: "0 auto"}}>
                 { children }
