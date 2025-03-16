@@ -51,7 +51,7 @@ function OptionsPage({ onClose }: OptionsPageProp) {
                     </p>
 
                     <p className='flex mb-3'>
-                        <Link>
+                        <Link to={'/abono'}>
                             <i className="fa-solid fa-briefcase-medical mr-2 sec-func-color-text"></i>
                             <span>Abonos</span>
                         </Link>
