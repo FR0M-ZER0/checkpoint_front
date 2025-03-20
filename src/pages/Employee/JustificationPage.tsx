@@ -48,20 +48,34 @@ function JustificationPage() {
 
         if (file) formData.append('arquivo', file)
 
-        try {
-            const response = await api.post('/abonar-falta', formData)
-            console.log(response.data)
-
-            setReason('')
-            setJustification('')
-            setAbsenceId('')
-            setFile(null)
-            setFileName('')
-            fetchAbsences()
-            toast.success('Solicitação enviada com sucesso')
-        } catch (err) {
-            console.error(err)
+        if (!absenceId || !reason) {
+            toast.error('Preencha os campos obrigatórios')
+            return
         }
+
+        if (reason === 'doença' || reason === 'luto' || reason === 'compromissos legais') {
+            if (!file) toast.error("Você deve enviar um documento comprabotório")
+            return
+        } else if (reason === 'outros' || reason === 'força maior') {
+            if (!justification) toast.error("Você deve enviar uma justificativa")
+            return
+        } else {
+            try {
+                const response = await api.post('/abonar-falta', formData)
+                console.log(response.data)
+    
+                setReason('')
+                setJustification('')
+                setAbsenceId('')
+                setFile(null)
+                setFileName('')
+                fetchAbsences()
+                toast.success('Solicitação enviada com sucesso')
+            } catch (err) {
+                console.error(err)
+            }
+        }
+
     }
 
     const fetchAbsences = async (): Promise<void> => {
@@ -82,7 +96,7 @@ function JustificationPage() {
         <TemplateWithTitle title='Abonar ausência ou atraso'>
             <form className='mt-8 w-full' onSubmit={handleSubmit}>
                 <div>
-                    <label htmlFor="reason">Motivo</label>
+                    <label htmlFor="reason">Motivo <span className='main-red-text'>*</span></label>
                     <select className='w-full mt-2' name='reason' value={reason} onChange={(e) => setReason(e.target.value)}>
                         <option value="" disabled selected>Selectione uma opção</option>
                         <option value="doença">Doença</option>
@@ -123,7 +137,7 @@ function JustificationPage() {
 
                 <div className='w-full flex justify-between mt-8'>
                     <div className='w-1/2'>
-                        <label htmlFor="data">Data</label>
+                        <label htmlFor="data">Data <span className='main-red-text'>*</span></label>
                         <select className='mt-2 mb-4 w-full' name='data' onChange={(e) => setAbsenceId(e.target.value)} value={absenceId}>
                             {absences.filter(absence => absence.tipo === selectedType).length > 0 ? (
                                 <>
@@ -150,7 +164,13 @@ function JustificationPage() {
                 </div>
 
                 <div className='mt-8'>
-                    <label htmlFor="justificativa">Justificativa</label>
+                    <label htmlFor="justificativa">
+                        Justificativa 
+                        {
+                            reason === 'força maior' || reason === 'outros' &&
+                            <span className='main-red-text'> *</span>
+                        }
+                    </label>
                     <div className='relative'>
                         <textarea name="justificativa" className='w-full mt-2' rows={6} onChange={(e) => setJustification(e.target.value)} value={justification}>
                         </textarea>
