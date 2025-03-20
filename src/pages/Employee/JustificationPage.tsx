@@ -56,6 +56,7 @@ function JustificationPage() {
             setJustification('')
             setAbsenceId('')
             setFile(null)
+            setFileName('')
             fetchAbsences()
             toast.success('Solicitação enviada com sucesso')
         } catch (err) {
