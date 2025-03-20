@@ -59,6 +59,7 @@ function JustificationPage() {
             setJustification('')
             setAbsenceId('')
             setFile(null)
+            fetchAbsences()
         } catch (err) {
             console.error(err)
         }
@@ -66,7 +67,8 @@ function JustificationPage() {
 
     const fetchAbsences = async (): Promise<void> => {
         try {
-            const response = await api.get<Absence[]>('/colaborador/faltas/1')
+            // TODO: Mudar por um id dinâmico
+            const response = await api.get<Absence[]>('colaborador/falta/sem-solicitacao/1')
             setAbsences(response.data)
         } catch (err: unknown) {
             console.error(err)
