@@ -48,11 +48,7 @@ function JustificationPage() {
         if (file) formData.append('arquivo', file)
 
         try {
-            const response = await api.post('/abonar-falta', formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data"
-                }
-            })
+            const response = await api.post('/abonar-falta', formData)
             console.log(response.data)
 
             setReason('')
