@@ -126,16 +126,19 @@ function JustificationPage() {
                         <label htmlFor="data">Data</label>
                         <select className='mt-2 mb-4 w-full' name='data' onChange={(e) => setAbsenceId(e.target.value)} value={absenceId}>
                             {absences.filter(absence => absence.tipo === selectedType).length > 0 ? (
-                                absences
-                                    .filter(absence => absence.tipo === selectedType)
-                                    .map(absence => (
-                                        <option key={absence.id} value={absence.id}>
-                                            {formatDate(absence.criadoEm)}
-                                        </option>
-                                    ))
+                                <>
+                                    <option value="" disabled selected>Selecione uma data</option>
+                                    {absences
+                                        .filter(absence => absence.tipo === selectedType)
+                                        .map(absence => (
+                                            <option key={absence.id} value={absence.id}>
+                                                {formatDate(absence.criadoEm)}
+                                            </option>
+                                        ))}
+                                </>
                             ) : (
                                 <option disabled selected>
-                                    Nenhuma {selectedType === 'Atraso' ? 'atraso' : 'ausência'} registrada
+                                     {selectedType === 'Atraso' ? 'Nenhum atraso registrado' : 'Nenhuma ausência registrada'} 
                                 </option>
                             )}
                         </select>
