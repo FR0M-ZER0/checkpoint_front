@@ -4,6 +4,7 @@ import SubmitButton from '../../components/SubmitButton'
 import calendarSVG from '../../assets/calendar.svg'
 import api from '../../services/api'
 import { formatDate } from '../../utils/formatter'
+import { toast } from 'react-toastify'
 
 interface Absence {
     id: number,
@@ -56,6 +57,7 @@ function JustificationPage() {
             setAbsenceId('')
             setFile(null)
             fetchAbsences()
+            toast.success('Solicitação enviada com sucesso')
         } catch (err) {
             console.error(err)
         }

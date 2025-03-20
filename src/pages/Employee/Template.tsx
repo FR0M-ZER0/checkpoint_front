@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react'
 import TopBar from '../../components/TopBar'
 import BottomBar from '../../components/BottomBar'
+import { ToastContainer } from 'react-toastify'
 
 type templateProps = {
     children?: ReactNode
@@ -14,6 +15,11 @@ function Template({ children }: templateProps) {
                 { children }
             </div>
             <BottomBar/>
+            <ToastContainer
+                hideProgressBar={true}
+                pauseOnFocusLoss={false}
+                theme='colored'
+            />
         </div>
     )
 }
