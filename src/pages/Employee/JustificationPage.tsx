@@ -13,8 +13,13 @@ interface Absence {
 
 function JustificationPage() {
     const [fileName, setFileName] = useState<string>('')
+    const [file, setFile] = useState<File | null>(null)
     const [absences, setAbsences] = useState<Absence[]>([])
     const [selectedType, setSelectedType] = useState<'Atraso' | 'Ausencia'>('Ausencia')
+    const [reason, setReason] = useState<string>('')
+    const [justification, setJustification] = useState<string>('')
+    const [absenceId, setAbsenceId] = useState<string>('')
+
 
     const handleImageClick = (): void => {
         document.getElementById('arquivo')?.click()
@@ -28,14 +33,42 @@ function JustificationPage() {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
         if (event.target.files && event.target.files.length > 0) {
             setFileName(event.target.files[0].name)
+            setFile(event.target.files[0])
         }
     }
 
-    const fetchAbsences = async () => {
+    const handleSubmit = async (event: React.FormEvent): Promise<void> => {
+        event.preventDefault()
+
+        const formData: FormData = new FormData()
+        formData.append('justificativa', justification)
+        formData.append('motivo', reason)
+        formData.append('faltaId', absenceId)
+
+        if (file) formData.append('arquivo', file)
+
         try {
-            const response = await api.get('/colaborador/faltas/1')
-            setAbsences(response.data)
+            const response = await api.post('/abonar-falta', formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            })
+            console.log(response.data)
+
+            setReason('')
+            setJustification('')
+            setAbsenceId('')
+            setFile(null)
         } catch (err) {
+            console.error(err)
+        }
+    }
+
+    const fetchAbsences = async (): Promise<void> => {
+        try {
+            const response = await api.get<Absence[]>('/colaborador/faltas/1')
+            setAbsences(response.data)
+        } catch (err: unknown) {
             console.error(err)
         }
     }
@@ -46,16 +79,16 @@ function JustificationPage() {
 
     return (
         <TemplateWithTitle title='Abonar ausência ou atraso'>
-            <form className='mt-8 w-full'>
+            <form className='mt-8 w-full' onSubmit={handleSubmit}>
                 <div>
                     <label htmlFor="reason">Motivo</label>
-                    <select className='w-full mt-2' name='reason'>
+                    <select className='w-full mt-2' name='reason' value={reason} onChange={(e) => setReason(e.target.value)}>
                         <option value="" disabled selected>Selectione uma opção</option>
-                        <option value="">Doença</option>
-                        <option value="">Luto</option>
-                        <option value="">Compromissos legais</option>
-                        <option value="">Força maior</option>
-                        <option value="">Outros</option>
+                        <option value="doença">Doença</option>
+                        <option value="luto">Luto</option>
+                        <option value="compromissos legais">Compromissos legais</option>
+                        <option value="força maior">Força maior</option>
+                        <option value="outros">Outros</option>
                     </select>
                 </div>
 
@@ -90,7 +123,7 @@ function JustificationPage() {
                 <div className='w-full flex justify-between mt-8'>
                     <div className='w-1/2'>
                         <label htmlFor="data">Data</label>
-                        <select className='mt-2 mb-4 w-full' name='data'>
+                        <select className='mt-2 mb-4 w-full' name='data' onChange={(e) => setAbsenceId(e.target.value)} value={absenceId}>
                             {absences.filter(absence => absence.tipo === selectedType).length > 0 ? (
                                 absences
                                     .filter(absence => absence.tipo === selectedType)
@@ -115,7 +148,7 @@ function JustificationPage() {
                 <div className='mt-8'>
                     <label htmlFor="justificativa">Justificativa</label>
                     <div className='relative'>
-                        <textarea name="justificativa" className='w-full mt-2' rows={6}>
+                        <textarea name="justificativa" className='w-full mt-2' rows={6} onChange={(e) => setJustification(e.target.value)} value={justification}>
                         </textarea>
                         <p className='absolute bottom-[8px] left-[14px] light-gray-text'>
                             { fileName }
