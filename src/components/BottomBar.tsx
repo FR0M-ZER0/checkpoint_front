@@ -1,36 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router'
 import OptionsPage from '../pages/Employee/OptionsPage'
 import { AnimatePresence } from 'framer-motion'
-import { Client } from '@stomp/stompjs'
-import SockJS from 'sockjs-client'
+import { useSelector } from 'react-redux'
+import { RootState } from '../redux/store'
 
 function BottomBar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
-    const [notifications, setNotifications] = useState<number>(0)
-
-    useEffect(() => {
-        const socket = new SockJS('http://localhost:8080/ws')
-        const client = new Client({
-            webSocketFactory: () => socket,
-            onConnect: () => {
-                client.subscribe('/topic/notificacoes', (message) => {
-                    const novaNotificacao = JSON.parse(message.body)
-                    console.log('Nova notificação recebida:', novaNotificacao)
-                    setNotifications((prev) => prev + 1)
-                })
-            },
-            onStompError: (frame) => {
-                console.error('Erro no WebSocket:', frame)
-            },
-        })
-
-        client.activate()
-
-        return () => {
-            client.deactivate()
-        }
-    }, [])
+    const notifications = useSelector((state: RootState) => state.notifications.count)
 
     return (
         <nav className='main-func-color w-full h-[62px] fixed bottom-0 flex main-white-text items-center justify-evenly'>
