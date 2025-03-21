@@ -40,42 +40,43 @@ function JustificationPage() {
 
     const handleSubmit = async (event: React.FormEvent): Promise<void> => {
         event.preventDefault()
-
-        const formData: FormData = new FormData()
-        formData.append('justificativa', justification)
-        formData.append('motivo', reason)
-        formData.append('faltaId', absenceId)
-
-        if (file) formData.append('arquivo', file)
-
+    
         if (!absenceId || !reason) {
             toast.error('Preencha os campos obrigatórios')
             return
         }
-
-        if (reason === 'doença' || reason === 'luto' || reason === 'compromissos legais') {
-            if (!file) toast.error("Você deve enviar um documento comprabotório")
-            return
-        } else if (reason === 'outros' || reason === 'força maior') {
-            if (!justification) toast.error("Você deve enviar uma justificativa")
-            return
-        } else {
-            try {
-                const response = await api.post('/abonar-falta', formData)
-                console.log(response.data)
     
-                setReason('')
-                setJustification('')
-                setAbsenceId('')
-                setFile(null)
-                setFileName('')
-                fetchAbsences()
-                toast.success('Solicitação enviada com sucesso')
-            } catch (err) {
-                console.error(err)
-            }
+        if (['doença', 'luto', 'compromissos legais'].includes(reason) && !file) {
+            toast.error("Você deve enviar um documento comprobatório")
+            return
+        } 
+    
+        if (['outros', 'força maior'].includes(reason) && !justification) {
+            toast.error("Você deve enviar uma justificativa")
+            return
+        } 
+    
+        try {
+            const formData: FormData = new FormData()
+            formData.append('justificativa', justification)
+            formData.append('motivo', reason)
+            formData.append('faltaId', absenceId)
+            if (file) formData.append('arquivo', file)
+    
+            const response = await api.post('/abonar-falta', formData)
+            console.log(response.data)
+    
+            setReason('')
+            setJustification('')
+            setAbsenceId('')
+            setFile(null)
+            setFileName('')
+            fetchAbsences()
+            toast.success('Solicitação enviada com sucesso')
+        } catch (err) {
+            console.error(err)
+            toast.error('Erro ao enviar solicitação')
         }
-
     }
 
     const fetchAbsences = async (): Promise<void> => {
