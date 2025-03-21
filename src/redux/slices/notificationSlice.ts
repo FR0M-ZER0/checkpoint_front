@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import api from '../../services/api'
 
-interface Notification {
+export interface Notification {
     id: number
     mensagem: string
     lida: boolean

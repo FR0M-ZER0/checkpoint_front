@@ -5,11 +5,12 @@ type NotificationCardProp = {
     message: string
     date: string
     color: string
+    openModal: () => void
 }
 
-function NotificationCard({ title, message, date, color }: NotificationCardProp) {
+function NotificationCard({ title, message, date, color, openModal }: NotificationCardProp) {
     return (
-        <div className={`w-full bg-red-300 rounded-xl p-3 max-h-[100px] h-[100px] ${color}`}>
+        <div className={`w-full bg-red-300 rounded-xl p-3 max-h-[100px] h-[100px] ${color}`} onClick={openModal}>
             <div className='flex justify-between'>
                 <p className='font-semibold mb-2'>
                     Pedido de { title }
