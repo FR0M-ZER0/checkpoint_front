@@ -9,7 +9,9 @@ type templateWithTitleProp = {
 function TemplateWithTitle({ children, title }: templateWithTitleProp) {
     return (
         <Template>
-            <h1 className=''>{ title }</h1>
+            <div className='flex w-full mt-4'>
+                <h1 className='text-left text-2xl'>{ title }</h1>
+            </div>
 
             { children }
         </Template>

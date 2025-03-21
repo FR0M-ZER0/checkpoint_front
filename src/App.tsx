@@ -4,7 +4,9 @@ import { BrowserRouter, Routes, Route } from 'react-router'
 import LoginPage from './pages/Employee/LoginPage'
 import MarkingPage from './pages/Employee/MarkingPage'
 import DayPage from './pages/Employee/DayPage'
+import JustificationPage from './pages/Employee/JustificationPage'
 import Ferias from './pages/Ferias/Ferias'
+
 
 function App() {
 	return (
@@ -14,6 +16,9 @@ function App() {
 				<Route path="/" element={<MarkingPage />} />
 				<Route path="/dia" element={<DayPage />} />
 				<Route path="/ferias" element={<Ferias />} />
+			</Routes>
+			<Routes>
+				<Route path="/abono" element={<JustificationPage />} />
 			</Routes>
 		</BrowserRouter>
 	)
