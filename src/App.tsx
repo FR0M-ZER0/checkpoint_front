@@ -5,6 +5,7 @@ import LoginPage from './pages/Employee/LoginPage'
 import MarkingPage from './pages/Employee/MarkingPage'
 import DayPage from './pages/Employee/DayPage'
 import JustificationPage from './pages/Employee/JustificationPage'
+import NotificationsPage from './pages/Employee/NotificationsPage'
 
 function App() {
 	/**
@@ -23,6 +24,9 @@ function App() {
 			</Routes>
 			<Routes>
 				<Route path="/abono" element={<JustificationPage />} />
+			</Routes>
+			<Routes>
+				<Route path="/notificacoes" element={<NotificationsPage />} />
 			</Routes>
 		</BrowserRouter>
 	)
