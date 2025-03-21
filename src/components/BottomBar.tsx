@@ -7,7 +7,7 @@ import { RootState } from '../redux/store'
 
 function BottomBar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
-    const notifications = useSelector((state: RootState) => state.notifications.count)
+    const { count } = useSelector((state: RootState) => state.notifications)
 
     return (
         <nav className='main-func-color w-full h-[62px] fixed bottom-0 flex main-white-text items-center justify-evenly'>
@@ -17,11 +17,11 @@ function BottomBar() {
                 </Link>
             </span>
             <span className="relative">
-                <Link to={'/'}>
+                <Link to={'/notificacoes'}>
                     <i className="fa-solid fa-bell text-2xl"></i>
-                    {notifications > 0 && (
+                    { count > 0 && (
                         <span className="absolute top-[-5px] right-[-5px] bg-red-600 text-white text-xs rounded-full px-2">
-                            {notifications}
+                            { count }
                         </span>
                     )}
                 </Link>

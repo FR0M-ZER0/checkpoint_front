@@ -88,8 +88,8 @@ function MarkingPage() {
                         <p>Registrar início: 02h:08min</p>
                     </div>
 
-                    <div className='text-white'>
-                        <button className='main-func-color px-8 py-2 rounded-lg mr-4 cursor-pointer'>
+                    <div className='text-white w-full flex justify-between'>
+                        <button className='main-func-color px-8 py-2 rounded-lg cursor-pointer'>
                             Confirmar
                         </button>
 

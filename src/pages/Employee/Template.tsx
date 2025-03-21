@@ -1,9 +1,10 @@
-import React, { ReactNode, useEffect } from 'react'
+import React, { ReactNode, use, useEffect } from 'react'
 import TopBar from '../../components/TopBar'
 import BottomBar from '../../components/BottomBar'
 import { ToastContainer } from 'react-toastify'
-import { useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { fetchUnreadNotifications } from '../../redux/slices/notificationSlice'
+import { RootState } from '../../redux/store'
 
 type templateProps = {
     children?: ReactNode
@@ -11,6 +12,7 @@ type templateProps = {
 
 function Template({ children }: templateProps) {
     const dispatch = useDispatch()
+    const { count } = useSelector((state: RootState) => state.notifications)
 
     useEffect(() => {
         // TODO: colocar o id do colaborador logado
@@ -22,8 +24,17 @@ function Template({ children }: templateProps) {
             dispatch({ type: 'websocket/disconnect' })
         }
     }, [dispatch])
+
+    useEffect(() => {
+        if (count > 0) {
+            document.title = `(${count}) Checkpoint`
+        } else {
+            document.title = "Checkpoint - marcação de ponto online"
+        }
+    }, [count])
+
     return (
-        <div className='min-w-screen' style={{ minHeight: 'calc(100vh + 162px)' }}>
+        <div className='min-w-screen pb-[62px]' style={{ minHeight: 'calc(100vh + 162px)' }}>
             <TopBar/>
             <div className='w-[90%] flex flex-col items-center' style={{margin: "0 auto"}}>
                 { children }
