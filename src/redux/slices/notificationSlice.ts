@@ -27,6 +27,14 @@ export const fetchUnreadNotifications = createAsyncThunk(
     }
 )
 
+export const markNotificationAsRead = createAsyncThunk(
+    'notifications/markAsRead',
+    async (notificationId: number) => {
+        const response = await api.put(`/colaborador/notificacao/${notificationId}`)
+        return response.data
+    }
+)
+
 const notificationSlice = createSlice({
     name: 'notifications',
     initialState,
@@ -40,9 +48,17 @@ const notificationSlice = createSlice({
         }
     },
     extraReducers: (builder) => {
-        builder.addCase(fetchUnreadNotifications.fulfilled, (state, action) => {
+        builder
+        .addCase(fetchUnreadNotifications.fulfilled, (state, action) => {
             state.notifications = action.payload
             state.count = action.payload.length
+        })
+        .addCase(markNotificationAsRead.fulfilled, (state, action) => {
+            const updatedNotification = action.payload;
+            state.notifications = state.notifications.map(n =>
+                n.id === updatedNotification.id ? { ...n, lida: true } : n
+            );
+            state.count = state.notifications.filter(n => !n.lida).length;
         })
     }
 })
