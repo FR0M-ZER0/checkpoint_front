@@ -6,21 +6,17 @@ import MarkingPage from './pages/Employee/MarkingPage'
 import DayPage from './pages/Employee/DayPage'
 import JustificationPage from './pages/Employee/JustificationPage'
 import NotificationsPage from './pages/Employee/NotificationsPage'
+import Ferias from './pages/Ferias/Ferias'
+
 
 function App() {
-	/**
-	 * Rotas
-	 */
 	return (
 		<BrowserRouter>
 			<Routes>
 				<Route path="/login" element={<LoginPage />} />
-			</Routes>
-			<Routes>
 				<Route path="/" element={<MarkingPage />} />
-			</Routes>
-			<Routes>
 				<Route path="/dia" element={<DayPage />} />
+				<Route path="/ferias" element={<Ferias />} />
 			</Routes>
 			<Routes>
 				<Route path="/abono" element={<JustificationPage />} />
