@@ -1,19 +1,29 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import api from '../../services/api'
+
+interface Notification {
+    id: number
+    mensagem: string
+    lida: boolean
+    criadoEm: string
+    tipo: string
+}
 
 interface NotificationState {
     count: number
+    notifications: Notification[]
 }
 
 const initialState: NotificationState = {
     count: 0,
+    notifications: []
 }
 
 export const fetchUnreadNotifications = createAsyncThunk(
     'notifications/fetchUnread',
     async (colaboradorId: number) => {
-        const response = await fetch(`http://localhost:8080/colaborador/notificacoes/${colaboradorId}`)
-        const data = await response.json()
-        return data.length
+        const response = await api.get(`/colaborador/notificacoes/${colaboradorId}`)
+        return response.data
     }
 )
 
@@ -26,11 +36,13 @@ const notificationSlice = createSlice({
         },
         reset: (state) => {
             state.count = 0
+            state.notifications = []
         }
     },
     extraReducers: (builder) => {
         builder.addCase(fetchUnreadNotifications.fulfilled, (state, action) => {
-            state.count = action.payload
+            state.notifications = action.payload
+            state.count = action.payload.length
         })
     }
 })
