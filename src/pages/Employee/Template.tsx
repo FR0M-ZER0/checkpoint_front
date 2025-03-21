@@ -34,7 +34,7 @@ function Template({ children }: templateProps) {
     }, [count])
 
     return (
-        <div className='min-w-screen' style={{ minHeight: 'calc(100vh + 162px)' }}>
+        <div className='min-w-screen pb-[62px]' style={{ minHeight: 'calc(100vh + 162px)' }}>
             <TopBar/>
             <div className='w-[90%] flex flex-col items-center' style={{margin: "0 auto"}}>
                 { children }
