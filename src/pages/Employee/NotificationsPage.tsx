@@ -28,7 +28,7 @@ function NotificationsPage() {
     
     return (
         <TemplateWithTitle title='Notificações'>
-            <div className='mt-5'>
+            <div className='mt-5 w-full'>
                 {
                     notifications.map(notification => (
                         <div className='mb-3'>
