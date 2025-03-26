@@ -1,12 +1,15 @@
 import React from 'react'
 import { Link } from 'react-router'
 import { motion } from 'framer-motion'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../redux/store'
 
 type OptionsPageProp = {
     onClose: () => void
 }
 
 function OptionsPage({ onClose }: OptionsPageProp) {
+    const { count } = useSelector((state: RootState) => state.notifications)
     return (
         <motion.div
             className='min-h-screen min-w-screen bg-white fixed top-0 left-0 main-black-text'
@@ -36,11 +39,21 @@ function OptionsPage({ onClose }: OptionsPageProp) {
                         </Link>
                     </p>
 
-                    <p className='flex mb-3'>
-                        <Link>
+                    <p className='flex mb-3 justify-between'>
+                        <Link to={'/notificacoes'}>
                             <i className="fa-solid fa-bell mr-2 main-red-text"></i>
                             <span>Notificações</span>
                         </Link>
+
+                        <p>
+                            {
+                                count > 0 && (
+                                    <span className='text-white text-xs rounded-full px-2 py-1 bg-red-600'>
+                                        { count }
+                                    </span>
+                                )
+                            }
+                        </p>
                     </p>
 
                     <p className='flex mb-3'>
@@ -51,7 +64,7 @@ function OptionsPage({ onClose }: OptionsPageProp) {
                     </p>
 
                     <p className='flex mb-3'>
-                        <Link>
+                        <Link to={'/abono'}>
                             <i className="fa-solid fa-briefcase-medical mr-2 sec-func-color-text"></i>
                             <span>Abonos</span>
                         </Link>
