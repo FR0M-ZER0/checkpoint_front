@@ -13,7 +13,9 @@ function TemplateWithTitle({ children, title }: templateWithTitleProp) {
                 <h1 className='text-left text-2xl'>{ title }</h1>
             </div>
 
-            { children }
+            <div className='w-full'>
+                { children }
+            </div>
         </Template>
     )
 }
