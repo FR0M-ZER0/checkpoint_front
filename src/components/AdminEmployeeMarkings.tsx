@@ -7,9 +7,10 @@ type AdminEmployeeMarkingsProp = {
     pauseTime: string
     resumeTime: string
     endTime: string
+    extraTime?: string
 }
 
-function AdminEmployeeMarkings({ employeeName, startTime, pauseTime, resumeTime, endTime }: AdminEmployeeMarkingsProp) {
+function AdminEmployeeMarkings({ employeeName, startTime, pauseTime, resumeTime, endTime, extraTime }: AdminEmployeeMarkingsProp) {
     return (
         <div>
             <p className='mb-4'>{ employeeName }</p>
@@ -86,6 +87,13 @@ function AdminEmployeeMarkings({ employeeName, startTime, pauseTime, resumeTime,
                     </div>
                 </div> 
             </div>
+
+            {
+                extraTime &&
+                <p className='mt-2 font-bold'>
+                    Horas extras: <span className='dark-green-text'>{ extraTime }</span>
+                </p>
+            }
         </div>
     )
 }
