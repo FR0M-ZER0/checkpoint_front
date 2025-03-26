@@ -10,7 +10,7 @@ function AdminBottomBar() {
                 </Link>
             </span>
             <span>
-                <Link to={'/'}>
+                <Link to={'/admin/marcações'}>
                     <i className="fa-solid fa-timeline text-2xl"></i>
                 </Link>
             </span>

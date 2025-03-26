@@ -10,6 +10,7 @@ import NotificationsPage from './pages/Employee/NotificationsPage'
 // Páginas de admin
 import DashboardPage from './pages/Admin/DashboardPage'
 import AdminNotificationsPage from './pages/Admin/NotificationsPage'
+import MarkingsPage from './pages/Admin/MarkingsPage'
 
 function App() {
 	/**
@@ -39,6 +40,9 @@ function App() {
 			</Routes>
 			<Routes>
 				<Route path="/admin/solicitações" element={<AdminNotificationsPage />} />
+			</Routes>
+			<Routes>
+				<Route path="/admin/marcações" element={<MarkingsPage />} />
 			</Routes>
 		</BrowserRouter>
 	)
