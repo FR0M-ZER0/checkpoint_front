@@ -121,6 +121,10 @@ input, select, textarea {
   background-color: var(--gray-line);
 }
 
+.main-black-color {
+  background-color: var(--main-black-color);
+}
+
 /* Cores de texto */
 .main-white-text {
   color: var(--main-white-color);

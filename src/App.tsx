@@ -7,6 +7,9 @@ import DayPage from './pages/Employee/DayPage'
 import JustificationPage from './pages/Employee/JustificationPage'
 import NotificationsPage from './pages/Employee/NotificationsPage'
 
+// Páginas de admin
+import DashboardPage from './pages/Admin/DashboardPage'
+
 function App() {
 	/**
 	 * Rotas
@@ -27,6 +30,11 @@ function App() {
 			</Routes>
 			<Routes>
 				<Route path="/notificacoes" element={<NotificationsPage />} />
+			</Routes>
+
+			{/* Admin */}
+			<Routes>
+				<Route path="/admin/dashboard" element={<DashboardPage />} />
 			</Routes>
 		</BrowserRouter>
 	)
