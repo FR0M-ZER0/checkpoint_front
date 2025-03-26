@@ -36,7 +36,7 @@ type AdminNotificationCardProp = {
 function AdminNotificationCard({ type, date, name, observation, dayStart, dayEnd, file, reason, justification, period, markingTime, markingType, openModal }: AdminNotificationCardProp) {
     return (
         <div className='w-full rounded-xl p-3 notification-admin-color flex justify-between' onClick={openModal}>
-            <div className='flex flex-col'>
+            <div className='flex flex-col mr-4'>
                 <div className='w-[54px] h-[54px] rounded-full bg-white'>
                 </div>
 
@@ -59,6 +59,18 @@ function AdminNotificationCard({ type, date, name, observation, dayStart, dayEnd
                 <p>
                     { dayStart } até { dayEnd }
                 </p>
+
+                {
+                    observation &&
+                    <div className='mt-4'>
+                        <p className='font-bold'>
+                            Observação:
+                        </p>
+                        <p className='text-sm line-clamp-2'>
+                            { observation }
+                        </p>
+                    </div>
+                }
             </div>
         </div>
     )

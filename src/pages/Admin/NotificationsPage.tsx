@@ -24,6 +24,7 @@ function NotificationsPage() {
                     type='Férias'
                     dayStart='01/02/2022'
                     dayEnd='14/02/2022'
+                    observation='Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet'
                 />
             </div>
         </TemplateWithTitle>
