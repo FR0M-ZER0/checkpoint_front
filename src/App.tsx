@@ -9,6 +9,7 @@ import NotificationsPage from './pages/Employee/NotificationsPage'
 
 // Páginas de admin
 import DashboardPage from './pages/Admin/DashboardPage'
+import AdminNotificationsPage from './pages/Admin/NotificationsPage'
 
 function App() {
 	/**
@@ -35,6 +36,9 @@ function App() {
 			{/* Admin */}
 			<Routes>
 				<Route path="/admin/dashboard" element={<DashboardPage />} />
+			</Routes>
+			<Routes>
+				<Route path="/admin/solicitações" element={<AdminNotificationsPage />} />
 			</Routes>
 		</BrowserRouter>
 	)

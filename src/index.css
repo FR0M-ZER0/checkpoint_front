@@ -27,6 +27,9 @@
   --btn-blue: #0CA2FF;
   --btn-red: #DB0A0A;
   --gray-line: #C9C9C9;
+
+  /* Admin notification */
+  --notification-admin-color: #EADDDD;
 }
 
 /* Estilos padrões */
@@ -123,6 +126,10 @@ input, select, textarea {
 
 .main-black-color {
   background-color: var(--main-black-color);
+}
+
+.notification-admin-color {
+  background-color: var(--notification-admin-color);
 }
 
 /* Cores de texto */

@@ -15,7 +15,7 @@ function AdminBottomBar() {
                 </Link>
             </span>
             <span>
-                <Link to={'/'}>
+                <Link to={'/admin/solicitações'}>
                     <i className="fa-solid fa-bell text-2xl"></i>
                 </Link>
             </span>
