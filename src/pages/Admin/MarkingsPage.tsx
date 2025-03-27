@@ -20,6 +20,9 @@ function MarkingsPage() {
                     pauseTime='04h: 01min'
                     resumeTime='04h: 01min'
                     endTime='04h: 01min'
+                    icon={
+                        <i className="fa-solid fa-pen"></i>
+                    }
                 />
             </div>
 
@@ -31,6 +34,9 @@ function MarkingsPage() {
                     resumeTime='04h: 01min'
                     endTime='04h: 01min'
                     extraTime='02h: 03min'
+                    icon={
+                        <i className="fa-solid fa-pen"></i>
+                    }
                 />
             </div>
 
@@ -41,6 +47,9 @@ function MarkingsPage() {
                     pauseTime='04h: 01min'
                     resumeTime='04h: 01min'
                     endTime='04h: 01min'
+                    icon={
+                        <i className="fa-solid fa-pen"></i>
+                    }
                 />
             </div>
         </TemplateWithTitle>

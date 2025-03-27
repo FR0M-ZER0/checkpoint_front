@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import PointButton from './PointButton'
 
 type AdminEmployeeMarkingsProp = {
@@ -8,12 +8,19 @@ type AdminEmployeeMarkingsProp = {
     resumeTime: string
     endTime: string
     extraTime?: string
+    icon?: ReactNode
+    onClick?: () => void
 }
 
-function AdminEmployeeMarkings({ employeeName, startTime, pauseTime, resumeTime, endTime, extraTime }: AdminEmployeeMarkingsProp) {
+function AdminEmployeeMarkings({ employeeName, startTime, pauseTime, resumeTime, endTime, extraTime, icon, onClick }: AdminEmployeeMarkingsProp) {
     return (
         <div>
-            <p className='mb-4'>{ employeeName }</p>
+            <div className='flex'>
+                <p className='mb-4 mr-2'>{ employeeName }</p>
+                <span onClick={onClick}>
+                    { icon }
+                </span>
+            </div>
             <div className='grid grid-cols-2 gap-y-4'>
                 <div className='flex items-center'>
                     <div className='h-[64px] w-[64px] mr-2'>
