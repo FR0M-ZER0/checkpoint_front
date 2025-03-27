@@ -3,11 +3,14 @@ import TemplateWithFilter from './TemplateWithFilter'
 import Clock from '../../components/Clock'
 import PointCard from '../../components/PointCard'
 import Modal from '../../components/Modal'
-import { formatDate } from '../../utils/formatter'
+import { formatDate, formatTime } from '../../utils/formatter'
+import api from '../../services/api'
+import { toast } from 'react-toastify'
 
 function MarkingPage() {
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
     const [dayName, setDayName] = useState<string>('')
+    const [currentTime, setCurrentTime] = useState<string>('')
     const d: Date = new Date()
 
     const closeModal = (): void => {
@@ -16,6 +19,25 @@ function MarkingPage() {
 
     const openModal = (): void => {
         setIsModalVisible(true)
+
+        const now = new Date()
+        setCurrentTime(formatTime(now))
+    }
+
+    const handleSubmit = async (event, type) => {
+        event.preventDefault()
+        const data = {
+            // TODO: mudar para o id do usuário autenticado
+            colaboradorId: 1,
+            tipo: type
+        }
+
+        try {
+            const response = await api.post('/marcacoes', data)
+            toast.success(response.data)
+        } catch (err) {
+            toast.error(err)
+        }
     }
 
     useEffect(() => {
@@ -85,7 +107,7 @@ function MarkingPage() {
                 isModalVisible &&
                 <Modal title='Marcar ponto' onClose={closeModal}>
                     <div className='mb-[60px]'>
-                        <p>Registrar início: 02h:08min</p>
+                        <p>Registrar início: { currentTime }</p>
                     </div>
 
                     <div className='text-white w-full flex justify-between'>
