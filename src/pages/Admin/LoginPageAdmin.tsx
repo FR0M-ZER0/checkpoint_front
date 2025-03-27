@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from "../../assets/logo.png"
+import logo from "../../assets/logo.png";
 
 function LoginPage() {
   const [email, setEmail] = React.useState('');
@@ -11,13 +11,14 @@ function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 min-h-screen">
-      <div className="mt-18 mb-12">
+    <div className="flex flex-col items-center justify-center p-4 min-h-screen bg-[#EDEDED]">
+      <div className="mt-18 mb-12 text-center">
         <img 
           src={logo}
           alt="Checkpoint Logo" 
           className="w-120" 
         />
+        <h1 className="font-inter text-xl mt-4">Área administrativa</h1>
       </div>
 
       {/* Formulário de Login */}

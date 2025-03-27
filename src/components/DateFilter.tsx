@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { formatDate } from '../utils/formatter'
 
+<<<<<<< HEAD
 function DateFilter({ onDateChange }: { onDateChange: (newDate: string) => void }) {
     // Estamos pegando o dia de amanhã porque por algum motivo ele mostra o dia de hoje como se fosse o de ontem (deve ser por causa do fuso horário)
     const tomorrow = new Date()
@@ -10,12 +11,18 @@ function DateFilter({ onDateChange }: { onDateChange: (newDate: string) => void 
     const [dayName, setDayName] = useState<string>('')
     const [currentDate, setCurrentDate] = useState<string>(tomorrowFormatted)
     const d: Date = new Date(currentDate)
+=======
+function DateFilter() {
+    const [dayName, setDayName] = useState<string>('')
+    const d: Date = new Date()
+>>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
     const dateInputRef = useRef<HTMLInputElement>(null)
 
     const handleDateClick = () => {
         dateInputRef.current?.showPicker()
     }
 
+<<<<<<< HEAD
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newDate = e.target.value
         const newDate2 = new Date(e.target.value)
@@ -50,21 +57,32 @@ function DateFilter({ onDateChange }: { onDateChange: (newDate: string) => void 
         onDateChange(formattedDate2)
     }
 
+=======
+>>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
     useEffect(() => {
         const diasDaSemana: Array<string> = [
             'domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 
             'quinta-feira', 'sexta-feira', 'sábado'
         ]        
         setDayName(diasDaSemana[d.getDay()])
+<<<<<<< HEAD
     }, [currentDate])
 
     return (
         <div className='flex justify-center items-center w-full text-center relative'>
             <i className="fa-solid fa-chevron-left text-xl cursor-pointer" onClick={goBack}></i>
+=======
+    }, [])
+
+    return (
+        <div className='flex justify-center items-center w-full text-center relative'>
+            <i className="fa-solid fa-chevron-left text-xl"></i>
+>>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
             <div className='mx-8'>
                 <p className='font-light'>{ formatDate(d) }</p>
                 <p className='text-xl'>{ dayName }</p>
             </div>
+<<<<<<< HEAD
             <i className="fa-solid fa-chevron-right text-xl cursor-pointer" onClick={goForward}></i>
             <input 
                 type="date" 
@@ -72,10 +90,21 @@ function DateFilter({ onDateChange }: { onDateChange: (newDate: string) => void 
                 className="opacity-0 absolute right-[50px] w-[10px]"
                 value={currentDate}
                 onChange={handleDateChange}
+=======
+            <i className="fa-solid fa-chevron-right text-xl"></i>
+            <input 
+                type="date" 
+                ref={dateInputRef}
+                className="opacity-0 absolute right-0"
+>>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
             />
             <i className="fa-solid fa-calendar-days text-2xl cursor-pointer absolute right-0" onClick={handleDateClick}></i>
         </div>
     )
 }
 
+<<<<<<< HEAD
 export default DateFilter
+=======
+export default DateFilter
+>>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
