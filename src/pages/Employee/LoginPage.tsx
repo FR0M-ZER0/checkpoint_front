@@ -16,14 +16,14 @@ function LoginPage() {
 				<img
 					src={logo}
 					alt="Checkpoint Logo"
-					className="w-120"
+					className="w-54"
 				/>
 			</div>
 
 			{/* Formulário de Login */}
 			<form onSubmit={handleSubmit} className="w-full max-w-md">
 				<div className="mb-6">
-					<label htmlFor="email" className="block text-gray-800 font-medium mb-2 text-lg">
+					<label htmlFor="email">
 						Email
 					</label>
 					<input
@@ -33,12 +33,12 @@ function LoginPage() {
 						onChange={(e) => setEmail(e.target.value)}
 						placeholder="Digite seu email"
 						required
-						className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+						className="w-full rounded-lg focus:border-blue-500 focus:outline-none mt-2"
 					/>
 				</div>
 
 				<div className="mb-6">
-					<label htmlFor="password" className="block text-gray-800 font-medium mb-2 text-lg">
+					<label htmlFor="password">
 						Senha
 					</label>
 					<input
@@ -48,7 +48,7 @@ function LoginPage() {
 						onChange={(e) => setPassword(e.target.value)}
 						placeholder="Digite sua senha"
 						required
-						className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+						className="w-full rounded-lg focus:border-blue-500 focus:outline-none mt-2"
 					/>
 				</div>
 
@@ -56,7 +56,7 @@ function LoginPage() {
 				<div className="mb-8 text-center">
 					<a
 						href="/recuperar-senha"
-						className="text-blue-600 hover:text-blue-800 text-md underline"
+						className="text-blue-600 hover:text-blue-800 underline text-sm"
 					>
 						Esqueci minha senha
 					</a>
@@ -64,13 +64,13 @@ function LoginPage() {
 
 				<button
 					type="submit"
-					className="w-full main-func-color text-white font-bold py-4 px-6 rounded-lg text-lg transition duration-200"
+					className="w-full main-func-color font-semibold main-white-text py-3 rounded-lg transition duration-200"
 				>
 					Entrar
 				</button>
 			</form>
 
-			<footer className="flex flex-col flex-grow justify-end py-4 text-gray-400 text-xs w-full text-center">
+			<footer className="flex flex-col flex-grow justify-end pt-4 text-gray-400 text-xs w-full text-center">
 				Desenvolvido por FR0M_ZER0
 			</footer>
 		</div>
