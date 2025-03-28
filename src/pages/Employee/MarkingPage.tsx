@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, FormEvent } from 'react'
 import TemplateWithFilter from './TemplateWithFilter'
 import Clock from '../../components/Clock'
 import PointCard from '../../components/PointCard'
@@ -25,16 +25,16 @@ function MarkingPage() {
     const openModal = (type: string): void => {
         setIsModalVisible(true)
 
-        const now = new Date()
+        const now: Date = new Date()
         setCurrentTime(formatTime(now))
         setMarkingType(type)
     }
 
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault()
         const data = {
             // TODO: mudar para o id do usuário autenticado
-            colaboradorId: 8,
+            colaboradorId: 9,
             tipo: markingType
         }
 
@@ -43,25 +43,26 @@ function MarkingPage() {
             closeModal()
             fetchTodayMarkings()
             toast.success('Marcação registrada')
-        } catch (err) {
+        } catch (err: unknown) {
+            console.error(err)
             toast.error("Você já fez essa marcação hoje")
         }
     }
 
-    const fetchTodayMarkings = async () => {
+    const fetchTodayMarkings = async (): Promise<void> => {
         try {
-            const response = await api.get(`/marcacoes/colaborador/${8}/hoje`)
+            const response = await api.get(`/marcacoes/colaborador/${9}/hoje`)
             setMarkingStart(formatTimeAndMinute(response.data[0].dataHora))
             setMarkingPause(formatTimeAndMinute(response.data[1].dataHora))
             setMarkingResume(formatTimeAndMinute(response.data[2].dataHora))
             setMarkingEnd(formatTimeAndMinute(response.data[3].dataHora))
-        } catch (err) {
-            console.log(err)
+        } catch (err: unknown) {
+            console.error(err)
         }
     }
 
     useEffect(() => {
-        const diasDaSemana = [
+        const diasDaSemana: string[] = [
             'domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 
             'quinta-feira', 'sexta-feira', 'sábado'
         ]        
