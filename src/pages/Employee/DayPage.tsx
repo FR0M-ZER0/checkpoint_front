@@ -239,7 +239,7 @@ function DayPage() {
                             <textarea name="observation" rows={5} className='main-background-color block w-full p-2 rounded'></textarea>
                         </div>
 
-                        <div className='text-white'>
+                        <div className='text-white flex justify-between'>
                             <button className='main-func-color px-8 py-2 rounded-lg mr-4 cursor-pointer'>
                                 Confirmar
                             </button>
