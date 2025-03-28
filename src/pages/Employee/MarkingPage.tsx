@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, FormEvent } from 'react'
 import TemplateWithFilter from './TemplateWithFilter'
 import Clock from '../../components/Clock'
 import PointCard from '../../components/PointCard'
@@ -25,12 +25,12 @@ function MarkingPage() {
     const openModal = (type: string): void => {
         setIsModalVisible(true)
 
-        const now = new Date()
+        const now: Date = new Date()
         setCurrentTime(formatTime(now))
         setMarkingType(type)
     }
 
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault()
         const data = {
             // TODO: mudar para o id do usuário autenticado
@@ -48,7 +48,7 @@ function MarkingPage() {
         }
     }
 
-    const fetchTodayMarkings = async () => {
+    const fetchTodayMarkings = async (): Promise<void> => {
         try {
             const response = await api.get(`/marcacoes/colaborador/${8}/hoje`)
             setMarkingStart(formatTimeAndMinute(response.data[0].dataHora))
@@ -61,7 +61,7 @@ function MarkingPage() {
     }
 
     useEffect(() => {
-        const diasDaSemana = [
+        const diasDaSemana: string[] = [
             'domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 
             'quinta-feira', 'sexta-feira', 'sábado'
         ]        
