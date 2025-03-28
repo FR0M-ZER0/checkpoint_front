@@ -7,6 +7,7 @@ import SquareButton from '../../components/SquareButton'
 import Modal from '../../components/Modal'
 import api from '../../services/api'
 import { formatStringToTime } from '../../utils/formatter'
+import { calculateWorkTime } from '../../utils/comparisons'
 
 function DayPage() {
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
@@ -15,6 +16,9 @@ function DayPage() {
     const [markingPause, setMarkingPause] = useState<string>('')
     const [markingResume, setMarkingResume] = useState<string>('')
     const [markingEnd, setMarkingEnd] = useState<string>('')
+    const [doneTimeStart, setDonetimeStart] = useState<string>('')
+    const [doneTimePause, setDonetimePause] = useState<string>('')
+    const [doneTimeResume, setDonetimeResume] = useState<string>('')
 
     const openModal = (type: string): void => {
         setIsModalVisible(true)
@@ -42,6 +46,10 @@ function DayPage() {
             setMarkingPause(formatStringToTime(response.data[1].dataHora))
             setMarkingResume(formatStringToTime(response.data[2].dataHora))
             setMarkingEnd(formatStringToTime(response.data[3].dataHora))
+
+            setDonetimeStart(calculateWorkTime(response.data[0].dataHora, response.data[1].dataHora))
+            setDonetimePause(calculateWorkTime(response.data[1].dataHora, response.data[2].dataHora))
+            setDonetimeResume(calculateWorkTime(response.data[2].dataHora, response.data[3].dataHora))
         } catch (err: unknown) {
             console.error(err)
         }
@@ -69,7 +77,7 @@ function DayPage() {
                                 <div className='absolute w-[4px] h-[110px] top-[80px] right-1/2 z-[-1] gray-line-color'></div>
                                 <div className='text-[12px] light-gray-text absolute top-[100px] w-[400px] left-[50px]'>
                                     <p className='font-medium'>Realizado por</p>
-                                    <p className='font-light'>04h:32min</p>
+                                    <p className='font-light'>{doneTimeStart}</p>
                                 </div>
                             </div>
                             <div className='ml-2'>
@@ -109,7 +117,7 @@ function DayPage() {
                                 <div className='absolute w-[4px] h-[110px] top-[80px] right-1/2 z-[-1] gray-line-color'></div>
                                 <div className='text-[12px] light-gray-text absolute top-[100px] w-[400px] left-[50px]'>
                                     <p className='font-medium'>Realizado por</p>
-                                    <p className='font-light'>04h:32min</p>
+                                    <p className='font-light'>{doneTimePause}</p>
                                 </div>
                             </div>
                             <div className='ml-2'>
@@ -149,7 +157,7 @@ function DayPage() {
                                 <div className='absolute w-[4px] h-[110px] top-[80px] right-1/2 z-[-1] gray-line-color'></div>
                                 <div className='text-[12px] light-gray-text absolute top-[100px] w-[400px] left-[50px]'>
                                     <p className='font-medium'>Realizado por</p>
-                                    <p className='font-light'>04h:32min</p>
+                                    <p className='font-light'>{doneTimeResume}</p>
                                 </div>
                             </div>
                             <div className='ml-2'>
