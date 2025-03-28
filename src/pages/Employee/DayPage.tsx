@@ -1,14 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import TemplateWithFilter from './TemplateWithFilter'
 import DateFilter from '../../components/DateFilter'
 import HoursState from '../../components/HoursState'
 import PointButton from '../../components/PointButton'
 import SquareButton from '../../components/SquareButton'
 import Modal from '../../components/Modal'
+import api from '../../services/api'
+import { formatStringToTime } from '../../utils/formatter'
 
 function DayPage() {
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
     const [modalType, setModalType] = useState<string>('')
+    const [markingStart, setMarkingStart] = useState<string>('')
+    const [markingPause, setMarkingPause] = useState<string>('')
+    const [markingResume, setMarkingResume] = useState<string>('')
+    const [markingEnd, setMarkingEnd] = useState<string>('')
 
     const openModal = (type: string): void => {
         setIsModalVisible(true)
@@ -19,6 +25,31 @@ function DayPage() {
         setIsModalVisible(false)
     }
 
+    const getCurrentDate = (): string => {
+        const today = new Date()
+        const year = today.getFullYear()
+        const month = (today.getMonth() + 1).toString().padStart(2, '0')
+        const day = today.getDate().toString().padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
+
+    const fetchDate = async (): Promise<void> => {
+        const currentDate = getCurrentDate()
+        try {
+            // TODO: colocar o id do colaborador logado no sistema
+            const response = await api.get(`/marcacoes/colaborador/9/data/${currentDate}`)
+            setMarkingStart(formatStringToTime(response.data[0].dataHora))
+            setMarkingPause(formatStringToTime(response.data[1].dataHora))
+            setMarkingResume(formatStringToTime(response.data[2].dataHora))
+            setMarkingEnd(formatStringToTime(response.data[3].dataHora))
+        } catch (err: unknown) {
+            console.error(err)
+        }
+    }
+
+    useEffect(() => {
+        fetchDate()
+    }, [])
     return (
         <TemplateWithFilter filter={
             <DateFilter/>
@@ -43,7 +74,7 @@ function DayPage() {
                             </div>
                             <div className='ml-2'>
                                 <p className='text-lg'>Início</p>
-                                <p className='font-light text-sm'>04h:10min</p>
+                                <p className='font-light text-sm'>{markingStart}</p>
                             </div>
                         </div>
 
@@ -83,7 +114,7 @@ function DayPage() {
                             </div>
                             <div className='ml-2'>
                                 <p className='text-lg'>Pausa</p>
-                                <p className='font-light text-sm'>04h:10min</p>
+                                <p className='font-light text-sm'>{markingPause}</p>
                             </div>
                         </div>
 
@@ -123,7 +154,7 @@ function DayPage() {
                             </div>
                             <div className='ml-2'>
                                 <p className='text-lg'>Retomada</p>
-                                <p className='font-light text-sm'>04h:10min</p>
+                                <p className='font-light text-sm'>{markingResume}</p>
                             </div>
                         </div>
 
@@ -158,7 +189,7 @@ function DayPage() {
                             </div>
                             <div className='ml-2'>
                                 <p className='text-lg'>Saída</p>
-                                <p className='font-light text-sm'>04h:10min</p>
+                                <p className='font-light text-sm'>{markingEnd}</p>
                             </div>
                         </div>
 

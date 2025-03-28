@@ -34,7 +34,7 @@ function MarkingPage() {
         event.preventDefault()
         const data = {
             // TODO: mudar para o id do usuário autenticado
-            colaboradorId: 8,
+            colaboradorId: 9,
             tipo: markingType
         }
 
@@ -43,20 +43,21 @@ function MarkingPage() {
             closeModal()
             fetchTodayMarkings()
             toast.success('Marcação registrada')
-        } catch (err) {
+        } catch (err: unknown) {
+            console.error(err)
             toast.error("Você já fez essa marcação hoje")
         }
     }
 
     const fetchTodayMarkings = async (): Promise<void> => {
         try {
-            const response = await api.get(`/marcacoes/colaborador/${8}/hoje`)
+            const response = await api.get(`/marcacoes/colaborador/${9}/hoje`)
             setMarkingStart(formatTimeAndMinute(response.data[0].dataHora))
             setMarkingPause(formatTimeAndMinute(response.data[1].dataHora))
             setMarkingResume(formatTimeAndMinute(response.data[2].dataHora))
             setMarkingEnd(formatTimeAndMinute(response.data[3].dataHora))
-        } catch (err) {
-            console.log(err)
+        } catch (err: unknown) {
+            console.error(err)
         }
     }
 
