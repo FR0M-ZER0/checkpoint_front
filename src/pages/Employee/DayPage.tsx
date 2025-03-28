@@ -36,12 +36,12 @@ function DayPage() {
         const day = today.getDate().toString().padStart(2, '0')
         return `${year}-${month}-${day}`
     }
+    const [currentDate, setCurrentDate] = useState<string>(getCurrentDate())
 
-    const fetchDate = async (): Promise<void> => {
-        const currentDate = getCurrentDate()
+    const fetchDate = async (selectedDate: string): Promise<void> => {
         try {
             // TODO: colocar o id do colaborador logado no sistema
-            const response = await api.get(`/marcacoes/colaborador/9/data/${currentDate}`)
+            const response = await api.get(`/marcacoes/colaborador/9/data/${selectedDate}`)
             setMarkingStart(formatStringToTime(response.data[0].dataHora))
             setMarkingPause(formatStringToTime(response.data[1].dataHora))
             setMarkingResume(formatStringToTime(response.data[2].dataHora))
@@ -55,12 +55,16 @@ function DayPage() {
         }
     }
 
+    const handleDateChange = (newDate: string) => {
+        setCurrentDate(newDate)
+    }
+
     useEffect(() => {
-        fetchDate()
-    }, [])
+        fetchDate(currentDate)
+    }, [currentDate])
     return (
         <TemplateWithFilter filter={
-            <DateFilter/>
+            <DateFilter onDateChange={handleDateChange}/>
         }>
             <div className='mt-4 w-full'>
                 <HoursState/>
