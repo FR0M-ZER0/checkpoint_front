@@ -18,7 +18,11 @@ function DateFilter({ onDateChange }: { onDateChange: (newDate: string) => void 
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newDate = e.target.value
-        setCurrentDate(newDate)
+        const newDate2 = new Date(e.target.value)
+        // TODO: Pelo visto, o toISOString diminui ou aumenta em um dia a data, que ao passar em setCurrentDate, também sofre outro altereção
+        newDate2.setDate(newDate2.getDate() + 1)
+        const formattedDate = newDate2.toISOString().split('T')[0]
+        setCurrentDate(formattedDate)
         onDateChange(newDate)
     }
 
