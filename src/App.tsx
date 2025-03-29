@@ -1,13 +1,12 @@
 import { BrowserRouter, Routes, Route } from 'react-router'; // Importe Routes e Route de react-router-dom
 
-// Páginas
 import LoginPage from './pages/Employee/LoginPage';
 import MarkingPage from './pages/Employee/MarkingPage';
 import DayPage from './pages/Employee/DayPage';
 import JustificationPage from './pages/Employee/JustificationPage';
 import NotificationsPage from './pages/Employee/NotificationsPage';
 import Ferias from './pages/Ferias/Ferias';
-import FolgaPage from './pages/Folga/FolgaPage'; // Importe o componente Folga
+import FolgaPage from './pages/Folga/FolgaPage';
 
 function App() {
     return (
