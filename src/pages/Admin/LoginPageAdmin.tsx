@@ -1,29 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react'
 import logo from "../../assets/logo.png"
-import api from '../../services/api'
 import { toast, ToastContainer } from 'react-toastify'
 import { useNavigate } from 'react-router'
+import api from '../../services/api'
 
 function LoginPage() {
-	const [email, setEmail] = useState<string>('')
-	const [password, setPassword] = useState<string>('')
+	const [email, setEmail] = React.useState('')
+	const [password, setPassword] = React.useState('')
 	const navigate = useNavigate()
 
 	const handleSubmit = async (e: React.FormEvent): Promise<void> => {
 		e.preventDefault()
+
 		const formData = {
 			email,
-			senhaHash: password
+			senha: password
 		}
 
 		try {
-			const response = await api.post('/login', formData)
-			localStorage.setItem("id", response.data.id)
-			localStorage.setItem("nome", response.data.nome)
-			localStorage.setItem("email", response.data.email)
-			localStorage.setItem("criado_em", response.data.criadoEm)
-			localStorage.setItem("ativo", response.data.ativo)
-			navigate('/')
+			const response = await api.post('/admin/login', formData)
+			localStorage.setItem("admin_id", response.data.id)
+			localStorage.setItem("admin_nome", response.data.nome)
+			localStorage.setItem("admin_email", response.data.email)
+			localStorage.setItem("admin_criado_em", response.data.criadoEm)
+			localStorage.setItem("admin_ativo", response.data.ativo)
+			navigate('/admin/dashboard')
 		} catch (err: unknown) {
 			toast.error('Suas credenciais estão erradas')
 			console.error(err)
@@ -31,13 +32,14 @@ function LoginPage() {
 	}
 
 	return (
-		<div className="flex flex-col items-center justify-center p-4 min-h-screen">
-			<div className="mt-18 mb-12">
+		<div className="flex flex-col items-center justify-center p-4 min-h-screen bg-[#EDEDED]">
+			<div className="mt-18 mb-12 text-center">
 				<img
 					src={logo}
 					alt="Checkpoint Logo"
 					className="w-54"
 				/>
+				<p className="text-lg mt-4">Área administrativa</p>
 			</div>
 
 			{/* Formulário de Login */}

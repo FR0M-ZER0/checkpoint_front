@@ -2,10 +2,12 @@ import { BrowserRouter, Routes, Route } from 'react-router'
 
 // Páginas
 import LoginPage from './pages/Employee/LoginPage'
+import LoginPageAdmin from './pages/Admin/LoginPageAdmin'
 import MarkingPage from './pages/Employee/MarkingPage'
 import DayPage from './pages/Employee/DayPage'
 import JustificationPage from './pages/Employee/JustificationPage'
 import NotificationsPage from './pages/Employee/NotificationsPage'
+import Ferias from './pages/Ferias/Ferias'
 
 // Páginas de admin
 import DashboardPage from './pages/Admin/DashboardPage'
@@ -13,19 +15,14 @@ import AdminNotificationsPage from './pages/Admin/NotificationsPage'
 import MarkingsPage from './pages/Admin/MarkingsPage'
 
 function App() {
-	/**
-	 * Rotas
-	 */
 	return (
 		<BrowserRouter>
 			<Routes>
 				<Route path="/login" element={<LoginPage />} />
-			</Routes>
-			<Routes>
+				<Route path="/admin/login" element={<LoginPageAdmin/>} />
 				<Route path="/" element={<MarkingPage />} />
-			</Routes>
-			<Routes>
 				<Route path="/dia" element={<DayPage />} />
+				<Route path="/ferias" element={<Ferias />} />
 			</Routes>
 			<Routes>
 				<Route path="/abono" element={<JustificationPage />} />
