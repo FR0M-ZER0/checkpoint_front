@@ -14,7 +14,7 @@ function App() {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/login" element={<LoginPage />} />
-				<Route path="/loginadmin" element={<LoginPageAdmin/>} />
+				<Route path="/admin/login" element={<LoginPageAdmin/>} />
 				<Route path="/" element={<MarkingPage />} />
 				<Route path="/dia" element={<DayPage />} />
 				<Route path="/ferias" element={<Ferias />} />
