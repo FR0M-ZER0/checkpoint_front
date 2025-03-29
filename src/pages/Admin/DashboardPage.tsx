@@ -2,13 +2,16 @@ import React from 'react'
 import TemplateWithTitle from './TemplateWithTitle'
 import AdminNotificationBar from '../../components/AdminNotificationBar'
 import AdminEmployeeMarkings from '../../components/AdminEmployeeMarkings'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../redux/store'
 
 function DashboardPage() {
+    const { count } = useSelector((state: RootState) => state.solicitations)
     return (
         <TemplateWithTitle title='Olá gestor 1'>
 
             <div className='mt-4'>
-                <AdminNotificationBar text='Notificações' notifications={10}/>
+                <AdminNotificationBar text='Notificações' notifications={count}/>
             </div>
 
             <p className='font-bold mt-8'>Últimas marcações</p>

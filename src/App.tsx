@@ -11,7 +11,7 @@ import Ferias from './pages/Ferias/Ferias'
 
 // Páginas de admin
 import DashboardPage from './pages/Admin/DashboardPage'
-import AdminNotificationsPage from './pages/Admin/NotificationsPage'
+import AdminNotificationsPage from './pages/Admin/SolicitationsPage'
 import MarkingsPage from './pages/Admin/MarkingsPage'
 
 function App() {

@@ -56,9 +56,19 @@ function AdminNotificationCard({ type, date, name, observation, dayStart, dayEnd
                     { type }
                 </p>
 
-                <p>
-                    { dayStart } até { dayEnd }
-                </p>
+                {
+                    period &&
+                    <p className='text-sm'>
+                        Em { period }
+                    </p>
+                }
+
+                {
+                    dayStart && dayEnd &&
+                    <p>
+                        { dayStart } até { dayEnd }
+                    </p>
+                }
 
                 {
                     observation &&
