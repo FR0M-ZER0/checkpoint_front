@@ -1,0 +1,55 @@
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import api from '../../services/api'
+
+export interface Solicitation {
+    id: string
+    marcacaoId: string
+    periodo: string
+    tipo: string
+    status: string
+    observacao: string
+    horario: string
+    criadoEm: string
+}
+
+interface SolicitationState {
+    count: number
+    solicitations: Solicitation[]
+}
+
+const initialState: SolicitationState = {
+    count: 0,
+    solicitations: []
+}
+
+export const fetchPendingSolicitations = createAsyncThunk(
+    'solicitations/fetchPending',
+    async () => {
+        const response = await api.get('/ajuste-ponto/solicitacao/pendentes')
+        return response.data
+    }
+)
+
+export const solicitationSlice = createSlice({
+    name: 'solicitations',
+    initialState,
+    reducers: {
+        incrementSolicitation: (state) => {
+            state.count += 1
+        },
+        resetSolicitation: (state) => {
+            state.count = 0
+            state.solicitations = []
+        }
+    },
+    extraReducers: (builder) => {
+        builder
+        .addCase(fetchPendingSolicitations.fulfilled, (state, action) => {
+            state.solicitations = action.payload
+            state.count = action.payload.length
+        })
+    }
+})
+
+export const { incrementSolicitation, resetSolicitation } = solicitationSlice.actions
+export default solicitationSlice.reducer
