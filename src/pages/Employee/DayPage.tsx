@@ -28,6 +28,7 @@ function DayPage() {
     const [observacao, setObservacao] = useState<string>('')
     const [markingId, setMarkingId] = useState<string>('')
     const [periodo, setPeriodo] = useState<string>('')
+    const [userId, setUserId] = useState<string|null>('')
 
     const openModal = (type: string, id: string, marcacaoPeriodo: string): void => {
         setIsModalVisible(true)
@@ -53,8 +54,7 @@ function DayPage() {
 
     const fetchDate = async (selectedDate: string): Promise<void> => {
         try {
-            // TODO: colocar o id do colaborador logado no sistema
-            const response = await api.get(`/marcacoes/colaborador/9/data/${selectedDate}`)
+            const response = await api.get(`/marcacoes/colaborador/${userId}/data/${selectedDate}`)
             setMarkingStart(formatStringToTime(response.data[0].dataHora))
             setMarkingStartId(response.data[0].id)
 
@@ -103,7 +103,8 @@ function DayPage() {
 
     useEffect(() => {
         fetchDate(currentDate)
-    }, [currentDate])
+        setUserId(localStorage.getItem('id'))
+    }, [currentDate, userId])
     return (
         <TemplateWithFilter filter={
             <DateFilter onDateChange={handleDateChange}/>

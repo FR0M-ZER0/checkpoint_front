@@ -1,4 +1,4 @@
-import React, { ReactNode, use, useEffect } from 'react'
+import React, { ReactNode, useState, useEffect } from 'react'
 import TopBar from '../../components/TopBar'
 import BottomBar from '../../components/BottomBar'
 import { ToastContainer } from 'react-toastify'
@@ -13,17 +13,16 @@ type templateProps = {
 function Template({ children }: templateProps) {
     const dispatch = useDispatch()
     const { count } = useSelector((state: RootState) => state.notifications)
+    const [userId, setUserId] = useState<string|null>('')
 
     useEffect(() => {
-        // TODO: colocar o id do colaborador logado
-        const colaboradorId: number  = 1
         dispatch({ type: "websocket/connect" })
-        dispatch(fetchUnreadNotifications(colaboradorId))
+        dispatch(fetchUnreadNotifications(userId))
 
         return () => {
             dispatch({ type: 'websocket/disconnect' })
         }
-    }, [dispatch])
+    }, [dispatch, userId])
 
     useEffect(() => {
         if (count > 0) {
@@ -32,6 +31,10 @@ function Template({ children }: templateProps) {
             document.title = "Checkpoint - marcação de ponto online"
         }
     }, [count])
+
+    useEffect(() => {
+        setUserId(localStorage.getItem('id'))
+    }, [userId])
 
     return (
         <div className='min-w-screen pb-[62px]' style={{ minHeight: 'calc(100vh + 162px)' }}>
