@@ -19,7 +19,6 @@ function App() {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/login" element={<LoginPage />} />
-				<Route path="/admin/login" element={<LoginPageAdmin/>} />
 				<Route path="/" element={<MarkingPage />} />
 				<Route path="/dia" element={<DayPage />} />
 				<Route path="/ferias" element={<Ferias />} />
@@ -34,6 +33,7 @@ function App() {
 			{/* Admin */}
 			<Routes>
 				<Route path="/admin/dashboard" element={<DashboardPage />} />
+				<Route path="/admin/login" element={<LoginPageAdmin/>} />
 			</Routes>
 			<Routes>
 				<Route path="/admin/solicitações" element={<AdminNotificationsPage />} />
