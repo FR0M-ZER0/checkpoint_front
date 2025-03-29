@@ -1,13 +1,34 @@
 import React from 'react'
 import logo from "../../assets/logo.png"
+import { toast, ToastContainer } from 'react-toastify'
+import { useNavigate } from 'react-router'
+import api from '../../services/api'
 
 function LoginPage() {
 	const [email, setEmail] = React.useState('')
 	const [password, setPassword] = React.useState('')
+	const navigate = useNavigate()
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		// Lógica de login aqui
+	const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+		e.preventDefault()
+
+		const formData = {
+			email,
+			senha: password
+		}
+
+		try {
+			const response = await api.post('/admin/login', formData)
+			localStorage.setItem("admin_id", response.data.id)
+			localStorage.setItem("admin_nome", response.data.nome)
+			localStorage.setItem("admin_email", response.data.email)
+			localStorage.setItem("admin_criado_em", response.data.criadoEm)
+			localStorage.setItem("admin_ativo", response.data.ativo)
+			navigate('/admin/dashboard')
+		} catch (err: unknown) {
+			toast.error('Suas credenciais estão erradas')
+			console.error(err)
+		}
 	}
 
 	return (
@@ -74,6 +95,12 @@ function LoginPage() {
 			<footer className="flex flex-col flex-grow justify-end pt-4 text-gray-400 text-xs w-full text-center">
 				Desenvolvido por FR0M_ZER0
 			</footer>
+
+			<ToastContainer
+				hideProgressBar={true}
+				pauseOnFocusLoss={false}
+				theme='colored'
+			/>
 		</div>
 	)
 }

@@ -26,6 +26,7 @@ function LoginPage() {
 			navigate('/')
 		} catch (err: unknown) {
 			toast.error('Suas credenciais estão erradas')
+			console.error(err)
 		}
 	}
 
