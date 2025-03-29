@@ -2,7 +2,7 @@ import { Middleware } from '@reduxjs/toolkit'
 import { increment } from '../slices/notificationSlice'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
-import { incrementSolicitation } from '../slices/solicitationSlice'
+import { addSolicitation, incrementSolicitation } from '../slices/solicitationSlice'
 
 const webSocketMiddleware: Middleware = (store) => {
     let client: Client | null = null
@@ -22,8 +22,10 @@ const webSocketMiddleware: Middleware = (store) => {
                         })
 
                         client!.subscribe('/topic/solicitacoes', (message) => {
+                            const solicitation = JSON.parse(message.body)
                             console.log('Nova solicitação:', message.body)
                             store.dispatch(incrementSolicitation())
+                            store.dispatch(addSolicitation(solicitation))
                         })
                     },
                     onStompError: (frame) => {
