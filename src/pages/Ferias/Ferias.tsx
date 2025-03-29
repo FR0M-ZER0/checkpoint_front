@@ -43,13 +43,11 @@ function Ferias() {
                     setSaldoDisponivel(saldo);
                 } else {
                     console.error('Erro ao buscar saldo de férias:', response.status);
-                    // Aqui você poderia implementar um tratamento de erro mais amigável para o usuário
-                    // Exemplo: mostrar uma mensagem na tela dizendo que houve um problema ao buscar o saldo
+
                 }
             } catch (error) {
                 console.error('Erro ao conectar com o servidor:', error);
-                // Aqui você também pode implementar um tratamento de erro
-                // mais amigável para o usuário
+
             }
         };
 
@@ -133,8 +131,7 @@ function Ferias() {
     const saldoNegativoVenda = diasVendidos > 0 ? diasVendidos : 0;
 
     return (
-        <TemplateWithFilter
-            filter={<div className='flex w-full flex-col text-center justify-center'><p className='font-light'>{formatDate(new Date())}</p></div>}
+        <TemplateWithFilter filter={undefined}
         >
             <main className='w-full flex-col px-4 overflow-hidden max-w-screen-md mx-auto pb-20'>
                 <h1 className="text-xl font-bold text-left md:text-center mb-4">Férias</h1>
