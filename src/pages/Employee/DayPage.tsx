@@ -1,25 +1,17 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from 'react'
-=======
-import React, { useState } from 'react'
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
 import TemplateWithFilter from './TemplateWithFilter'
 import DateFilter from '../../components/DateFilter'
 import HoursState from '../../components/HoursState'
 import PointButton from '../../components/PointButton'
 import SquareButton from '../../components/SquareButton'
 import Modal from '../../components/Modal'
-<<<<<<< HEAD
 import api from '../../services/api'
 import { formatStringToTime } from '../../utils/formatter'
 import { calculateWorkTime } from '../../utils/comparisons'
-=======
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
 
 function DayPage() {
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
     const [modalType, setModalType] = useState<string>('')
-<<<<<<< HEAD
     const [markingStart, setMarkingStart] = useState<string>('')
     const [markingPause, setMarkingPause] = useState<string>('')
     const [markingResume, setMarkingResume] = useState<string>('')
@@ -27,8 +19,6 @@ function DayPage() {
     const [doneTimeStart, setDonetimeStart] = useState<string>('')
     const [doneTimePause, setDonetimePause] = useState<string>('')
     const [doneTimeResume, setDonetimeResume] = useState<string>('')
-=======
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
 
     const openModal = (type: string): void => {
         setIsModalVisible(true)
@@ -39,7 +29,6 @@ function DayPage() {
         setIsModalVisible(false)
     }
 
-<<<<<<< HEAD
     const getCurrentDate = (): string => {
         const today = new Date()
         const year = today.getFullYear()
@@ -76,11 +65,6 @@ function DayPage() {
     return (
         <TemplateWithFilter filter={
             <DateFilter onDateChange={handleDateChange}/>
-=======
-    return (
-        <TemplateWithFilter filter={
-            <DateFilter/>
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
         }>
             <div className='mt-4 w-full'>
                 <HoursState/>
@@ -97,20 +81,12 @@ function DayPage() {
                                 <div className='absolute w-[4px] h-[110px] top-[80px] right-1/2 z-[-1] gray-line-color'></div>
                                 <div className='text-[12px] light-gray-text absolute top-[100px] w-[400px] left-[50px]'>
                                     <p className='font-medium'>Realizado por</p>
-<<<<<<< HEAD
                                     <p className='font-light'>{doneTimeStart}</p>
-=======
-                                    <p className='font-light'>04h:32min</p>
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
                                 </div>
                             </div>
                             <div className='ml-2'>
                                 <p className='text-lg'>Início</p>
-<<<<<<< HEAD
                                 <p className='font-light text-sm'>{markingStart}</p>
-=======
-                                <p className='font-light text-sm'>04h:10min</p>
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
                             </div>
                         </div>
 
@@ -145,20 +121,12 @@ function DayPage() {
                                 <div className='absolute w-[4px] h-[110px] top-[80px] right-1/2 z-[-1] gray-line-color'></div>
                                 <div className='text-[12px] light-gray-text absolute top-[100px] w-[400px] left-[50px]'>
                                     <p className='font-medium'>Realizado por</p>
-<<<<<<< HEAD
                                     <p className='font-light'>{doneTimePause}</p>
-=======
-                                    <p className='font-light'>04h:32min</p>
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
                                 </div>
                             </div>
                             <div className='ml-2'>
                                 <p className='text-lg'>Pausa</p>
-<<<<<<< HEAD
                                 <p className='font-light text-sm'>{markingPause}</p>
-=======
-                                <p className='font-light text-sm'>04h:10min</p>
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
                             </div>
                         </div>
 
@@ -193,20 +161,12 @@ function DayPage() {
                                 <div className='absolute w-[4px] h-[110px] top-[80px] right-1/2 z-[-1] gray-line-color'></div>
                                 <div className='text-[12px] light-gray-text absolute top-[100px] w-[400px] left-[50px]'>
                                     <p className='font-medium'>Realizado por</p>
-<<<<<<< HEAD
                                     <p className='font-light'>{doneTimeResume}</p>
-=======
-                                    <p className='font-light'>04h:32min</p>
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
                                 </div>
                             </div>
                             <div className='ml-2'>
                                 <p className='text-lg'>Retomada</p>
-<<<<<<< HEAD
                                 <p className='font-light text-sm'>{markingResume}</p>
-=======
-                                <p className='font-light text-sm'>04h:10min</p>
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
                             </div>
                         </div>
 
@@ -241,11 +201,7 @@ function DayPage() {
                             </div>
                             <div className='ml-2'>
                                 <p className='text-lg'>Saída</p>
-<<<<<<< HEAD
                                 <p className='font-light text-sm'>{markingEnd}</p>
-=======
-                                <p className='font-light text-sm'>04h:10min</p>
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
                             </div>
                         </div>
 
@@ -283,11 +239,7 @@ function DayPage() {
                             <textarea name="observation" rows={5} className='main-background-color block w-full p-2 rounded'></textarea>
                         </div>
 
-<<<<<<< HEAD
                         <div className='text-white flex justify-between'>
-=======
-                        <div className='text-white'>
->>>>>>> ad9c352 (Adiciona página de login das roles Employee e Admin)
                             <button className='main-func-color px-8 py-2 rounded-lg mr-4 cursor-pointer'>
                                 Confirmar
                             </button>
