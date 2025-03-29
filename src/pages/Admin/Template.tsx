@@ -21,7 +21,7 @@ function Template({ children }: templateProps) {
         return () => {
             dispatch({ type: 'websocket/disconnect' })
         }
-    }, [dispatch, adminId])
+    }, [dispatch])
 
     useEffect(() => {
         if (count > 0) {
