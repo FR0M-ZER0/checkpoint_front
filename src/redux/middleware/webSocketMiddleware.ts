@@ -2,6 +2,8 @@ import { Middleware } from '@reduxjs/toolkit'
 import { increment } from '../slices/notificationSlice'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
+import { addSolicitation, incrementSolicitation } from '../slices/solicitationSlice'
+import { addResponse, increment as incrementResponse } from '../slices/responseSlice'
 
 const webSocketMiddleware: Middleware = (store) => {
     let client: Client | null = null
@@ -18,6 +20,20 @@ const webSocketMiddleware: Middleware = (store) => {
                         client!.subscribe('/topic/notificacoes', (message) => {
                             console.log('Nova notificação:', message.body)
                             store.dispatch(increment())
+                        })
+
+                        client!.subscribe('/topic/solicitacoes', (message) => {
+                            const solicitation = JSON.parse(message.body)
+                            console.log('Nova solicitação:', message.body)
+                            store.dispatch(incrementSolicitation())
+                            store.dispatch(addSolicitation(solicitation))
+                        })
+
+                        client!.subscribe('/topic/respostas', (message) => {
+                            const response = JSON.parse(message.body)
+                            console.log('Nova resposta:', message.body)
+                            store.dispatch(incrementResponse())
+                            store.dispatch(addResponse(response))
                         })
                     },
                     onStompError: (frame) => {

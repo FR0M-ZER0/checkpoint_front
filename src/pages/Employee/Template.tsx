@@ -1,10 +1,11 @@
-import React, { ReactNode, use, useEffect } from 'react'
+import React, { ReactNode, useState, useEffect, useRef } from 'react'
 import TopBar from '../../components/TopBar'
 import BottomBar from '../../components/BottomBar'
-import { ToastContainer } from 'react-toastify'
+import { toast, ToastContainer } from 'react-toastify'
 import { useSelector, useDispatch } from 'react-redux'
 import { fetchUnreadNotifications } from '../../redux/slices/notificationSlice'
 import { RootState } from '../../redux/store'
+import { fetchUnreadResponses } from '../../redux/slices/responseSlice'
 
 type templateProps = {
     children?: ReactNode
@@ -12,26 +13,42 @@ type templateProps = {
 
 function Template({ children }: templateProps) {
     const dispatch = useDispatch()
-    const { count } = useSelector((state: RootState) => state.notifications)
+    const notificationCount: number = useSelector((state: RootState) => state.notifications.count)
+    const responseCount: number = useSelector((state: RootState) => state.responses.count)
+    const { responses } = useSelector((state: RootState) => state.responses)
+    const prevResponseCount = useRef(responses.length)
+
+    const totalUnread: number = notificationCount + responseCount
+    const [userId, setUserId] = useState<string|null>('')
 
     useEffect(() => {
-        // TODO: colocar o id do colaborador logado
-        const colaboradorId: number  = 1
         dispatch({ type: "websocket/connect" })
-        dispatch(fetchUnreadNotifications(colaboradorId))
+        dispatch(fetchUnreadNotifications(userId))
+        dispatch(fetchUnreadResponses(userId))
 
         return () => {
             dispatch({ type: 'websocket/disconnect' })
         }
-    }, [dispatch])
+    }, [dispatch, userId])
 
     useEffect(() => {
-        if (count > 0) {
-            document.title = `(${count}) Checkpoint`
+        if (totalUnread > 0) {
+            document.title = `(${totalUnread}) Checkpoint`
         } else {
             document.title = "Checkpoint - marcação de ponto online"
         }
-    }, [count])
+    }, [totalUnread])
+
+    useEffect(() => {
+        setUserId(localStorage.getItem('id'))
+    }, [userId])
+
+    useEffect(() => {
+        if (responses.length > prevResponseCount.current) {
+            toast.info('Nova notificação recebida!')
+        }
+        prevResponseCount.current = responses.length
+    }, [responses.length])
 
     return (
         <div className='min-w-screen pb-[62px]' style={{ minHeight: 'calc(100vh + 162px)' }}>

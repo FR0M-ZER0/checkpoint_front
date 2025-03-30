@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, FormEvent } from 'react'
 import TemplateWithFilter from './TemplateWithFilter'
 import DateFilter from '../../components/DateFilter'
 import HoursState from '../../components/HoursState'
@@ -8,6 +8,7 @@ import Modal from '../../components/Modal'
 import api from '../../services/api'
 import { formatStringToTime } from '../../utils/formatter'
 import { calculateWorkTime } from '../../utils/comparisons'
+import { toast } from 'react-toastify'
 
 function DayPage() {
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
@@ -16,17 +17,30 @@ function DayPage() {
     const [markingPause, setMarkingPause] = useState<string>('')
     const [markingResume, setMarkingResume] = useState<string>('')
     const [markingEnd, setMarkingEnd] = useState<string>('')
+    const [markingStartId, setMarkingStartId] = useState<string>('')
+    const [markingPauseId, setMarkingPauseId] = useState<string>('')
+    const [markingResumeId, setMarkingResumeId] = useState<string>('')
+    const [markingEndId, setMarkingEndId] = useState<string>('')
     const [doneTimeStart, setDonetimeStart] = useState<string>('')
     const [doneTimePause, setDonetimePause] = useState<string>('')
     const [doneTimeResume, setDonetimeResume] = useState<string>('')
+    const [horario, setHorario] = useState<string>('')
+    const [observacao, setObservacao] = useState<string>('')
+    const [markingId, setMarkingId] = useState<string>('')
+    const [periodo, setPeriodo] = useState<string>('')
+    const [userId, setUserId] = useState<string|null>('')
 
-    const openModal = (type: string): void => {
+    const openModal = (type: string, id: string, marcacaoPeriodo: string): void => {
         setIsModalVisible(true)
         setModalType(type)
+        setMarkingId(id)
+        setPeriodo(marcacaoPeriodo)
     }
 
     const closeModal = (): void => {
         setIsModalVisible(false)
+        setObservacao('')
+        setHorario('')
     }
 
     const getCurrentDate = (): string => {
@@ -40,12 +54,18 @@ function DayPage() {
 
     const fetchDate = async (selectedDate: string): Promise<void> => {
         try {
-            // TODO: colocar o id do colaborador logado no sistema
-            const response = await api.get(`/marcacoes/colaborador/9/data/${selectedDate}`)
+            const response = await api.get(`/marcacoes/colaborador/${userId}/data/${selectedDate}`)
             setMarkingStart(formatStringToTime(response.data[0].dataHora))
+            setMarkingStartId(response.data[0].id)
+
             setMarkingPause(formatStringToTime(response.data[1].dataHora))
+            setMarkingPauseId(response.data[1].id)
+
             setMarkingResume(formatStringToTime(response.data[2].dataHora))
+            setMarkingResumeId(response.data[2].id)
+
             setMarkingEnd(formatStringToTime(response.data[3].dataHora))
+            setMarkingEndId(response.data[3].id)
 
             setDonetimeStart(calculateWorkTime(response.data[0].dataHora, response.data[1].dataHora))
             setDonetimePause(calculateWorkTime(response.data[1].dataHora, response.data[2].dataHora))
@@ -59,9 +79,32 @@ function DayPage() {
         setCurrentDate(newDate)
     }
 
+    const handleModalSubmit = async (e: FormEvent): Promise<void> => {
+        e.preventDefault()
+
+        const formData = {
+            marcacaoId: markingId,
+            periodo,
+            tipo: modalType === 'edit' ? 'edicao' : 'exclusao',
+            status: 'pendente',
+            observacao,
+            horario
+        }
+
+        try {
+            await api.post('/ajuste-ponto/solicitacao', formData)
+            toast.success('Solicitação de ajuste enviado')
+            closeModal()
+        } catch (err: unknown) {
+            console.error(err)
+            toast.error('Um erro aconteceu')
+        }
+    }
+
     useEffect(() => {
         fetchDate(currentDate)
-    }, [currentDate])
+        setUserId(localStorage.getItem('id'))
+    }, [currentDate, userId])
     return (
         <TemplateWithFilter filter={
             <DateFilter onDateChange={handleDateChange}/>
@@ -91,7 +134,7 @@ function DayPage() {
                         </div>
 
                         <div className='flex'>
-                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit')}>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit', markingStartId, 'inicio')}>
                                 <SquareButton
                                     text='Edição'
                                     icon={
@@ -100,7 +143,7 @@ function DayPage() {
                                     color='btn-blue-color'
                                 />
                             </div>
-                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete')}>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete', markingStartId, 'inicio')}>
                                 <SquareButton
                                     text='Exclusão'
                                     icon={
@@ -131,7 +174,7 @@ function DayPage() {
                         </div>
 
                         <div className='flex'>
-                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit')}>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit', markingPauseId, 'pausa')}>
                                 <SquareButton
                                     text='Edição'
                                     icon={
@@ -140,7 +183,7 @@ function DayPage() {
                                     color='btn-blue-color'
                                 />
                             </div>
-                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete')}>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete', markingPauseId, 'pausa')}>
                                 <SquareButton
                                     text='Exclusão'
                                     icon={
@@ -171,7 +214,7 @@ function DayPage() {
                         </div>
 
                         <div className='flex'>
-                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit')}>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit', markingResumeId, 'retomada')}>
                                 <SquareButton
                                     text='Edição'
                                     icon={
@@ -180,7 +223,7 @@ function DayPage() {
                                     color='btn-blue-color'
                                 />
                             </div>
-                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete')}>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete', markingResumeId, 'retomada')}>
                                 <SquareButton
                                     text='Exclusão'
                                     icon={
@@ -206,7 +249,7 @@ function DayPage() {
                         </div>
 
                         <div className='flex'>
-                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit')}>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('edit', markingEndId, 'saida')}>
                                 <SquareButton
                                     text='Edição'
                                     icon={
@@ -215,7 +258,7 @@ function DayPage() {
                                     color='btn-blue-color'
                                 />
                             </div>
-                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete')}>
+                            <div className='h-[64px] w-[64px]' onClick={() => openModal('delete', markingEndId, 'saida')}>
                                 <SquareButton
                                     text='Exclusão'
                                     icon={
@@ -233,10 +276,17 @@ function DayPage() {
             {
                 isModalVisible &&
                 <Modal title={`Solicitar ${modalType === 'edit' ? 'ajuste' : 'exclusão'}`} onClose={closeModal}>
-                    <form action="">
+                    <form onSubmit={handleModalSubmit}>
+                        {
+                            modalType === 'edit' &&
+                            <div className='mb-4'>
+                                <label htmlFor="markingTime">Horário</label>
+                                <input type="time" name="markingTime" className='w-full main-background-color' value={horario} onChange={e => setHorario(e.target.value)}/>
+                            </div>
+                        }
                         <div className='mb-[60px]'>
                             <label htmlFor="observation">Observação</label>
-                            <textarea name="observation" rows={5} className='main-background-color block w-full p-2 rounded'></textarea>
+                            <textarea name="observation" rows={5} className='main-background-color block w-full p-2 rounded shadow-md' value={observacao} onChange={e => setObservacao(e.target.value)}></textarea>
                         </div>
 
                         <div className='text-white flex justify-between'>
@@ -244,7 +294,7 @@ function DayPage() {
                                 Confirmar
                             </button>
 
-                            <button className='sec-func-color px-8 py-2 rounded-lg cursor-pointer'>
+                            <button className='sec-func-color px-8 py-2 rounded-lg cursor-pointer' onClick={closeModal}>
                                 Cancelar
                             </button>
                         </div>

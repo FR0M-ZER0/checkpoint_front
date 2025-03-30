@@ -16,6 +16,7 @@ function MarkingPage() {
     const [markingPause, setMarkingPause] = useState<string>('')
     const [markingResume, setMarkingResume] = useState<string>('')
     const [markingEnd, setMarkingEnd] = useState<string>('')
+    const [userId, setUserId] = useState<string|null>('')
     const d: Date = new Date()
 
     const closeModal = (): void => {
@@ -33,8 +34,7 @@ function MarkingPage() {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault()
         const data = {
-            // TODO: mudar para o id do usuário autenticado
-            colaboradorId: 9,
+            colaboradorId: userId,
             tipo: markingType
         }
 
@@ -51,7 +51,7 @@ function MarkingPage() {
 
     const fetchTodayMarkings = async (): Promise<void> => {
         try {
-            const response = await api.get(`/marcacoes/colaborador/${9}/hoje`)
+            const response = await api.get(`/marcacoes/colaborador/${userId}/hoje`)
             setMarkingStart(formatTimeAndMinute(response.data[0].dataHora))
             setMarkingPause(formatTimeAndMinute(response.data[1].dataHora))
             setMarkingResume(formatTimeAndMinute(response.data[2].dataHora))
@@ -71,7 +71,8 @@ function MarkingPage() {
 
     useEffect(() => {
         fetchTodayMarkings()
-    }, [])
+        setUserId(localStorage.getItem('id'))
+    }, [userId])
 
     return (
         <TemplateWithFilter
