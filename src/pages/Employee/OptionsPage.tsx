@@ -10,7 +10,10 @@ type OptionsPageProp = {
 }
 
 function OptionsPage({ onClose }: OptionsPageProp) {
-    const { count } = useSelector((state: RootState) => state.notifications)
+    const notificationCount: number = useSelector((state: RootState) => state.notifications.count)
+    const responseCount: number = useSelector((state: RootState) => state.responses.count)
+
+    const totalUnread: number = notificationCount + responseCount
     const [name, setName] = useState<string|null>('')
     const [email, setEmail] = useState<string|null>('')
     const navigate = useNavigate()
@@ -77,9 +80,9 @@ function OptionsPage({ onClose }: OptionsPageProp) {
 
                             <p>
                                 {
-                                    count > 0 && (
+                                    totalUnread > 0 && (
                                         <span className='text-white text-xs rounded-full px-2 py-1 bg-red-600'>
-                                            { count }
+                                            { totalUnread }
                                         </span>
                                     )
                                 }
