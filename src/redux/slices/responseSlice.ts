@@ -22,7 +22,7 @@ const initialState: ResponseState = {
 export const fetchUnreadResponses = createAsyncThunk(
     'responses/fetchUnread',
     async (colaboradorId: number) => {
-        const response = await api.get(`/colaborador/respostas/${colaboradorId}`)
+        const response = await api.get(`/colaborador/resposta/${colaboradorId}`)
         return response.data
     }
 )
@@ -30,7 +30,7 @@ export const fetchUnreadResponses = createAsyncThunk(
 export const markResponseAsRead = createAsyncThunk(
     'responses/markAsRead',
     async (responseId: number) => {
-        const response = await api.put(`/colaborador/notificacao/${responseId}`)
+        const response = await api.put(`/colaborador/resposta/${responseId}`)
         return response.data
     }
 )
@@ -45,6 +45,16 @@ const responseSlice = createSlice({
         reset: (state) => {
             state.count = 0
             state.responses = []
+        },
+        addResponse: (state, action) => {
+            state.responses.unshift(action.payload)
+            state.count = state.responses.length
+        },
+        removeResponse: (state, action) => {
+            state.responses = state.responses.filter(
+                (response) => response.id !== action.payload
+            )
+            state.count = state.responses.length
         }
     },
     extraReducers: (builder) => {
@@ -63,5 +73,5 @@ const responseSlice = createSlice({
     }
 })
 
-export const { increment, reset } = responseSlice.actions
+export const { increment, reset, addResponse, removeResponse } = responseSlice.actions
 export default responseSlice.reducer

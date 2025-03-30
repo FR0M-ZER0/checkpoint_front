@@ -1,7 +1,7 @@
-import React, { ReactNode, useState, useEffect } from 'react'
+import React, { ReactNode, useState, useEffect, useRef } from 'react'
 import TopBar from '../../components/TopBar'
 import BottomBar from '../../components/BottomBar'
-import { ToastContainer } from 'react-toastify'
+import { toast, ToastContainer } from 'react-toastify'
 import { useSelector, useDispatch } from 'react-redux'
 import { fetchUnreadNotifications } from '../../redux/slices/notificationSlice'
 import { RootState } from '../../redux/store'
@@ -15,6 +15,8 @@ function Template({ children }: templateProps) {
     const dispatch = useDispatch()
     const notificationCount: number = useSelector((state: RootState) => state.notifications.count)
     const responseCount: number = useSelector((state: RootState) => state.responses.count)
+    const { responses } = useSelector((state: RootState) => state.responses)
+    const prevResponseCount = useRef(responses.length)
 
     const totalUnread: number = notificationCount + responseCount
     const [userId, setUserId] = useState<string|null>('')
@@ -40,6 +42,13 @@ function Template({ children }: templateProps) {
     useEffect(() => {
         setUserId(localStorage.getItem('id'))
     }, [userId])
+
+    useEffect(() => {
+        if (responses.length > prevResponseCount.current) {
+            toast.info('Nova notificação recebida!')
+        }
+        prevResponseCount.current = responses.length
+    }, [responses.length])
 
     return (
         <div className='min-w-screen pb-[62px]' style={{ minHeight: 'calc(100vh + 162px)' }}>

@@ -3,7 +3,7 @@ import { increment } from '../slices/notificationSlice'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 import { addSolicitation, incrementSolicitation } from '../slices/solicitationSlice'
-import { increment as incrementResponse } from '../slices/responseSlice'
+import { addResponse, increment as incrementResponse } from '../slices/responseSlice'
 
 const webSocketMiddleware: Middleware = (store) => {
     let client: Client | null = null
@@ -30,8 +30,10 @@ const webSocketMiddleware: Middleware = (store) => {
                         })
 
                         client!.subscribe('/topic/respostas', (message) => {
+                            const response = JSON.parse(message.body)
                             console.log('Nova resposta:', message.body)
                             store.dispatch(incrementResponse())
+                            store.dispatch(addResponse(response))
                         })
                     },
                     onStompError: (frame) => {
