@@ -7,9 +7,11 @@ import { formatDate } from '../../utils/formatter'
 import Modal from '../../components/Modal'
 import { markNotificationAsRead, Notification } from '../../redux/slices/notificationSlice'
 import { useDispatch } from 'react-redux'
+import { markResponseAsRead, Response } from '../../redux/slices/responseSlice'
 
 function NotificationsPage() {
     const { notifications } = useSelector((state: RootState) => state.notifications)
+    const { responses } = useSelector((state: RootState) => state.responses)
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
     const [selectedNotification, setSelectedNotification] = useState<null | {
         tipo: string
@@ -18,12 +20,13 @@ function NotificationsPage() {
     }>(null)
     const dispatch = useDispatch()
 
-    const openModal = async (notification: Notification): Promise<void> => {
+    const openModal = async (notification: Notification|Response, type: string): Promise<void> => {
         setSelectedNotification(notification)
         setIsModalVisible(true)
 
         try {
-            dispatch(markNotificationAsRead(notification.id))
+            if (type === 'notificação') dispatch(markNotificationAsRead(notification.id))
+            if (type === 'resposta') dispatch(markResponseAsRead(notification.id))
             console.log('Notificação lida')
         } catch(err: unknown) {
             console.error(err)
@@ -39,6 +42,21 @@ function NotificationsPage() {
         <TemplateWithTitle title='Notificações'>
             <div className='mt-5 w-full'>
                 {
+                    responses
+                    .filter(response => !response.lida)
+                    .map(response => (
+                        <div className='mb-3'>
+                            <NotificationCard 
+                                title={response.tipo}
+                                message={response.mensagem}
+                                date={formatDate(response.criadoEm)}
+                                color={'main-blue-color'}
+                                openModal={() => openModal(response, 'resposta')}
+                            />
+                        </div>
+                    ))
+                }
+                {
                     notifications
                         .filter(notification => !notification.lida)
                         .map(notification => (
@@ -49,7 +67,7 @@ function NotificationsPage() {
                                     date={formatDate(notification.criadoEm)}
                                     // TODO: colocar uma cor diferente por tipo
                                     color={'main-green-color'}
-                                    openModal={() => openModal(notification)}
+                                    openModal={() => openModal(notification, 'notificação')}
                                 />
                             </div>
                     ))
