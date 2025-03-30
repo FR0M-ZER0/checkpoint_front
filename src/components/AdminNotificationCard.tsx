@@ -37,7 +37,8 @@ function AdminNotificationCard({ type, date, name, observation, dayStart, dayEnd
     return (
         <div className='w-full rounded-xl p-3 notification-admin-color flex justify-between' onClick={openModal}>
             <div className='flex flex-col mr-4'>
-                <div className='w-[54px] h-[54px] rounded-full bg-white'>
+                <div className='w-[54px] h-[54px] rounded-full bg-white flex items-center justify-center'>
+                    <i className="fa-solid fa-user-secret text-4xl text-gray-400"></i>
                 </div>
 
                 <div className='light-gray-text text-sm mt-4'>
