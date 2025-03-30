@@ -1,5 +1,5 @@
-import React, { ReactNode, useState, useEffect } from 'react'
-import { ToastContainer } from 'react-toastify'
+import React, { ReactNode, useState, useEffect, useRef } from 'react'
+import { toast, ToastContainer } from 'react-toastify'
 import AdminBottomBar from '../../components/AdminBottomBar'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
@@ -11,8 +11,9 @@ type templateProps = {
 
 function Template({ children }: templateProps) {
     const dispatch = useDispatch()
-    const { count } = useSelector((state: RootState) => state.solicitations)
+    const { count, solicitations } = useSelector((state: RootState) => state.solicitations)
     const [adminId, setAdminId] = useState<string|null>('')
+    const prevSolicitationCount = useRef(solicitations.length)
 
     useEffect(() => {
         dispatch({ type: "websocket/connect" })
@@ -34,6 +35,14 @@ function Template({ children }: templateProps) {
     useEffect(() => {
         setAdminId(localStorage.getItem('admin_id'))
     }, [adminId])
+
+    useEffect(() => {
+        if (solicitations.length > prevSolicitationCount.current) {
+            toast.info('Nova solicitação recebida!')
+        }
+        prevSolicitationCount.current = solicitations.length
+    }, [solicitations.length])
+
     return (
         <div className='min-w-screen pb-[62px]' style={{ minHeight: 'calc(100vh + 162px)', backgroundColor: '#EDEDED' }}>
             <div className='w-[90%] flex flex-col items-center' style={{margin: "0 auto"}}>

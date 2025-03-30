@@ -44,6 +44,12 @@ export const solicitationSlice = createSlice({
         addSolicitation: (state, action) => {
             state.solicitations.unshift(action.payload)
             state.count = state.solicitations.length
+        },
+        removeSolicitation: (state, action) => {
+            state.solicitations = state.solicitations.filter(
+                (solicitation) => solicitation.id !== action.payload
+            )
+            state.count = state.solicitations.length
         }
     },
     extraReducers: (builder) => {
@@ -55,5 +61,5 @@ export const solicitationSlice = createSlice({
     }
 })
 
-export const { incrementSolicitation, resetSolicitation, addSolicitation } = solicitationSlice.actions
+export const { incrementSolicitation, resetSolicitation, addSolicitation, removeSolicitation } = solicitationSlice.actions
 export default solicitationSlice.reducer
