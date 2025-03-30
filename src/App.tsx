@@ -12,6 +12,7 @@ import FolgaPage from './pages/Folga/FolgaPage';
 import DashboardPage from './pages/Admin/DashboardPage'
 import AdminNotificationsPage from './pages/Admin/SolicitationsPage'
 import MarkingsPage from './pages/Admin/MarkingsPage'
+import LoginPageAdmin from './pages/Admin/LoginPageAdmin';
 
 function App() {
 	return (
