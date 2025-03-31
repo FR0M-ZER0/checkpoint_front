@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Quicksand:wght@300..700&display=swap');
 
 :root {
   --main-background-color: #E4EAFF;
@@ -7,9 +6,11 @@
   --main-red-color: #E3170A;
   --main-white-color: #EDEDED;
   --main-func-color: #33357D;
+  --sec-func-color: #7D3333;
   --main-green-color: #12E382;
   --main-yellow-color: #EBEB28;
   --main-blue-color: #3286F3;
+  --light-gray-color: #6A6A6A;
 
   /* Cores do calendário */
   --light-blue-color: #0075F2;
@@ -21,6 +22,14 @@
   /* Cores do botão de solicitação */
   --main-gray-color: #BCC6E9;
   --main-button-text: #3F4E82;
+
+  /* Cores dos botões de ajuste de ponto */
+  --btn-blue: #0CA2FF;
+  --btn-red: #DB0A0A;
+  --gray-line: #C9C9C9;
+
+  /* Admin notification */
+  --notification-admin-color: #EADDDD;
 }
 
 /* Estilos padrões */
@@ -38,11 +47,152 @@ input {
   display: block;
 }
 
-/* Cores */
+input, select, textarea {
+  display: block;
+  background-color: white;
+  box-shadow: 0px 10px 15px -3px rgba(0,0,0,0.1) , 0px 4px 6px -2px rgba(0,0,0,0.05);
+  padding: 10px 8px;
+  border-radius: .5rem;
+}
+
+/* Cores de background */
+.main-background-color {
+  background-color: var(--main-background-color);
+}
+
 .main-func-color {
   background-color: var(--main-func-color);
 }
 
+.sec-func-color {
+  background-color: var(--sec-func-color);
+}
+
+.main-green-color {
+  background-color: var(--main-green-color);
+}
+
+.main-blue-color {
+  background-color: var(--main-blue-color);
+}
+
+.main-yellow-color {
+  background-color: var(--main-yellow-color);
+}
+
+.main-red-color {
+  background-color: var(--main-red-color);
+}
+
+.main-white-color {
+  background-color: var(--main-white-color);
+}
+
+.light-blue-color {
+  background-color: var(--light-blue-color);
+}
+
+.main-orange-color {
+  background-color: var(--main-orange-color);
+}
+
+.dark-blue-color {
+  background-color: var(--dark-blue-color);
+}
+
+.dark-green-color {
+  background-color: var(--dark-green-color);
+}
+
+.main-gray-color {
+  background-color: var(--main-gray-color);
+}
+
+.light-gray-color {
+  background-color: var(--light-gray-color);
+}
+
+.btn-blue-color {
+  background-color: var(--btn-blue);
+}
+
+.btn-red-color {
+  background-color: var(--btn-red);
+}
+
+.gray-line-color {
+  background-color: var(--gray-line);
+}
+
+.main-black-color {
+  background-color: var(--main-black-color);
+}
+
+.notification-admin-color {
+  background-color: var(--notification-admin-color);
+}
+
+/* Cores de texto */
 .main-white-text {
   color: var(--main-white-color);
+}
+
+.main-black-text {
+  color: var(--main-black-color);
+}
+
+.main-red-text {
+  color: var(--main-red-color);
+}
+
+.main-blue-text {
+  color: var(--main-blue-color);
+}
+
+.main-green-text {
+  color: var(--main-green-color);
+}
+
+.main-yellow-text {
+  color: var(--main-yellow-color);
+}
+
+.main-orange-text {
+  color: var(--main-orange-color);
+}
+
+.main-gray-text {
+  color: var(--main-gray-color);
+}
+
+.sec-func-color-text {
+  color: var(--sec-func-color);
+}
+
+.main-func-color-text {
+  color: var(--main-func-color);
+}
+
+.light-blue-text {
+  color: var(--light-blue-color);
+}
+
+.dark-blue-text {
+  color: var(--dark-blue-color);
+}
+
+.dark-green-text {
+  color: var(--dark-green-color);
+}
+
+.main-button-text {
+  color: var(--main-button-text);
+}
+
+.light-gray-text {
+  color: var(--light-gray-color);
+}
+
+.quicksand {
+  font-family: "Quicksand", sans-serif; 
 }
