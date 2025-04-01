@@ -35,7 +35,7 @@ function BottomBar() {
                 </Link>
             </span>
             <span>
-                <Link to={'/'}>
+                <Link to={'/espelho-ponto'}>
                     <i className="fa-solid fa-calendar text-2xl"></i>
                 </Link>
             </span>

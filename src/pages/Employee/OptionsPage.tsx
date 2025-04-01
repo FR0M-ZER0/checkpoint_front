@@ -90,9 +90,9 @@ function OptionsPage({ onClose }: OptionsPageProp) {
                         </p>
 
                         <p className='flex mb-3'>
-                            <Link>
+                            <Link to={'/espelho-ponto'}>
                                 <i className="fa-solid fa-calendar mr-2 dark-blue-text"></i>
-                                <span>Espelho de pontos</span>
+                                <span>Espelho de ponto</span>
                             </Link>
                         </p>
 
@@ -104,7 +104,7 @@ function OptionsPage({ onClose }: OptionsPageProp) {
                         </p>
 
                         <p className='flex mb-3'>
-                            <Link>
+                            <Link to={'/folgas'}>
                                 <i className="fa-solid fa-bed mr-2 main-button-text"></i>
                                 <span>Folgas</span>
                             </Link>
