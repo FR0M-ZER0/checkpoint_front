@@ -18,13 +18,22 @@ function OptionsPage({ onClose }: OptionsPageProp) {
     const [email, setEmail] = useState<string|null>('')
     const navigate = useNavigate()
 
+    const getCurrentDate = (): string => {
+        const today = new Date()
+        const year = today.getFullYear()
+        const month = (today.getMonth() + 1).toString().padStart(2, '0')
+        const day = today.getDate().toString().padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
+
+    const currentDate = getCurrentDate()
+
     const handleLogout = (): void => {
         localStorage.removeItem("nome")
         localStorage.removeItem("email")
         localStorage.removeItem("id")
         localStorage.removeItem("criado_em")
         localStorage.removeItem("ativo")
-
         navigate('/login')
     }
 
@@ -32,6 +41,7 @@ function OptionsPage({ onClose }: OptionsPageProp) {
         setName(localStorage.getItem("nome"))
         setEmail(localStorage.getItem("email"))
     }, [])
+
     return (
         <motion.div
             className='min-h-screen min-w-screen bg-white fixed top-0 left-0 main-black-text'
@@ -49,7 +59,7 @@ function OptionsPage({ onClose }: OptionsPageProp) {
 
                     <div className='flex items-center mb-8'>
                         <div className='h-20 w-20 rounded-lg bg-gray-300 mr-2 flex items-end justify-center'>
-                        <i className="fa-solid fa-user-secret text-6xl text-gray-500"></i>
+                            <i className="fa-solid fa-user-secret text-6xl text-gray-500"></i>
                         </div>
                         <div className='text-sm text-gray-600'>
                             <p>{name}</p>
@@ -66,7 +76,7 @@ function OptionsPage({ onClose }: OptionsPageProp) {
                         </p>
 
                         <p className='flex mb-3'>
-                            <Link to={'/dia'}>
+                            <Link to={`/dia/${currentDate}`}>
                                 <i className="fa-solid fa-stopwatch mr-2 main-orange-text"></i>
                                 <span>Marcação</span>
                             </Link>
@@ -77,22 +87,19 @@ function OptionsPage({ onClose }: OptionsPageProp) {
                                 <i className="fa-solid fa-bell mr-2 main-red-text"></i>
                                 <span>Notificações</span>
                             </Link>
-
                             <p>
-                                {
-                                    totalUnread > 0 && (
-                                        <span className='text-white text-xs rounded-full px-2 py-1 bg-red-600'>
-                                            { totalUnread }
-                                        </span>
-                                    )
-                                }
+                                { totalUnread > 0 && (
+                                    <span className='text-white text-xs rounded-full px-2 py-1 bg-red-600'>
+                                        { totalUnread }
+                                    </span>
+                                )}
                             </p>
                         </p>
 
                         <p className='flex mb-3'>
-                            <Link>
+                            <Link to={'/espelho-ponto'}>
                                 <i className="fa-solid fa-calendar mr-2 dark-blue-text"></i>
-                                <span>Espelho de pontos</span>
+                                <span>Espelho de ponto</span>
                             </Link>
                         </p>
 
@@ -104,7 +111,7 @@ function OptionsPage({ onClose }: OptionsPageProp) {
                         </p>
 
                         <p className='flex mb-3'>
-                            <Link>
+                            <Link to={'/folgas'}>
                                 <i className="fa-solid fa-bed mr-2 main-button-text"></i>
                                 <span>Folgas</span>
                             </Link>
