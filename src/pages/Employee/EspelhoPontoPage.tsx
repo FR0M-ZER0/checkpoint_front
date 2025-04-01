@@ -107,7 +107,7 @@ function EspelhoPontoPage() {
                     </div>
                 </div>
                 <div className="mt-8 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" />
+                    <Skeleton height={150} baseColor="#dedede" highlightColor="#c5c5c5" count={3} />
                 </div>
             </TemplateWithFilter>
         )
