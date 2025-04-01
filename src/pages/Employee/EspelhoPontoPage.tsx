@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react"
+import React, { useState, useEffect } from "react"
+import { Link } from "react-router"
 import api from "../../services/api"
 import TemplateWithFilter from "./TemplateWithFilter"
-import { Link } from "react-router"
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 type valueType = {
     totalFaltas: number,
@@ -18,10 +20,11 @@ type statusColorsType = {
 }
 
 function EspelhoPontoPage() {
-    const [data, setData] = useState({})
-    const [values, setValues] = useState<valueType>({})
+    const [data, setData] = useState<Record<string, string>>({})
+    const [values, setValues] = useState<valueType>({ totalFaltas: 0, totalFerias: 0, totalFolgas: 0, totalHorasTrabalhadas: 0 })
     const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear())
-    const [userId, setUserId] = useState<string|null>('')
+    const [userId, setUserId] = useState<string | null>('')
+    const [loading, setLoading] = useState<boolean>(true)
 
     const fecthDays = async (): Promise<void> => {
         try {
@@ -36,7 +39,7 @@ function EspelhoPontoPage() {
         try {
             const response = await api.get(`/dias-trabalho/${userId}/resumo`)
             setValues(response.data)
-        } catch (err:unknown) {
+        } catch (err: unknown) {
             console.error(err)
         }
     }
@@ -59,13 +62,56 @@ function EspelhoPontoPage() {
     const handleNextYear = () => setCurrentYear(prev => prev + 1)
 
     useEffect(() => {
-        fecthDays()
-        fetchTotalValues()
+        const fetchData = async () => {
+            await fecthDays()
+            await fetchTotalValues()
+            setLoading(false)
+        }
+        if (userId) {
+            setLoading(true)
+            fetchData()
+        }
     }, [currentYear, userId])
 
     useEffect(() => {
         setUserId(localStorage.getItem("id"))
-    }, [userId])
+    }, [])
+
+    if (loading) {
+        return (
+            <TemplateWithFilter filter={
+                <div className="flex justify-center items-center w-full text-center relative">
+                    <i className="fa-solid fa-chevron-left text-xl cursor-pointer" onClick={handlePrevYear}></i>
+                    <div className="mx-8">
+                        <h1 className="quicksand text-2xl"><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></h1>
+                    </div>
+                    <i className="fa-solid fa-chevron-right text-xl cursor-pointer" onClick={handleNextYear}></i>
+                </div>
+            }>
+                <div className="mt-4 w-full flex justify-between">
+                    <div className="light-blue-text">
+                        <p className="quicksand font-bold"><Skeleton width={50} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                        <p className="text-sm"><Skeleton width={60} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                    </div>
+                    <div className="main-orange-text">
+                        <p className="quicksand font-bold"><Skeleton width={50} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                        <p className="text-sm"><Skeleton width={60} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                    </div>
+                    <div className="dark-green-text">
+                        <p className="quicksand font-bold"><Skeleton width={50} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                        <p className="text-sm"><Skeleton width={60} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                    </div>
+                    <div className="main-red-text">
+                        <p className="quicksand font-bold"><Skeleton width={50} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                        <p className="text-sm"><Skeleton width={60} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                    </div>
+                </div>
+                <div className="mt-8 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" />
+                </div>
+            </TemplateWithFilter>
+        )
+    }
 
     return (
         <TemplateWithFilter filter={
@@ -78,12 +124,12 @@ function EspelhoPontoPage() {
             </div>
         }>
             <div className="mt-4 w-full flex justify-between">
-                <div className="light-blue-text ">
+                <div className="light-blue-text">
                     <p className="quicksand font-bold">{values.totalHorasTrabalhadas}h</p>
                     <p className="text-sm">Horas trab.</p>
                 </div>
 
-                <div className="main-orange-text ">
+                <div className="main-orange-text">
                     <p className="quicksand font-bold">{values.totalFolgas}d</p>
                     <p className="text-sm">Folgas</p>
                 </div>
@@ -100,7 +146,7 @@ function EspelhoPontoPage() {
             </div>
             <div className="mt-8 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {months.map((month, index) => {
-                    const monthNumber = index + 1;
+                    const monthNumber = index + 1
                     const daysWithActivities = Object.keys(data)
                         .filter(dateKey => dateKey.startsWith(`${currentYear}-${String(monthNumber).padStart(2, "0")}`))
                         .map(dateKey => ({
@@ -137,7 +183,7 @@ function EspelhoPontoPage() {
                                 })}
                             </div>
                         </div>
-                    );
+                    )
                 })}
             </div>
         </TemplateWithFilter>

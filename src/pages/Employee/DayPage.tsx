@@ -10,8 +10,11 @@ import { formatStringToTime } from '../../utils/formatter'
 import { calculateWorkTime } from '../../utils/comparisons'
 import { toast } from 'react-toastify'
 import { useParams } from 'react-router'
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 function DayPage() {
+    const [loading, setLoading] = useState<boolean>(true)
     const [dayType, setDayType] = useState<string>('')
     const [faltaDetails, setFaltaDetails] = useState<string>('')
 
@@ -132,7 +135,15 @@ function DayPage() {
     }, [])
 
     useEffect(() => {
-        fetchDate(currentDate)
+        const fetchData = async () => {
+            await fetchDate(currentDate)
+            setLoading(false)
+        }
+
+        if (userId) {
+            setLoading(true)
+            fetchData()
+        }
     }, [currentDate, userId])
 
     if(dayType !== 'normal'){
@@ -155,13 +166,46 @@ function DayPage() {
         else circleColor = 'hidden'
 
         return (
-            <TemplateWithFilter filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>
+            <TemplateWithFilter filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>{
+                loading ? 
+                <>
+                    <div className='flex justify-between w-full mt-4'>
+                        <div>
+                            <p className=''><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                            <p className='text-sm light-gray-text'><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                        </div>
+                        <div>
+                            <p className='dark-green-text'><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                            <p className='text-sm light-gray-text'><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                        </div>
+                        <div>
+                            <p className='dark-green-text'><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                            <p className='text-sm light-gray-text'><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                        </div>
+                    </div>
+
+                    <div className='w-full flex justify-evenly'>
+                        <div className='flex flex-col'>
+                            <div>
+                                <Skeleton width={80} height={80} baseColor="#dedede" highlightColor="#c5c5c5" count={4} />     
+                            </div>
+                        </div>
+                        <div className='flex flex-col'>
+                            <div className='flex'>
+                                <Skeleton width={80} height={80} baseColor="#dedede" highlightColor="#c5c5c5" count={4} />     
+                                <Skeleton width={80} height={80} baseColor="#dedede" highlightColor="#c5c5c5" count={4} />     
+                            </div>
+                        </div>
+                    </div>
+                </>
+                :
                 <div className="flex flex-col justify-center items-center" style={{minHeight: '100vw'}}>
                     <div className={`h-[100px] w-[100px] rounded-full flex justify-center items-center ${circleColor} text-4xl`}>
                         {icon}
                     </div>
                     <p className="mt-2">{message}</p>
                 </div>
+            }
             </TemplateWithFilter>
         )
     }
