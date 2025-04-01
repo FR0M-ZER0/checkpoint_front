@@ -153,7 +153,7 @@ function EspelhoPontoPage() {
                             day: parseInt(dateKey.split("-")[2], 10),
                             status: data[dateKey]
                         }))
-
+                        .sort((a, b) => a.day - b.day)
                     if (daysWithActivities.length === 0) return null
 
                     return (
