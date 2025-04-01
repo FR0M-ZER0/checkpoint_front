@@ -22,7 +22,7 @@ function App() {
 			<Routes>
 				<Route path="/login" element={<LoginPage />} />
 				<Route path="/" element={<MarkingPage />} />
-				<Route path="/dia" element={<DayPage />} />
+				<Route path="/dia/:date" element={<DayPage />} />
 				<Route path="/ferias" element={<Ferias />} />
 				<Route path="/folgas" element={<FolgaPage />} />
 				<Route path="/abono" element={<JustificationPage />} />

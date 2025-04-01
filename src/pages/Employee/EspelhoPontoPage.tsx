@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
 import api from "../../services/api"
 import TemplateWithFilter from "./TemplateWithFilter"
+import { Link } from "react-router"
 
 type valueType = {
     totalFaltas: number,
@@ -120,14 +121,20 @@ function EspelhoPontoPage() {
                                 ))}
                             </div>
                             <div className="grid grid-cols-7 gap-1">
-                                {daysWithActivities.map(({ day, status }) => (
-                                    <div
-                                        key={day}
-                                        className={`h-[50px] flex items-center justify-center text-white font-bold border border-white ${statusColors[status]}`}
-                                    >
-                                        <p className="quicksand text-lg">{String(day).padStart(2, "0")}</p>
-                                    </div>
-                                ))}
+                                {daysWithActivities.map(({ day, status }) => {
+                                    const formattedDay = String(day).padStart(2, "0")
+                                    const formattedMonth = String(index + 1).padStart(2, "0")
+                                    const formattedDate = `${currentYear}-${formattedMonth}-${formattedDay}`
+                                    return (
+                                        <Link key={day} to={`/dia/${formattedDate}`}>
+                                            <div
+                                                className={`h-[50px] flex items-center justify-center text-white font-bold border border-white ${statusColors[status]}`}
+                                            >
+                                                <p className="quicksand text-lg">{formattedDay}</p>
+                                            </div>
+                                        </Link>
+                                    )
+                                })}
                             </div>
                         </div>
                     );

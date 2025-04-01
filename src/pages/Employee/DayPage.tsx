@@ -9,6 +9,7 @@ import api from '../../services/api'
 import { formatStringToTime } from '../../utils/formatter'
 import { calculateWorkTime } from '../../utils/comparisons'
 import { toast } from 'react-toastify'
+import { useParams } from 'react-router'
 
 function DayPage() {
     const [dayType, setDayType] = useState<string>('')
@@ -43,7 +44,8 @@ function DayPage() {
         const day = today.getDate().toString().padStart(2, '0')
         return `${year}-${month}-${day}`
     }
-    const [currentDate, setCurrentDate] = useState<string>(getCurrentDate())
+    const { date } = useParams<{ date: string }>()
+    const [currentDate, setCurrentDate] = useState<string>(date || getCurrentDate())
 
     const openModal = (type: string, id: string, marcacaoPeriodo: string): void => {
         setIsModalVisible(true)
@@ -141,7 +143,7 @@ function DayPage() {
         else message = 'Não houve atividades neste dia'
         
         return (
-            <TemplateWithFilter filter={<DateFilter onDateChange={handleDateChange}/>}>
+            <TemplateWithFilter filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>
                 <div className="flex justify-center items-center h-screen">
                     <h1 className="text-2xl">{message}</h1>
                 </div>
@@ -150,7 +152,7 @@ function DayPage() {
     }
 
     return (
-        <TemplateWithFilter filter={<DateFilter onDateChange={handleDateChange}/>}>
+        <TemplateWithFilter filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>
             <div className='mt-4 w-full'>
                 <HoursState/>
             </div>

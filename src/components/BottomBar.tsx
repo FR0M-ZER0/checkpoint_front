@@ -12,6 +12,14 @@ function BottomBar() {
 
     const totalUnread: number = notificationCount + responseCount
 
+    const getCurrentDate = (): string => {
+        const today = new Date()
+        const year = today.getFullYear()
+        const month = (today.getMonth() + 1).toString().padStart(2, '0')
+        const day = today.getDate().toString().padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
+    const currentDate = getCurrentDate()
     return (
         <nav className='main-func-color w-full h-[62px] fixed bottom-0 flex main-white-text items-center justify-evenly'>
             <span>
@@ -30,7 +38,7 @@ function BottomBar() {
                 </Link>
             </span>
             <span>
-                <Link to={'/dia'}>
+                <Link to={`/dia/${currentDate}`}>
                     <i className="fa-solid fa-clock text-2xl"></i>
                 </Link>
             </span>
@@ -44,10 +52,7 @@ function BottomBar() {
             </span>
 
             <AnimatePresence>
-                {
-                    isMenuOpen &&
-                    <OptionsPage onClose={() => setIsMenuOpen(false)} />
-                }
+                { isMenuOpen && <OptionsPage onClose={() => setIsMenuOpen(false)} /> }
             </AnimatePresence>
         </nav>
     )
