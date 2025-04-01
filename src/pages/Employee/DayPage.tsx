@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FormEvent } from 'react'
+import React, { useState, useEffect, FormEvent, ReactNode } from 'react'
 import TemplateWithFilter from './TemplateWithFilter'
 import DateFilter from '../../components/DateFilter'
 import HoursState from '../../components/HoursState'
@@ -137,15 +137,30 @@ function DayPage() {
 
     if(dayType !== 'normal'){
         let message = ''
-        if(dayType === 'ferias') message = 'Férias'
-        else if(dayType === 'folga') message = 'Folga'
-        else if(dayType === 'falta') message = `Falta - ${faltaDetails}`
-        else message = 'Não houve atividades neste dia'
+        if(dayType === 'ferias') message = 'Você estava de férias neste dia'
+        else if(dayType === 'folga') message = 'Você folgou neste dia'
+        else if(dayType === 'falta') message = `Você se ${faltaDetails === 'Atraso' ? 'atrasou' :  'ausentou'} neste dia`
+        else message = 'Não há dados registrados neste dia'
         
+        let circleColor: string = ''
+        if(dayType === 'folga') circleColor = 'main-orange-color'
+        else if(dayType === 'ferias') circleColor = 'dark-green-color'
+        else if(dayType === 'falta') circleColor = 'main-red-color'
+        else circleColor = 'bg-gray-500'
+
+        let icon: ReactNode
+        if(dayType === 'folga') icon = <i className="fa-solid fa-bed opacity-50"></i>
+        else if(dayType === 'ferias') icon = <i className="fa-solid fa-plane opacity-50"></i>
+        else if(dayType === 'falta') icon = <i className="fa-solid fa-briefcase-medical opacity-50"></i>
+        else circleColor = 'hidden'
+
         return (
             <TemplateWithFilter filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>
-                <div className="flex justify-center items-center h-screen">
-                    <h1 className="text-2xl">{message}</h1>
+                <div className="flex flex-col justify-center items-center" style={{minHeight: '100vw'}}>
+                    <div className={`h-[100px] w-[100px] rounded-full flex justify-center items-center ${circleColor} text-4xl`}>
+                        {icon}
+                    </div>
+                    <p className="mt-2">{message}</p>
                 </div>
             </TemplateWithFilter>
         )
