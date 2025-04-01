@@ -11,24 +11,39 @@ import { calculateWorkTime } from '../../utils/comparisons'
 import { toast } from 'react-toastify'
 
 function DayPage() {
-    const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
-    const [modalType, setModalType] = useState<string>('')
+    const [dayType, setDayType] = useState<string>('')
+    const [faltaDetails, setFaltaDetails] = useState<string>('')
+
     const [markingStart, setMarkingStart] = useState<string>('')
     const [markingPause, setMarkingPause] = useState<string>('')
     const [markingResume, setMarkingResume] = useState<string>('')
     const [markingEnd, setMarkingEnd] = useState<string>('')
+
     const [markingStartId, setMarkingStartId] = useState<string>('')
     const [markingPauseId, setMarkingPauseId] = useState<string>('')
     const [markingResumeId, setMarkingResumeId] = useState<string>('')
     const [markingEndId, setMarkingEndId] = useState<string>('')
+
     const [doneTimeStart, setDonetimeStart] = useState<string>('')
     const [doneTimePause, setDonetimePause] = useState<string>('')
     const [doneTimeResume, setDonetimeResume] = useState<string>('')
-    const [horario, setHorario] = useState<string>('')
-    const [observacao, setObservacao] = useState<string>('')
+
+    const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+    const [modalType, setModalType] = useState<string>('')
     const [markingId, setMarkingId] = useState<string>('')
     const [periodo, setPeriodo] = useState<string>('')
-    const [userId, setUserId] = useState<string|null>('')
+    const [horario, setHorario] = useState<string>('')
+    const [observacao, setObservacao] = useState<string>('')
+
+    const [userId, setUserId] = useState<string | null>('')
+    const getCurrentDate = (): string => {
+        const today = new Date()
+        const year = today.getFullYear()
+        const month = (today.getMonth() + 1).toString().padStart(2, '0')
+        const day = today.getDate().toString().padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
+    const [currentDate, setCurrentDate] = useState<string>(getCurrentDate())
 
     const openModal = (type: string, id: string, marcacaoPeriodo: string): void => {
         setIsModalVisible(true)
@@ -43,33 +58,44 @@ function DayPage() {
         setHorario('')
     }
 
-    const getCurrentDate = (): string => {
-        const today = new Date()
-        const year = today.getFullYear()
-        const month = (today.getMonth() + 1).toString().padStart(2, '0')
-        const day = today.getDate().toString().padStart(2, '0')
-        return `${year}-${month}-${day}`
-    }
-    const [currentDate, setCurrentDate] = useState<string>(getCurrentDate())
-
     const fetchDate = async (selectedDate: string): Promise<void> => {
+        if (!userId) return
         try {
-            const response = await api.get(`/marcacoes/colaborador/${userId}/data/${selectedDate}`)
-            setMarkingStart(formatStringToTime(response.data[0].dataHora))
-            setMarkingStartId(response.data[0].id)
+            const response = await api.get(`/dias-trabalho/${userId}/${selectedDate}`)
+            const data = response.data
+            setDayType(data.tipo)
+            if(data.tipo === 'normal'){
+                if(data.marcacoes && data.marcacoes.length === 4) {
+                    setMarkingStart(formatStringToTime(data.marcacoes[0].dataHora))
+                    setMarkingStartId(data.marcacoes[0].id)
 
-            setMarkingPause(formatStringToTime(response.data[1].dataHora))
-            setMarkingPauseId(response.data[1].id)
+                    setMarkingPause(formatStringToTime(data.marcacoes[1].dataHora))
+                    setMarkingPauseId(data.marcacoes[1].id)
 
-            setMarkingResume(formatStringToTime(response.data[2].dataHora))
-            setMarkingResumeId(response.data[2].id)
+                    setMarkingResume(formatStringToTime(data.marcacoes[2].dataHora))
+                    setMarkingResumeId(data.marcacoes[2].id)
 
-            setMarkingEnd(formatStringToTime(response.data[3].dataHora))
-            setMarkingEndId(response.data[3].id)
+                    setMarkingEnd(formatStringToTime(data.marcacoes[3].dataHora))
+                    setMarkingEndId(data.marcacoes[3].id)
 
-            setDonetimeStart(calculateWorkTime(response.data[0].dataHora, response.data[1].dataHora))
-            setDonetimePause(calculateWorkTime(response.data[1].dataHora, response.data[2].dataHora))
-            setDonetimeResume(calculateWorkTime(response.data[2].dataHora, response.data[3].dataHora))
+                    setDonetimeStart(calculateWorkTime(data.marcacoes[0].dataHora, data.marcacoes[1].dataHora))
+                    setDonetimePause(calculateWorkTime(data.marcacoes[1].dataHora, data.marcacoes[2].dataHora))
+                    setDonetimeResume(calculateWorkTime(data.marcacoes[2].dataHora, data.marcacoes[3].dataHora))
+                }
+            } else {
+                setMarkingStart('')
+                setMarkingPause('')
+                setMarkingResume('')
+                setMarkingEnd('')
+                setDonetimeStart('')
+                setDonetimePause('')
+                setDonetimeResume('')
+                if(data.tipo === 'falta' && data.detalhes) {
+                    setFaltaDetails(data.detalhes.tipoFalta)
+                } else {
+                    setFaltaDetails('')
+                }
+            }
         } catch (err: unknown) {
             console.error(err)
         }
@@ -81,7 +107,6 @@ function DayPage() {
 
     const handleModalSubmit = async (e: FormEvent): Promise<void> => {
         e.preventDefault()
-
         const formData = {
             marcacaoId: markingId,
             periodo,
@@ -90,10 +115,9 @@ function DayPage() {
             observacao,
             horario
         }
-
         try {
             await api.post('/ajuste-ponto/solicitacao', formData)
-            toast.success('Solicitação de ajuste enviado')
+            toast.success('Solicitação de ajuste enviada')
             closeModal()
         } catch (err: unknown) {
             console.error(err)
@@ -102,13 +126,31 @@ function DayPage() {
     }
 
     useEffect(() => {
-        fetchDate(currentDate)
         setUserId(localStorage.getItem('id'))
+    }, [])
+
+    useEffect(() => {
+        fetchDate(currentDate)
     }, [currentDate, userId])
+
+    if(dayType !== 'normal'){
+        let message = ''
+        if(dayType === 'ferias') message = 'Férias'
+        else if(dayType === 'folga') message = 'Folga'
+        else if(dayType === 'falta') message = `Falta - ${faltaDetails}`
+        else message = 'Não houve atividades neste dia'
+        
+        return (
+            <TemplateWithFilter filter={<DateFilter onDateChange={handleDateChange}/>}>
+                <div className="flex justify-center items-center h-screen">
+                    <h1 className="text-2xl">{message}</h1>
+                </div>
+            </TemplateWithFilter>
+        )
+    }
+
     return (
-        <TemplateWithFilter filter={
-            <DateFilter onDateChange={handleDateChange}/>
-        }>
+        <TemplateWithFilter filter={<DateFilter onDateChange={handleDateChange}/>}>
             <div className='mt-4 w-full'>
                 <HoursState/>
             </div>
@@ -238,9 +280,9 @@ function DayPage() {
                     <div className='w-full flex justify-between items-center mb-[100px]'>
                         <div className='flex items-center'>
                             <div className='w-[80px] h-[80px]'>
-                            <PointButton color='main-red-color' icon={
-                                <i className="fa-solid fa-door-closed text-3xl"></i>
-                            }/>
+                                <PointButton color='main-red-color' icon={
+                                    <i className="fa-solid fa-door-closed text-3xl"></i>
+                                }/>
                             </div>
                             <div className='ml-2'>
                                 <p className='text-lg'>Saída</p>
@@ -269,7 +311,6 @@ function DayPage() {
                             </div>
                         </div>
                     </div>
-                    
                 </div>
             </main>
 
@@ -288,12 +329,10 @@ function DayPage() {
                             <label htmlFor="observation">Observação</label>
                             <textarea name="observation" rows={5} className='main-background-color block w-full p-2 rounded shadow-md' value={observacao} onChange={e => setObservacao(e.target.value)}></textarea>
                         </div>
-
                         <div className='text-white flex justify-between'>
                             <button className='main-func-color px-8 py-2 rounded-lg mr-4 cursor-pointer'>
                                 Confirmar
                             </button>
-
                             <button className='sec-func-color px-8 py-2 rounded-lg cursor-pointer' onClick={closeModal}>
                                 Cancelar
                             </button>
