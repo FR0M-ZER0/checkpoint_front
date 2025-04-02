@@ -68,25 +68,52 @@ function DayPage() {
         try {
             const response = await api.get(`/dias-trabalho/${userId}/${selectedDate}`)
             const data = response.data
+            
             setDayType(data.tipo)
-            if(data.tipo === 'normal'){
-                if(data.marcacoes) {
-                    setMarkingStart(formatStringToTime(data.marcacoes[0].dataHora))
-                    setMarkingStartId(data.marcacoes[0].id)
-
-                    setMarkingPause(formatStringToTime(data.marcacoes[1].dataHora))
-                    setMarkingPauseId(data.marcacoes[1].id)
-
-                    setMarkingResume(formatStringToTime(data.marcacoes[2].dataHora))
-                    setMarkingResumeId(data.marcacoes[2].id)
-
-                    setMarkingEnd(formatStringToTime(data.marcacoes[3].dataHora))
-                    setMarkingEndId(data.marcacoes[3].id)
-
-                    setDonetimeStart(calculateWorkTime(data.marcacoes[0].dataHora, data.marcacoes[1].dataHora))
-                    setDonetimePause(calculateWorkTime(data.marcacoes[1].dataHora, data.marcacoes[2].dataHora))
-                    setDonetimeResume(calculateWorkTime(data.marcacoes[2].dataHora, data.marcacoes[3].dataHora))
-                }
+    
+            if (data.tipo === 'normal' && data.marcacoes) {
+                setMarkingStart('')
+                setMarkingPause('')
+                setMarkingResume('')
+                setMarkingEnd('')
+    
+                let startTime: number | null = null
+                let pauseTime: number | null = null
+                let resumeTime: number | null = null
+                let endTime: number | null = null
+    
+                data.marcacoes.forEach((marcacao: any) => {
+                    const formattedTime = formatStringToTime(marcacao.dataHora)
+    
+                    switch (marcacao.tipo) {
+                        case 'ENTRADA':
+                            setMarkingStart(formattedTime)
+                            setMarkingStartId(marcacao.id)
+                            startTime = marcacao.dataHora
+                            break
+                        case 'PAUSA':
+                            setMarkingPause(formattedTime)
+                            setMarkingPauseId(marcacao.id)
+                            pauseTime = marcacao.dataHora
+                            break
+                        case 'RETOMADA':
+                            setMarkingResume(formattedTime)
+                            setMarkingResumeId(marcacao.id)
+                            resumeTime = marcacao.dataHora
+                            break
+                        case 'SAIDA':
+                            setMarkingEnd(formattedTime)
+                            setMarkingEndId(marcacao.id)
+                            endTime = marcacao.dataHora
+                            break
+                        default:
+                            break
+                    }
+                })
+    
+                setDonetimeStart(startTime && pauseTime ? calculateWorkTime(startTime, pauseTime) : '')
+                setDonetimePause(pauseTime && resumeTime ? calculateWorkTime(pauseTime, resumeTime) : '')
+                setDonetimeResume(resumeTime && endTime ? calculateWorkTime(resumeTime, endTime) : '')
             } else {
                 setMarkingStart('')
                 setMarkingPause('')
@@ -95,7 +122,8 @@ function DayPage() {
                 setDonetimeStart('')
                 setDonetimePause('')
                 setDonetimeResume('')
-                if(data.tipo === 'falta' && data.detalhes) {
+    
+                if (data.tipo === 'falta' && data.detalhes) {
                     setFaltaDetails(data.detalhes.tipoFalta)
                 } else {
                     setFaltaDetails('')

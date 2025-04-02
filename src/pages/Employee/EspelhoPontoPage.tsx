@@ -123,6 +123,16 @@ function EspelhoPontoPage() {
                 <i className="fa-solid fa-chevron-right text-xl cursor-pointer" onClick={handleNextYear}></i>
             </div>
         }>
+            <div className="my-4 w-full">
+                <select name="" id="" className="text-sm w-full">
+                    <option value="folga">Filtre por</option>
+                    <option value="folga">Folga</option>
+                    <option value="folga">Férias</option>
+                    <option value="folga">Normal</option>
+                    <option value="folga">Ausência</option>
+                </select>
+            </div>
+
             <div className="mt-4 w-full flex justify-between">
                 <div className="light-blue-text">
                     <p className="quicksand font-bold">{values.totalHorasTrabalhadas}h</p>
