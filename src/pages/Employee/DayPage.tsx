@@ -17,6 +17,7 @@ function DayPage() {
     const [loading, setLoading] = useState<boolean>(true)
     const [dayType, setDayType] = useState<string>('')
     const [faltaDetails, setFaltaDetails] = useState<string>('')
+    const [totalWorkTime, setTotalWorkTime] = useState<string>('')
 
     const [markingStart, setMarkingStart] = useState<string>('')
     const [markingPause, setMarkingPause] = useState<string>('')
@@ -158,6 +159,15 @@ function DayPage() {
         }
     }
 
+    const fetchTotalWorkTime = async (): Promise<void> => {
+        try {
+            const response = await api.get(`/marcacoes/colaborador/${userId}/total-trabalhado/${currentDate}`)
+            setTotalWorkTime(response.data)
+        } catch (err: unknown) {
+            console.error(err)
+        }
+    }
+
     useEffect(() => {
         setUserId(localStorage.getItem('id'))
     }, [])
@@ -165,6 +175,7 @@ function DayPage() {
     useEffect(() => {
         const fetchData = async () => {
             await fetchDate(currentDate)
+            fetchTotalWorkTime()
             setLoading(false)
         }
 
@@ -241,7 +252,7 @@ function DayPage() {
     return (
         <TemplateWithFilter filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>
             <div className='mt-4 w-full'>
-                <HoursState/>
+                <HoursState totalTime={totalWorkTime}/>
             </div>
 
             <main className='w-full mt-8'>
