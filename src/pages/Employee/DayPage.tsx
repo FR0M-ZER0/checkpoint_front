@@ -70,7 +70,7 @@ function DayPage() {
             const data = response.data
             setDayType(data.tipo)
             if(data.tipo === 'normal'){
-                if(data.marcacoes && data.marcacoes.length === 4) {
+                if(data.marcacoes) {
                     setMarkingStart(formatStringToTime(data.marcacoes[0].dataHora))
                     setMarkingStartId(data.marcacoes[0].id)
 
