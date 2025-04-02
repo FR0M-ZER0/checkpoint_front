@@ -25,6 +25,7 @@ function EspelhoPontoPage() {
     const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear())
     const [userId, setUserId] = useState<string | null>('')
     const [loading, setLoading] = useState<boolean>(true)
+    const [filterType, setFilterType] = useState<string>('')
 
     const fecthDays = async (): Promise<void> => {
         try {
@@ -43,6 +44,20 @@ function EspelhoPontoPage() {
             console.error(err)
         }
     }
+
+    const fetchFilteredDays = async (type: string): Promise<void> => {
+        if (!type) {
+            await fecthDays()
+            return
+        }
+    
+        try {
+            const response = await api.get(`/dias-trabalho/${userId}/filtro/${type}`)
+            setData(response.data)
+        } catch (err: unknown) {
+            console.error(err)
+        }
+    }    
 
     const months: string[] = [
         "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -76,6 +91,13 @@ function EspelhoPontoPage() {
     useEffect(() => {
         setUserId(localStorage.getItem("id"))
     }, [])
+
+    useEffect(() => {
+        if (userId) {
+            setLoading(true)
+            fetchFilteredDays(filterType).then(() => setLoading(false))
+        }
+    }, [currentYear, userId, filterType])    
 
     if (loading) {
         return (
@@ -124,12 +146,22 @@ function EspelhoPontoPage() {
             </div>
         }>
             <div className="my-4 w-full">
-                <select name="" id="" className="text-sm w-full">
-                    <option value="folga">Filtre por</option>
+                <select 
+                    name="filtro" 
+                    id="filtro" 
+                    className="text-sm w-full" 
+                    value={filterType} 
+                    onChange={(e) => {
+                        const selectedFilter = e.target.value;
+                        setFilterType(selectedFilter);
+                        fetchFilteredDays(selectedFilter);
+                    }}
+                >
+                    <option value="">Filtre por</option>
                     <option value="folga">Folga</option>
-                    <option value="folga">Férias</option>
-                    <option value="folga">Normal</option>
-                    <option value="folga">Ausência</option>
+                    <option value="ferias">Férias</option>
+                    <option value="marcacao">Normal</option>
+                    <option value="falta">Ausência</option>
                 </select>
             </div>
 
