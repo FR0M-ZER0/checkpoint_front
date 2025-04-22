@@ -23,16 +23,28 @@ export interface VacationSolicitation {
     criadoEm: string
 }
 
+export interface FolgaSolicitation {
+    solFolId: string
+    solFolData: string
+    solFolObservacao: string
+    solFolStatus: string
+    colaboradorId: string
+    criadoEm: string
+    solFolSaldoGasto: string
+}
+
 interface SolicitationState {
     count: number
     solicitations: Solicitation[]
     vacationSolicitations: VacationSolicitation[]
+    folgaSolicitations: FolgaSolicitation[]
 }
 
 const initialState: SolicitationState = {
     count: 0,
     solicitations: [],
-    vacationSolicitations: []
+    vacationSolicitations: [],
+    folgaSolicitations: []
 }
 
 export const fetchSolicitations = createAsyncThunk(
@@ -51,6 +63,14 @@ export const fetchVacationSolicitations = createAsyncThunk(
     }
 )
 
+export const fetchFolgaSolicitations = createAsyncThunk(
+    'solicitations/fetchFolgas',
+    async () => {
+        const response = await api.get('/solicitacao-folga')
+        return response.data
+    }
+)
+
 export const solicitationSlice = createSlice({
     name: 'solicitations',
     initialState,
@@ -62,6 +82,7 @@ export const solicitationSlice = createSlice({
             state.count = 0
             state.solicitations = []
             state.vacationSolicitations = []
+            state.folgaSolicitations = []
         },
         addSolicitation: (state, action) => {
             state.solicitations.unshift(action.payload)
@@ -82,6 +103,9 @@ export const solicitationSlice = createSlice({
         })
         .addCase(fetchVacationSolicitations.fulfilled, (state, action) => {
             state.vacationSolicitations = action.payload
+        })
+        .addCase(fetchFolgaSolicitations.fulfilled, (state, action) => {
+            state.folgaSolicitations = action.payload
         })
     }
 })
