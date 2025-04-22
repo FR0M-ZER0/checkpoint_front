@@ -15,6 +15,7 @@ import DashboardPage from './pages/Admin/DashboardPage'
 import AdminNotificationsPage from './pages/Admin/SolicitationsPage'
 import MarkingsPage from './pages/Admin/MarkingsPage'
 import LoginPageAdmin from './pages/Admin/LoginPageAdmin'
+import HorasExtrasPage from './pages/Admin/HorasExtras';
 
 function App() {
 	return (
@@ -30,6 +31,7 @@ function App() {
 				<Route path="/espelho-ponto" element={<EspelhoPontoPage />} />
 
 				{/* Admin */}
+				<Route path='/admin/colaboradores/horas-extras' element={<HorasExtrasPage />} />
 				<Route path="/admin/dashboard" element={<DashboardPage />} />
 				<Route path="/admin/login" element={<LoginPageAdmin/>} />
 				<Route path="/admin/solicitações" element={<AdminNotificationsPage />} />
