@@ -14,10 +14,11 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ChevronLeft, ChevronRight, Eye, MoreHorizontal } from "lucide-react"
 import { RequestDetailsDialog } from "./RequestDetailsDialog"
-import { removeSolicitation, Solicitation, VacationSolicitation } from "@/redux/slices/solicitationSlice"
+import { FolgaSolicitation, removeSolicitation, Solicitation, VacationSolicitation } from "@/redux/slices/solicitationSlice"
 import { formatDate } from "@/utils/formatter"
 import api from "@/services/api"
 import { toast } from "react-toastify"
+import { parseBRDate } from "@/utils/formatter"
 
 type RequestType = "ajustes" | "ferias" | "folgas" | "ausencias"
 
@@ -38,7 +39,8 @@ interface Request {
 export function RequestsTable({ type }: RequestsTableProps) {
 	const { solicitations } = useSelector((state: RootState) => state.solicitations)
 	const { vacationSolicitations } = useSelector((state: RootState) => state.solicitations)
-	const [requests, setRequests] = useState<Solicitation[] | VacationSolicitation[]>([])
+	const { folgaSolicitations } = useSelector((state: RootState) => state.solicitations)
+	const [requests, setRequests] = useState<Solicitation[] | VacationSolicitation[] | FolgaSolicitation[]>([])
 	const dispatch = useDispatch()
 
 	useEffect(() => {
@@ -46,10 +48,22 @@ export function RequestsTable({ type }: RequestsTableProps) {
 			setRequests(solicitations)
 		} else if (type === "ferias") {
 			setRequests(vacationSolicitations)
+		} else if (type === "folgas") {
+			const mappedFolgas = folgaSolicitations.map((folga) => ({
+				id: folga.solFolId,
+				colaborador: folga.colaborador,
+				department: folga.department,
+				data: folga.solFolData,
+				criadoEm: folga.criadoEm,
+				saldoGasto: folga.solFolSaldoGasto,
+				observacao: folga.solFolObservacao,
+				status: folga.solFolStatus,
+			}))
+			setRequests(mappedFolgas)
 		} else {
 			setRequests([])
 		}
-	}, [type, solicitations, vacationSolicitations])
+	}, [type, solicitations, vacationSolicitations, folgaSolicitations])
 
 	const [selectedRequest, setSelectedRequest] = useState<Request | null>(null)
 	const [isDetailsOpen, setIsDetailsOpen] = useState(false)
@@ -76,44 +90,70 @@ export function RequestsTable({ type }: RequestsTableProps) {
 	console.log(requests)
 
 	const handleApprove = async (id: number) => {
-		if (type === 'ajustes') {
-		  const solicitation = paginatedRequests.find((r) => r.id === id)
-		  if (!solicitation) return
-	  
-		  try {
-			await api.put(`/ajuste-ponto/solicitacao/${id}`, { status: 'aceito' })
-	  
-			if (solicitation.tipo === 'edicao') {
-			  await api.put(`/marcacoes/${solicitation.marcacaoId}/horario`, { novoHorario: solicitation.horario })
+		const solicitation = paginatedRequests.find((r) => r.id === id)
+		if (!solicitation) return
+
+		try {
+			if (type === 'ajustes') {
+				await api.put(`/ajuste-ponto/solicitacao/${id}`, { status: 'aceito' })
+
+				if (solicitation.tipo === 'edicao') {
+					await api.put(`/marcacoes/${solicitation.marcacaoId}/horario`, { novoHorario: solicitation.horario })
+				} else {
+					await api.delete(`/marcacoes/${solicitation.marcacaoId}`)
+				}
+
+				toast.success('Ajuste realizado com sucesso')
+			} else if (type === 'ferias') {
+				await api.put(`/solicitacao-ferias/${id}`, { status: 'Aprovado' })
+
+				await api.post('/api/ferias', {
+					colaboradorId: solicitation.colaboradorId,
+					dataInicio: solicitation.dataInicio,
+					dataFim: solicitation.dataFim,
+				})
+
+				toast.success('Férias criadas com sucesso')
+			} else if (type === 'folgas') {
+				await api.put(`/solicitacao-folga/${id}`, { solFolStatus: 'Aprovado' })
+				await api.post('/api/folga', {
+					colaboradorId: solicitation.colaborador.id,
+					data: parseBRDate(solicitation.data),
+					saldoGasto: solicitation.saldoGasto
+				})
+
+				toast.success('Folga criada com sucesso')
 			} else {
-			  await api.delete(`/marcacoes/${solicitation.marcacaoId}`)
+				handleStatusChange(id, "Aprovado")
 			}
-	  
-			toast.success('Ajuste realizado com sucesso')
+
 			dispatch(removeSolicitation(id))
-		  } catch (error) {
+		} catch (error) {
 			console.error(error)
-			toast.error('Erro ao aceitar ajuste')
-		  }
-		} else {
-		  handleStatusChange(id, "Aprovado")
+			toast.error('Erro ao aprovar solicitação')
 		}
-	  }
-	  
-	  const handleReject = async (id: number) => {
-		if (type === 'ajustes') {
-		  try {
-			await api.put(`/ajuste-ponto/solicitacao/${id}`, { status: 'rejeitado' })
-			toast.success('Solicitação rejeitada com sucesso')
+	}
+
+	const handleReject = async (id: number) => {
+		try {
+			if (type === 'ajustes') {
+				await api.put(`/ajuste-ponto/solicitacao/${id}`, { status: 'rejeitado' })
+			} else if (type === 'ferias') {
+				await api.put(`/solicitacao-ferias/${id}`, { status: 'Rejeitado' })
+			} else if (type === 'folgas') {
+				await api.put(`/solicitacao-folga/${id}`, { status: 'Rejeitado' })
+			} else {
+				handleStatusChange(id, "Rejeitado")
+			}
+
+			toast.error('Solicitação rejeitada com sucesso')
 			dispatch(removeSolicitation(id))
-		  } catch (error) {
+		} catch (error) {
 			console.error(error)
-			toast.error('Erro ao rejeitar ajuste')
-		  }
-		} else {
-		  handleStatusChange(id, "Rejeitado")
+			toast.error('Erro ao rejeitar solicitação')
 		}
-	  }
+	}
+
 
 	return (
 		<>
@@ -122,27 +162,27 @@ export function RequestsTable({ type }: RequestsTableProps) {
 					<TableHeader>
 						{
 							type === 'ajustes' ?
-							<TableRow>
-								<TableHead>Colaborador</TableHead>
-								<TableHead>Departamento</TableHead>
-								<TableHead>Período</TableHead>
-								<TableHead>Data da Solicitação</TableHead>
-								<TableHead>Tipo</TableHead>
-								<TableHead>Horario</TableHead>
-								<TableHead>Observação</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead className="text-right">Ações</TableHead>
-							</TableRow>
-							:
-							<TableRow>
-								<TableHead>Colaborador</TableHead>
-								<TableHead>Departamento</TableHead>
-								<TableHead>Data</TableHead>
-								<TableHead>Data da Solicitação</TableHead>
-								<TableHead>Observação</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead className="text-right">Ações</TableHead>
-							</TableRow>
+								<TableRow>
+									<TableHead>Colaborador</TableHead>
+									<TableHead>Departamento</TableHead>
+									<TableHead>Período</TableHead>
+									<TableHead>Data da Solicitação</TableHead>
+									<TableHead>Tipo</TableHead>
+									<TableHead>Horario</TableHead>
+									<TableHead>Observação</TableHead>
+									<TableHead>Status</TableHead>
+									<TableHead className="text-right">Ações</TableHead>
+								</TableRow>
+								:
+								<TableRow>
+									<TableHead>Colaborador</TableHead>
+									<TableHead>Departamento</TableHead>
+									<TableHead>Data</TableHead>
+									<TableHead>Data da Solicitação</TableHead>
+									<TableHead>Observação</TableHead>
+									<TableHead>Status</TableHead>
+									<TableHead className="text-right">Ações</TableHead>
+								</TableRow>
 						}
 					</TableHeader>
 					<TableBody>
@@ -153,49 +193,59 @@ export function RequestsTable({ type }: RequestsTableProps) {
 								</TableCell>
 							</TableRow>
 						) : type === 'ajustes' ? (
-								paginatedRequests.map((request) => (
-									<TableRow key={request.id}>
-										<TableCell className="font-medium">{request.colaboradorNome}</TableCell>
-										<TableCell>{request.department}</TableCell>
-										<TableCell>{request.periodo}</TableCell>	
-										<TableCell>{formatDate(request.criadoEm)}</TableCell>
-										<TableCell>{request.tipo}</TableCell>
-										<TableCell>{request.horario}</TableCell>
-										<TableCell className="max-w-[200px] truncate">{request.observacao}</TableCell>
-										<TableCell>
-											<Badge
-												variant={request.status === "rejeitado" ? "destructive" : "outline"}
-												className={request.status === "aceito" ? "bg-green-600 text-white" : ""}
-											>
-												{request.status}
-											</Badge>
-										</TableCell>
-										<TableCell className="text-right">
-											<DropdownMenu>
-												<DropdownMenuTrigger asChild>
-													<Button variant="ghost" size="icon" className="h-8 w-8">
-														<MoreHorizontal className="h-4 w-4" />
-														<span className="sr-only">Abrir menu</span>
-													</Button>
-												</DropdownMenuTrigger>
-												<DropdownMenuContent align="end">
-													<DropdownMenuLabel>Ações</DropdownMenuLabel>
-													<DropdownMenuSeparator />
-													<DropdownMenuItem onClick={() => handleViewDetails(request)}>
-														<Eye className="mr-2 h-4 w-4" />
-														<span>Ver detalhes</span>
-													</DropdownMenuItem>
-												</DropdownMenuContent>
-											</DropdownMenu>
-										</TableCell>
-									</TableRow>
-								))
+							paginatedRequests.map((request) => (
+								<TableRow key={request.id}>
+									<TableCell className="font-medium">{request.colaboradorNome}</TableCell>
+									<TableCell>{request.department}</TableCell>
+									<TableCell>{request.periodo}</TableCell>
+									<TableCell>{formatDate(request.criadoEm)}</TableCell>
+									<TableCell>{request.tipo}</TableCell>
+									<TableCell>{request.horario}</TableCell>
+									<TableCell className="max-w-[200px] truncate">{request.observacao}</TableCell>
+									<TableCell>
+										<Badge
+											variant={request.status === "rejeitado" ? "destructive" : "outline"}
+											className={request.status === "aceito" ? "bg-green-600 text-white" : ""}
+										>
+											{request.status}
+										</Badge>
+									</TableCell>
+									<TableCell className="text-right">
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<Button variant="ghost" size="icon" className="h-8 w-8">
+													<MoreHorizontal className="h-4 w-4" />
+													<span className="sr-only">Abrir menu</span>
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent align="end">
+												<DropdownMenuLabel>Ações</DropdownMenuLabel>
+												<DropdownMenuSeparator />
+												<DropdownMenuItem onClick={() => handleViewDetails(request)}>
+													<Eye className="mr-2 h-4 w-4" />
+													<span>Ver detalhes</span>
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</TableCell>
+								</TableRow>
+							))
 						) : (
 							paginatedRequests.map((request) => (
 								<TableRow key={request.id}>
 									<TableCell className="font-medium">{request.colaborador?.nome}</TableCell>
 									<TableCell>{request.department}</TableCell>
-									<TableCell>{formatDate(request.dataInicio)}-{formatDate(request.dataFim)}</TableCell>
+									{
+										type === 'ferias' ?
+										<TableCell>
+											{formatDate(request.dataInicio)}-{formatDate(request.dataFim)}
+										</TableCell>
+										:
+										<TableCell>
+											{formatDate(request.data)}
+										</TableCell>
+									}
+
 									<TableCell>{formatDate(request.criadoEm)}</TableCell>
 									<TableCell className="max-w-[200px] truncate">{request.observacao}</TableCell>
 									<TableCell>

@@ -76,7 +76,7 @@ export function RequestDetailsDialog({ request, open, onOpenChange, onApprove, o
 						<>
 							<div className="grid grid-cols-[120px_1fr] items-start gap-2">
 								<div className="font-medium">Colaborador:</div>
-								<div>{request.employee}</div>
+								<div>{request.colaborador?.nome}</div>
 							</div>
 							<div className="grid grid-cols-[120px_1fr] items-start gap-2">
 								<div className="font-medium">Departamento:</div>
@@ -84,26 +84,31 @@ export function RequestDetailsDialog({ request, open, onOpenChange, onApprove, o
 							</div>
 							<div className="grid grid-cols-[120px_1fr] items-start gap-2">
 								<div className="font-medium">Data:</div>
-								<div>{request.date}</div>
+								{
+									type === 'ferias' ?
+									<div>{formatDate(request.dataInicio)}-{formatDate(request.dataFim)}</div>
+									:
+									<div>{formatDate(request.data)}</div>
+								}
 							</div>
 							<div className="grid grid-cols-[120px_1fr] items-start gap-2">
 								<div className="font-medium">Solicitado em:</div>
-								<div>{request.requestDate}</div>
+								<div>{formatDate(request.criadoEm)}</div>
 							</div>
 							<div className="grid grid-cols-[120px_1fr] items-start gap-2">
 								<div className="font-medium">Status:</div>
 								<div>
 								<Badge
-									variant={request.status === "Rejeitado" ? "destructive" : "outline"}
-									className={request.status === "Aprovado" ? "bg-green-600 text-white" : ""}
+									variant={request.status.toLowerCase() === "rejeitado" ? "destructive" : "outline"}
+									className={request.status.toLowerCase() === "aprovado" ? "bg-green-600 text-white" : ""}
 								>
 									{request.status}
 								</Badge>
 								</div>
 							</div>
 							<div className="grid grid-cols-[120px_1fr] items-start gap-2">
-								<div className="font-medium">Detalhes:</div>
-								<div className="max-h-[150px] overflow-y-auto rounded-md border p-3 text-sm">{request.details}</div>
+								<div className="font-medium">Observação:</div>
+								<div className="max-h-[150px] overflow-y-auto rounded-md border p-3 text-sm">{request.observacao}</div>
 							</div>
 						</>
 					)}

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { DashboardSidebar } from "@/components/admin/Sidebar"
 import { DashboardHeader } from "@/components/admin/Header"
-import { fetchSolicitations, fetchVacationSolicitations } from '@/redux/slices/solicitationSlice'
+import { fetchFolgaSolicitations, fetchSolicitations, fetchVacationSolicitations } from '@/redux/slices/solicitationSlice'
 import { toast, ToastContainer } from 'react-toastify'
 
 export default function DashboardLayout({
@@ -20,6 +20,7 @@ export default function DashboardLayout({
         dispatch({ type: "websocket/connect" })
         dispatch(fetchSolicitations())
         dispatch(fetchVacationSolicitations())
+        dispatch(fetchFolgaSolicitations())
 
         return () => {
             dispatch({ type: 'websocket/disconnect' })
