@@ -32,9 +32,15 @@ const formatStringToTime = (dateString: string): string => {
     return `${hours}h:${minutes}min`;
 };
 
+const parseBRDate = (dateStr: string) => {
+    const [day, month, year] = dateStr.split("/");
+    return `${year}-${month}-${day}`;
+};  
+
 export {
     formatDate,
     formatTime,
     formatTimeAndMinute,
-    formatStringToTime
+    formatStringToTime,
+    parseBRDate
 };
