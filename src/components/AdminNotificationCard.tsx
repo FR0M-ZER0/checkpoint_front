@@ -30,18 +30,20 @@ type AdminNotificationCardProp = {
     markingTime?: string
     markingType?: string
 
+    solicitationType?: string
+
     openModal: () => void
 }
 
-function AdminNotificationCard({ type, date, name, observation, dayStart, dayEnd, file, reason, justification, period, markingTime, markingType, openModal }: AdminNotificationCardProp) {
+function AdminNotificationCard({ type, date, name, observation, dayStart, dayEnd, file, reason, justification, period, markingTime, markingType, solicitationType, openModal }: AdminNotificationCardProp) {
     return (
-        <div className='w-full rounded-xl p-3 notification-admin-color flex justify-between' onClick={openModal}>
+        <div className={`w-full rounded-xl p-3 flex justify-between ${solicitationType === "Folga" ? "main-orange-color" : "notification-admin-color"} `} onClick={openModal}>
             <div className='flex flex-col mr-4'>
                 <div className='w-[54px] h-[54px] rounded-full bg-white flex items-center justify-center'>
                     <i className="fa-solid fa-user-secret text-4xl text-gray-400"></i>
                 </div>
 
-                <div className='light-gray-text text-sm mt-4'>
+                <div className={`text-sm mt-4 ${solicitationType === "Folga" ? "text-white" : "light-gray-text"}  `}>
                     <p>
                         { name }
                     </p>
@@ -52,37 +54,67 @@ function AdminNotificationCard({ type, date, name, observation, dayStart, dayEnd
                 </div>
             </div>
 
-            <div className='flex-grow'>
-                <p>
-                    { type }
-                </p>
-
-                {
-                    period &&
-                    <p className='text-sm'>
-                        Em { period }
+            {
+                solicitationType === "Folga" ? (
+                    <div className='flex-grow'>
+                    <p className='text-white'>
+                        { type }
                     </p>
-                }
-
-                {
-                    dayStart && dayEnd &&
+    
+                    {
+                        period &&
+                        <p className='text-sm text-white'>
+                            Dia { period }
+                        </p>
+                    }
+    
+                    {
+                        observation &&
+                        <div className='mt-4 text-white'>
+                            <p className='font-bold'>
+                                Observação:
+                            </p>
+                            <p className='text-sm line-clamp-2'>
+                                { observation }
+                            </p>
+                        </div>
+                    }
+                </div>
+                 ) : (
+                    <div className='flex-grow'>
                     <p>
-                        { dayStart } até { dayEnd }
+                        { type }
                     </p>
-                }
+    
+                    {
+                        period &&
+                        <p className='text-sm'>
+                            Em { period }
+                        </p>
+                    }
+    
+                    {
+                        dayStart && dayEnd &&
+                        <p>
+                            { dayStart } até { dayEnd }
+                        </p>
+                    }
+    
+                    {
+                        observation &&
+                        <div className='mt-4'>
+                            <p className='font-bold'>
+                                Observação:
+                            </p>
+                            <p className='text-sm line-clamp-2'>
+                                { observation }
+                            </p>
+                        </div>
+                    }
+                </div>  
+                 )
+            }
 
-                {
-                    observation &&
-                    <div className='mt-4'>
-                        <p className='font-bold'>
-                            Observação:
-                        </p>
-                        <p className='text-sm line-clamp-2'>
-                            { observation }
-                        </p>
-                    </div>
-                }
-            </div>
         </div>
     )
 }
