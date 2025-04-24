@@ -1,4 +1,4 @@
-import React, { ReactNode, useState, useEffect, useRef } from 'react'
+import { ReactNode, useState, useEffect, useRef } from 'react'
 import TopBar from '../../components/TopBar'
 import BottomBar from '../../components/BottomBar'
 import { toast, ToastContainer } from 'react-toastify'
@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { fetchUnreadNotifications } from '../../redux/slices/notificationSlice'
 import { RootState } from '../../redux/store'
 import { fetchUnreadResponses } from '../../redux/slices/responseSlice'
+import SideBar from '../../components/Sidebar'
 
 type templateProps = {
     children?: ReactNode
@@ -52,11 +53,25 @@ function Template({ children }: templateProps) {
 
     return (
         <div className='min-w-screen pb-[62px]' style={{ minHeight: 'calc(100vh + 162px)' }}>
-            <TopBar/>
-            <div className='w-[90%] flex flex-col items-center' style={{margin: "0 auto"}}>
-                { children }
+            <div className='block md:hidden'>
+                <TopBar/>
             </div>
-            <BottomBar/>
+
+            <div className="grid grid-cols-1 md:grid-cols-[256px_1fr] w-full">
+                <div className="hidden md:block">
+                    <SideBar />
+                </div>
+                <div className="w-full flex justify-center">
+                    <div className='w-[1400px]'>
+                        {children}
+                    </div>
+                </div>
+            </div>
+
+
+            <div className="block md:hidden">
+                <BottomBar/>
+            </div>
             <ToastContainer
                 hideProgressBar={true}
                 pauseOnFocusLoss={false}
