@@ -76,13 +76,14 @@ function NotificationsPage() {
             <div className='mt-8'>
                 {
                     solicitations.map(solicitation => (
-                        <div className='mb-4' onClick={() => openModal(solicitation.horario, solicitation.tipo, solicitation.periodo, solicitation.marcacaoId, solicitation.id)}>
+                        <div className='mb-4' onClick={() => openModal(solicitation.horario, solicitation.tipo, solicitation.periodo, solicitation.marcacaoId, solicitation.id)} key={solicitation.id}>
                             <AdminNotificationCard
                                 name='Func. 1'
                                 date={formatDate(solicitation.criadoEm)}
-                                type='Ajuste de ponto'
+                                type={solicitation.solicitacaoTipo === "Folga" ? "Solicitação de folga" : "Ajuste de ponto"}
                                 period={solicitation.periodo}
                                 observation={solicitation.observacao}
+                                solicitationType={solicitation.solicitacaoTipo}
                             />
                         </div>
                     ))

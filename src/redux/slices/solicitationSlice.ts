@@ -3,13 +3,17 @@ import api from '../../services/api'
 
 export interface Solicitation {
     id: string
-    marcacaoId: string
-    periodo: string
-    tipo: string
-    status: string
-    observacao: string
-    horario: string
+    marcacaoId?: string
+    periodo?: string
+    tipo?: string
+    status?: string
+    observacao?: string
+    horario?: string
     criadoEm: string
+    data?: string
+    colaboradorId?: number
+    saldoGasto?: string
+    solicitacaoTipo?: string
 }
 
 interface SolicitationState {
@@ -26,6 +30,14 @@ export const fetchPendingSolicitations = createAsyncThunk(
     'solicitations/fetchPending',
     async () => {
         const response = await api.get('/ajuste-ponto/solicitacao/pendentes')
+        return response.data
+    }
+)
+
+export const fetchPendingSolicitationsBreak = createAsyncThunk(
+    'solicitations/fetchPendingBreak',
+    async () => {
+        const response = await api.get('/solicitacao-folga/pendentes')
         return response.data
     }
 )
@@ -55,10 +67,21 @@ export const solicitationSlice = createSlice({
     extraReducers: (builder) => {
         builder
         .addCase(fetchPendingSolicitations.fulfilled, (state, action) => {
-            state.solicitations = action.payload
-            state.count = action.payload.length
-        })
-    }
+            state.solicitations = [...state.solicitations, ...action.payload]; // Merge with existing
+            state.count = state.solicitations.length;
+          })
+          .addCase(fetchPendingSolicitationsBreak.fulfilled, (state, action) => {
+            const transformedData = action.payload.map(item => ({
+              ...item,
+              solicitacaoTipo: item.solFolTipo, // Map API field to component field
+              periodo: item.solFolData,
+              observacao: item.solFolObservacao,
+              criadoEm: item.criadoEm // Ensure date field is present
+            }))
+            state.solicitations = transformedData;
+            state.count = state.solicitations.length;
+          })
+      }
 })
 
 export const { incrementSolicitation, resetSolicitation, addSolicitation, removeSolicitation } = solicitationSlice.actions

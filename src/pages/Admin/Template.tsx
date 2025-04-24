@@ -3,7 +3,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import AdminBottomBar from '../../components/AdminBottomBar'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
-import { fetchPendingSolicitations } from '../../redux/slices/solicitationSlice'
+import { fetchPendingSolicitations, fetchPendingSolicitationsBreak } from '../../redux/slices/solicitationSlice'
 
 type templateProps = {
     children?: ReactNode
@@ -18,6 +18,7 @@ function Template({ children }: templateProps) {
     useEffect(() => {
         dispatch({ type: "websocket/connect" })
         dispatch(fetchPendingSolicitations())
+        dispatch(fetchPendingSolicitationsBreak())
 
         return () => {
             dispatch({ type: 'websocket/disconnect' })
