@@ -6,6 +6,7 @@ import Modal from '../../components/Modal'
 import { formatDate, formatTime, formatTimeAndMinute } from '../../utils/formatter'
 import api from '../../services/api'
 import { toast } from 'react-toastify'
+import { useMediaQuery } from '../../utils/hooks'
 
 function MarkingPage() {
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
@@ -18,6 +19,7 @@ function MarkingPage() {
     const [markingEnd, setMarkingEnd] = useState<string>('')
     const [userId, setUserId] = useState<string|null>('')
     const d: Date = new Date()
+    const isDesktop = useMediaQuery('(min-width: 768px)')
 
     const closeModal = (): void => {
         setIsModalVisible(false)
@@ -76,6 +78,7 @@ function MarkingPage() {
 
     return (
         <TemplateWithFilter
+            showFilter={!isDesktop}
             filter={
                 <div className='flex w-full flex-col text-center justify-center'>
                     <p className='font-light'>{ formatDate(d) }</p>
@@ -83,50 +86,49 @@ function MarkingPage() {
                 </div>
             }
         >
-            <main className='w-full flex-col text-center'>
+            <main className='w-full min-h-screen flex flex-col items-center justify-center text-center px-4'>
+                <div className='md:flex hidden w-full flex-col text-center justify-center'>
+                    <p className='font-light text-lg'>{ formatDate(d) }</p>
+                    <p className='text-2xl'>{ dayName }</p>
+                </div>
                 <Clock/>
-                <div onClick={() => openModal('ENTRADA')} className='mt-12'>
-                    <PointCard
-                        icon={
-                            <i className="fa-solid fa-door-open text-6xl"></i>
-                        }
-                        period='Início'
-                        time={markingStart}
-                        color='main-green-color'
-                    />
-                </div>
 
-                <div className='mt-4' onClick={() => openModal('PAUSA')}>
-                    <PointCard
-                        icon={
-                            <i className="fa-solid fa-mug-hot text-6xl"></i>
-                        }
-                        period='Pausa'
-                        time={markingPause}
-                        color='main-blue-color'
-                    />
-                </div>
+                <div className='mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl'>
+                    <div onClick={() => openModal('ENTRADA')}>
+                        <PointCard
+                            icon={<i className="fa-solid fa-door-open text-6xl"></i>}
+                            period='Início'
+                            time={markingStart}
+                            color='main-green-color'
+                        />
+                    </div>
 
-                <div className='mt-4' onClick={() => openModal('RETOMADA')}>
-                    <PointCard
-                        icon={
-                            <i className="fa-solid fa-battery-full text-6xl"></i>
-                        }
-                        period='Retomada'
-                        time={markingResume}
-                        color='main-yellow-color'
-                    />
-                </div>
+                    <div onClick={() => openModal('PAUSA')}>
+                        <PointCard
+                            icon={<i className="fa-solid fa-mug-hot text-6xl"></i>}
+                            period='Pausa'
+                            time={markingPause}
+                            color='main-blue-color'
+                        />
+                    </div>
 
-                <div className='mt-4' onClick={() => openModal('SAIDA')}>
-                    <PointCard
-                        icon={
-                            <i className="fa-solid fa-door-closed text-6xl"></i>
-                        }
-                        period='Saída'
-                        time={markingEnd}
-                        color='main-red-color'
-                    />
+                    <div onClick={() => openModal('RETOMADA')}>
+                        <PointCard
+                            icon={<i className="fa-solid fa-battery-full text-6xl"></i>}
+                            period='Retomada'
+                            time={markingResume}
+                            color='main-yellow-color'
+                        />
+                    </div>
+
+                    <div onClick={() => openModal('SAIDA')}>
+                        <PointCard
+                            icon={<i className="fa-solid fa-door-closed text-6xl"></i>}
+                            period='Saída'
+                            time={markingEnd}
+                            color='main-red-color'
+                        />
+                    </div>
                 </div>
             </main>
             {
