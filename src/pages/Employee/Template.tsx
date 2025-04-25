@@ -52,7 +52,7 @@ function Template({ children }: templateProps) {
     }, [responses.length])
 
     return (
-        <div className='min-w-screen pb-[62px]' style={{ minHeight: 'calc(100vh + 162px)' }}>
+        <div className='min-w-screen pb-[62px] md:pb-0 min-h-[calc(100vh+162px)] md:min-h-screen'>
             <div className='block md:hidden'>
                 <TopBar/>
             </div>
