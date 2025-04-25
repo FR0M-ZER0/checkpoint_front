@@ -146,7 +146,7 @@ function EspelhoPontoPage() {
                 <i className="fa-solid fa-chevron-right text-xl cursor-pointer" onClick={handleNextYear}></i>
             </div>
         }>
-            <div className="my-4 w-full">
+            <div className="my-4 w-full md:hidden block">
                 <select 
                     name="filtro" 
                     id="filtro" 
@@ -166,27 +166,72 @@ function EspelhoPontoPage() {
                 </select>
             </div>
 
-            <div className="mt-4 w-full flex justify-between">
-                <div className="light-blue-text">
-                    <p className="quicksand font-bold">{values.totalHorasTrabalhadas}h</p>
-                    <p className="text-sm">Horas trab.</p>
+            <div className="mt-4 w-full">
+                <div className="flex justify-between md:hidden">
+                    <div className="light-blue-text">
+                        <p className="quicksand font-bold">{values.totalHorasTrabalhadas}h</p>
+                        <p className="text-sm">Horas trab.</p>
+                    </div>
+
+                    <div className="main-orange-text">
+                        <p className="quicksand font-bold">{values.totalFolgas}d</p>
+                        <p className="text-sm">Folgas</p>
+                    </div>
+
+                    <div className="dark-green-text">
+                        <p className="quicksand font-bold">{values.totalFerias}d</p>
+                        <p className="text-sm">Férias</p>
+                    </div>
+
+                    <div className="main-red-text">
+                        <p className="quicksand font-bold">{values.totalFaltas}d</p>
+                        <p className="text-sm">Faltas</p>
+                    </div>
                 </div>
 
-                <div className="main-orange-text">
-                    <p className="quicksand font-bold">{values.totalFolgas}d</p>
-                    <p className="text-sm">Folgas</p>
-                </div>
+                <div className="hidden md:flex gap-4">
+                    <div className="flex items-center gap-2 light-blue-color text-white px-6 py-4 rounded-lg w-full cursor-pointer">
+                        <div className="mr-4 h-14 w-14 bg-[#006ADA] flex justify-center items-center rounded-xl shadow-md">
+                            <i className="fa-solid fa-gavel text-2xl"></i>
+                        </div>
+                        <div>
+                            <p className="quicksand text-sm font-semibold">Horas trabalhadas</p>
+                            <p className="font-bold text-lg">{values.totalHorasTrabalhadas}h</p>
+                        </div>
+                    </div>
 
-                <div className="dark-green-text">
-                    <p className="quicksand font-bold">{values.totalFerias}d</p>
-                    <p className="text-sm">Férias</p>
-                </div>
+                    <div className="flex items-center gap-2 main-red-color text-white px-6 py-4 rounded-lg w-full cursor-pointer">
+                        <div className="mr-4 h-14 w-14 bg-[#C90F03] flex justify-center items-center rounded-xl shadow-md">
+                            <i className="fa-solid fa-notes-medical text-2xl"></i>
+                        </div>
+                        <div>
+                            <p className="quicksand text-sm font-semibold">Faltas</p>
+                            <p className="font-bold text-lg">{values.totalFaltas}d</p>
+                        </div>
+                    </div>
 
-                <div className="main-red-text">
-                    <p className="quicksand font-bold">{values.totalFaltas}d</p>
-                    <p className="text-sm">Faltas</p>
+                    <div className="flex items-center gap-2 main-orange-color text-white px-6 py-4 rounded-lg w-full cursor-pointer">
+                        <div className="mr-4 h-14 w-14 bg-[#B73607] flex justify-center items-center rounded-xl shadow-md">
+                            <i className="fa-solid fa-bed text-2xl"></i>
+                        </div>
+                        <div>
+                            <p className="quicksand text-sm font-semibold">Folgas</p>
+                            <p className="font-bold text-lg">{values.totalFolgas}d</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 dark-green-color text-white px-6 py-4 rounded-lg w-full cursor-pointer">
+                        <div className="mr-4 h-14 w-14 bg-[#0A8246] flex justify-center items-center rounded-xl shadow-md">
+                            <i className="fa-solid fa-champagne-glasses text-2xl"></i>
+                        </div>
+                        <div>
+                            <p className="quicksand text-sm font-semibold">Férias</p>
+                            <p className="font-bold text-lg">{values.totalFerias}d</p>
+                        </div>
+                    </div>
                 </div>
             </div>
+
             <div className="mt-8 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 {months.map((month, index) => {
