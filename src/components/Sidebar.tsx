@@ -1,8 +1,12 @@
-import { Link, useLocation } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
+import { useState, useEffect } from 'react'
 
 function Sidebar() {
     const location = useLocation()
     const pathname = location.pathname
+    const navigate = useNavigate()
+    const [name, setName] = useState<string|null>('')
+    const [email, setEmail] = useState<string|null>('')
 
     const getCurrentDate = (): string => {
         const today = new Date()
@@ -12,6 +16,15 @@ function Sidebar() {
         return `${year}-${month}-${day}`
     }
 
+    const handleLogout = (): void => {
+        localStorage.removeItem("nome")
+        localStorage.removeItem("email")
+        localStorage.removeItem("id")
+        localStorage.removeItem("criado_em")
+        localStorage.removeItem("ativo")
+        navigate('/login')
+    }
+
     const currentDate = getCurrentDate()
     const linkBaseClass = "flex items-center mb-2 px-2 py-3 rounded-lg transition-colors duration-200"
 
@@ -19,6 +32,10 @@ function Sidebar() {
     const getLinkClass = (path: string, hoverClass: string) =>
         `${linkBaseClass} ${isActive(path) ? 'bg-white text-[#232566]' : `hover:bg-[#232566] ${hoverClass}`}`
 
+    useEffect(() => {
+        setName(localStorage.getItem("nome"))
+        setEmail(localStorage.getItem("email"))
+    }, [])
     return (
         <nav className="hidden md:flex flex-col w-64 min-h-screen main-func-color p-4 text-slate-300">
             <div className='pb-2 border-b-2 border-gray-600'>
@@ -27,8 +44,8 @@ function Sidebar() {
                         <i className="fa-solid fa-user-secret text-5xl text-gray-500"></i>
                     </div>
                     <div className='text-sm text-slate-400'>
-                        <p>Teste da silva</p>
-                        <p>teste@email.com</p>
+                        <p>{name}</p>
+                        <p>{email}</p>
                     </div>
                 </div>
 
@@ -80,7 +97,7 @@ function Sidebar() {
                     </label>
                 </div>
 
-                <p className={`${linkBaseClass} hover:bg-[#232566]`}>
+                <p className={`${linkBaseClass} hover:bg-[#232566] cursor-pointer`} onClick={ handleLogout}>
                     <i className="fa-solid fa-right-from-bracket mr-3"></i>
                     <span>Sair</span>
                 </p>
