@@ -12,6 +12,7 @@ import { toast } from 'react-toastify'
 import { useParams } from 'react-router'
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
+import { useMediaQuery } from '../../utils/hooks'
 
 function DayPage() {
     const [loading, setLoading] = useState<boolean>(true)
@@ -40,6 +41,9 @@ function DayPage() {
     const [observacao, setObservacao] = useState<string>('')
 
     const [userId, setUserId] = useState<string | null>('')
+
+    const isDesktop = useMediaQuery('(min-width: 768px)')
+    
     const getCurrentDate = (): string => {
         const today = new Date()
         const year = today.getFullYear()
@@ -166,9 +170,10 @@ function DayPage() {
         else circleColor = 'hidden'
 
         return (
-            <TemplateWithFilter filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>{
+            <TemplateWithFilter showFilter={!isDesktop} filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>{
                 loading ? 
                 <>
+                    <DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>
                     <div className='flex justify-between w-full mt-4'>
                         <div>
                             <p className=''><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
@@ -199,11 +204,17 @@ function DayPage() {
                     </div>
                 </>
                 :
-                <div className="flex flex-col justify-center items-center" style={{minHeight: '100vw'}}>
+                <div className="flex flex-col md:justify-start justify-center items-center md:min-h-screen min-h-[100vw]">
+                    <div className='mt-4 w-full hidden md:block'>
+                        <DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>
+                    </div>
                     <div className={`h-[100px] w-[100px] rounded-full flex justify-center items-center ${circleColor} text-4xl`}>
                         {icon}
                     </div>
-                    <p className="mt-2">{message}</p>
+
+                    <div className='md:flex-grow flex items-center'>
+                        <p className="mt-2">{message}</p>
+                    </div>
                 </div>
             }
             </TemplateWithFilter>
@@ -211,7 +222,7 @@ function DayPage() {
     }
 
     return (
-        <TemplateWithFilter filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>
+        <TemplateWithFilter showFilter={!isDesktop} filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>
             <div className='mt-4 w-full'>
                 <HoursState/>
             </div>
