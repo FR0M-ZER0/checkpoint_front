@@ -42,7 +42,7 @@ function Sidebar({ isDarkMode, setIsDarkMode }: SidebarProps) {
         setEmail(localStorage.getItem("email"))
     }, [])
     return (
-        <nav className="hidden md:flex flex-col w-64 min-h-screen main-func-color p-4 text-slate-300">
+        <nav className="hidden md:flex flex-col w-64 min-h-screen main-func-color p-4 text-slate-300 h-full">
             <div className='pb-2 border-b-2 border-gray-600'>
                 <div className='flex items-center mb-10'>
                     <div className='h-17 w-17 rounded-lg bg-gray-300 mr-2 flex items-end justify-center'>
