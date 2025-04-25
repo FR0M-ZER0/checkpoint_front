@@ -264,6 +264,9 @@ function DayPage() {
 
     return (
         <TemplateWithFilter showFilter={!isDesktop} filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>
+            <div className='mt-4'>
+                <DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>
+            </div>
             <div className='mt-4 w-full'>
                 <HoursState totalTime={totalWorkTime}/>
             </div>
