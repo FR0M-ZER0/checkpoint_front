@@ -86,7 +86,7 @@ function MarkingPage() {
                 </div>
             }
         >
-            <main className='w-full min-h-screen flex flex-col items-center justify-center text-center px-4'>
+            <main className='w-full min-h-screen flex flex-col items-center md:justify-center text-center md:px-4'>
                 <div className='md:flex hidden w-full flex-col text-center justify-center'>
                     <p className='font-light text-lg'>{ formatDate(d) }</p>
                     <p className='text-2xl'>{ dayName }</p>

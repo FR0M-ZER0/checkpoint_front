@@ -62,7 +62,7 @@ function Template({ children }: templateProps) {
                     <SideBar />
                 </div>
                 <div className="w-full flex justify-center">
-                    <div className='w-[1400px]'>
+                    <div className='md:w-[1400px] w-[90%]'>
                         {children}
                     </div>
                 </div>
