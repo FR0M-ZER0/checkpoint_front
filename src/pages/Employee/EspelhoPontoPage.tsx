@@ -27,6 +27,7 @@ function EspelhoPontoPage() {
     const [userId, setUserId] = useState<string | null>('')
     const [loading, setLoading] = useState<boolean>(true)
     const [filterType, setFilterType] = useState<string>('')
+    const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
 
     const fecthDays = async (): Promise<void> => {
         try {
@@ -98,7 +99,23 @@ function EspelhoPontoPage() {
             setLoading(true)
             fetchFilteredDays(filterType).then(() => setLoading(false))
         }
-    }, [currentYear, userId, filterType])    
+    }, [currentYear, userId, filterType])
+    
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement
+    
+            if (!target.closest('.status-card')) {
+                setSelectedStatus(null)
+            }
+        }
+    
+        document.addEventListener('click', handleClickOutside)
+    
+        return () => {
+            document.removeEventListener('click', handleClickOutside)
+        }
+    }, [])
 
     if (loading) {
         return (
@@ -190,7 +207,10 @@ function EspelhoPontoPage() {
                 </div>
 
                 <div className="hidden md:flex gap-4">
-                    <div className="flex items-center gap-2 light-blue-color text-white px-6 py-4 rounded-lg w-full cursor-pointer">
+                    <div
+                        onClick={() => setSelectedStatus(selectedStatus === 'normal' ? null : 'normal')}
+                        className="cursor-pointer flex items-center gap-2 light-blue-color text-white px-6 py-4 rounded-lg w-full status-card"
+                    >
                         <div className="mr-4 h-14 w-14 bg-[#006ADA] flex justify-center items-center rounded-xl shadow-md">
                             <i className="fa-solid fa-gavel text-2xl"></i>
                         </div>
@@ -200,7 +220,10 @@ function EspelhoPontoPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 main-red-color text-white px-6 py-4 rounded-lg w-full cursor-pointer">
+                    <div
+                        onClick={() => setSelectedStatus(selectedStatus === 'falta' ? null : 'falta')}
+                        className="cursor-pointer flex items-center gap-2 main-red-color text-white px-6 py-4 rounded-lg w-full status-card"
+                    >
                         <div className="mr-4 h-14 w-14 bg-[#C90F03] flex justify-center items-center rounded-xl shadow-md">
                             <i className="fa-solid fa-notes-medical text-2xl"></i>
                         </div>
@@ -210,7 +233,10 @@ function EspelhoPontoPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 main-orange-color text-white px-6 py-4 rounded-lg w-full cursor-pointer">
+                    <div
+                        onClick={() => setSelectedStatus(selectedStatus === 'folga' ? null : 'folga')}
+                        className="cursor-pointer flex items-center gap-2 main-orange-color text-white px-6 py-4 rounded-lg w-full status-card"
+                    >
                         <div className="mr-4 h-14 w-14 bg-[#B73607] flex justify-center items-center rounded-xl shadow-md">
                             <i className="fa-solid fa-bed text-2xl"></i>
                         </div>
@@ -220,7 +246,10 @@ function EspelhoPontoPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 dark-green-color text-white px-6 py-4 rounded-lg w-full cursor-pointer">
+                    <div
+                        onClick={() => setSelectedStatus(selectedStatus === 'ferias' ? null : 'ferias')}
+                        className="cursor-pointer flex items-center gap-2 dark-green-color text-white px-6 py-4 rounded-lg w-full status-card"
+                    >
                         <div className="mr-4 h-14 w-14 bg-[#0A8246] flex justify-center items-center rounded-xl shadow-md">
                             <i className="fa-solid fa-champagne-glasses text-2xl"></i>
                         </div>
@@ -265,7 +294,9 @@ function EspelhoPontoPage() {
                                 {fullMonthDays.map(({ day, status, date }) => (
                                     <Link key={day} to={`/dia/${date}`}>
                                         <div
-                                            className={`h-[50px] flex items-center justify-center text-white font-bold ${statusColors[status]}`}
+                                            className={`h-[50px] flex items-center justify-center text-white font-bold ${statusColors[status]} 
+                                                ${selectedStatus && selectedStatus !== status ? 'opacity-40' : ''}
+                                            `}
                                         >
                                             <p className="quicksand text-lg">{String(day).padStart(2, "0")}</p>
                                         </div>
