@@ -4,6 +4,7 @@ import api from "../../services/api"
 import TemplateWithFilter from "./TemplateWithFilter"
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
+import { getDaysInMonth, startOfMonth, getDay } from "date-fns"
 
 type valueType = {
     totalFaltas: number,
@@ -65,12 +66,12 @@ function EspelhoPontoPage() {
     ]
 
     const weekdays: string[] = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sab", "Dom"]
-
-    const statusColors: statusColorsType = {
+    const statusColors: statusColorsType & { neutral: string } = {
         normal: "light-blue-color",
         ferias: "dark-green-color",
         folga: "main-orange-color",
         falta: "main-red-color",
+        neutral: "bg-gray-300",
     }
 
     const handlePrevYear = () => setCurrentYear(prev => prev - 1)
@@ -187,42 +188,44 @@ function EspelhoPontoPage() {
                 </div>
             </div>
             <div className="mt-8 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
                 {months.map((month, index) => {
-                    const monthNumber = index + 1
-                    const daysWithActivities = Object.keys(data)
-                        .filter(dateKey => dateKey.startsWith(`${currentYear}-${String(monthNumber).padStart(2, "0")}`))
-                        .map(dateKey => ({
-                            day: parseInt(dateKey.split("-")[2], 10),
-                            status: data[dateKey]
-                        }))
-                        .sort((a, b) => a.day - b.day)
-                    if (daysWithActivities.length === 0) return null
+                    const totalDays = getDaysInMonth(new Date(currentYear, index))
+                    const firstDayWeekday = getDay(startOfMonth(new Date(currentYear, index)))
+
+                    const fullMonthDays = Array.from({ length: totalDays }, (_, dayIndex) => {
+                        const day = dayIndex + 1
+                        const formattedDay = String(day).padStart(2, "0")
+                        const formattedMonth = String(index + 1).padStart(2, "0")
+                        const formattedDate = `${currentYear}-${formattedMonth}-${formattedDay}`
+                        const status = data[formattedDate] || "neutral"
+                        return { day, status, date: formattedDate }
+                    })
 
                     return (
                         <div key={month} className="my-4">
                             <h2 className="text-xl font-bold text-center mb-3">{month}</h2>
+
                             <div className="grid grid-cols-7">
                                 {weekdays.map((day) => (
-                                    <div key={day} className="font-light px-1 text-sm">
-                                        {day}
-                                    </div>
+                                    <div key={day} className="font-light px-1 text-sm">{day}</div>
                                 ))}
                             </div>
+
                             <div className="grid grid-cols-7 gap-1">
-                                {daysWithActivities.map(({ day, status }) => {
-                                    const formattedDay = String(day).padStart(2, "0")
-                                    const formattedMonth = String(index + 1).padStart(2, "0")
-                                    const formattedDate = `${currentYear}-${formattedMonth}-${formattedDay}`
-                                    return (
-                                        <Link key={day} to={`/dia/${formattedDate}`}>
-                                            <div
-                                                className={`h-[50px] flex items-center justify-center text-white font-bold border border-white ${statusColors[status]}`}
-                                            >
-                                                <p className="quicksand text-lg">{formattedDay}</p>
-                                            </div>
-                                        </Link>
-                                    )
-                                })}
+                                {Array.from({ length: firstDayWeekday === 0 ? 6 : firstDayWeekday - 1 }).map((_, i) => (
+                                    <div key={`empty-${i}`} />
+                                ))}
+
+                                {fullMonthDays.map(({ day, status, date }) => (
+                                    <Link key={day} to={`/dia/${date}`}>
+                                        <div
+                                            className={`h-[50px] flex items-center justify-center text-white font-bold ${statusColors[status]}`}
+                                        >
+                                            <p className="quicksand text-lg">{String(day).padStart(2, "0")}</p>
+                                        </div>
+                                    </Link>
+                                ))}
                             </div>
                         </div>
                     )
