@@ -54,10 +54,27 @@ function MarkingPage() {
     const fetchTodayMarkings = async (): Promise<void> => {
         try {
             const response = await api.get(`/marcacoes/colaborador/${userId}/hoje`)
-            setMarkingStart(formatTimeAndMinute(response.data[0].dataHora))
-            setMarkingPause(formatTimeAndMinute(response.data[1].dataHora))
-            setMarkingResume(formatTimeAndMinute(response.data[2].dataHora))
-            setMarkingEnd(formatTimeAndMinute(response.data[3].dataHora))
+            const data = response.data
+
+            data.forEach((marcacao: any) => {
+                const formattedTime = formatTimeAndMinute(marcacao.dataHora)
+                switch (marcacao.tipo) {
+                    case 'ENTRADA':
+                        setMarkingStart(formattedTime)
+                        break
+                    case 'PAUSA':
+                        setMarkingPause(formattedTime)
+                        break
+                    case 'RETOMADA':
+                        setMarkingResume(formattedTime)
+                        break
+                    case 'SAIDA':
+                        setMarkingEnd(formattedTime)
+                        break
+                    default:
+                        break
+                }
+            })
         } catch (err: unknown) {
             console.error(err)
         }

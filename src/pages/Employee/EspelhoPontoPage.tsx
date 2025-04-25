@@ -25,6 +25,7 @@ function EspelhoPontoPage() {
     const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear())
     const [userId, setUserId] = useState<string | null>('')
     const [loading, setLoading] = useState<boolean>(true)
+    const [filterType, setFilterType] = useState<string>('')
 
     const fecthDays = async (): Promise<void> => {
         try {
@@ -43,6 +44,20 @@ function EspelhoPontoPage() {
             console.error(err)
         }
     }
+
+    const fetchFilteredDays = async (type: string): Promise<void> => {
+        if (!type) {
+            await fecthDays()
+            return
+        }
+    
+        try {
+            const response = await api.get(`/dias-trabalho/${userId}/filtro/${type}`)
+            setData(response.data)
+        } catch (err: unknown) {
+            console.error(err)
+        }
+    }    
 
     const months: string[] = [
         "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -77,6 +92,13 @@ function EspelhoPontoPage() {
         setUserId(localStorage.getItem("id"))
     }, [])
 
+    useEffect(() => {
+        if (userId) {
+            setLoading(true)
+            fetchFilteredDays(filterType).then(() => setLoading(false))
+        }
+    }, [currentYear, userId, filterType])    
+
     if (loading) {
         return (
             <TemplateWithFilter filter={
@@ -107,7 +129,7 @@ function EspelhoPontoPage() {
                     </div>
                 </div>
                 <div className="mt-8 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" />
+                    <Skeleton height={150} baseColor="#dedede" highlightColor="#c5c5c5" count={3} />
                 </div>
             </TemplateWithFilter>
         )
@@ -123,6 +145,26 @@ function EspelhoPontoPage() {
                 <i className="fa-solid fa-chevron-right text-xl cursor-pointer" onClick={handleNextYear}></i>
             </div>
         }>
+            <div className="my-4 w-full">
+                <select 
+                    name="filtro" 
+                    id="filtro" 
+                    className="text-sm w-full" 
+                    value={filterType} 
+                    onChange={(e) => {
+                        const selectedFilter = e.target.value;
+                        setFilterType(selectedFilter);
+                        fetchFilteredDays(selectedFilter);
+                    }}
+                >
+                    <option value="">Filtre por</option>
+                    <option value="folga">Folga</option>
+                    <option value="ferias">Férias</option>
+                    <option value="marcacao">Normal</option>
+                    <option value="falta">Ausência</option>
+                </select>
+            </div>
+
             <div className="mt-4 w-full flex justify-between">
                 <div className="light-blue-text">
                     <p className="quicksand font-bold">{values.totalHorasTrabalhadas}h</p>
@@ -153,7 +195,7 @@ function EspelhoPontoPage() {
                             day: parseInt(dateKey.split("-")[2], 10),
                             status: data[dateKey]
                         }))
-
+                        .sort((a, b) => a.day - b.day)
                     if (daysWithActivities.length === 0) return null
 
                     return (
