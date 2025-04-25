@@ -158,29 +158,26 @@ function NotificationsPage() {
              )}
              {/* Grid para os cards */}
              <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4'>
-                {
-                    vacationRequests.map(request => {
-                        // ***** ACESSANDO COM OS NOMES CORRETOS *****
-                        const nome = request.colaborador?.nome || `Colab. ID: ${request.colaboradorId}`; // Usa request.colaborador.nome e request.colaboradorId
-                        // const dataCriacao = request.criado_em ? formatDate(new Date(request.criado_em)) : '--/--/----'; // criado_em parece faltar
-                        const dataCriacao = '--/--/----'; // Placeholder enquanto criado_em não vem
-                        const inicioFmt = request.dataInicio ? formatDate(new Date(request.dataInicio + 'T00:00:00')) : '??'; // Usa request.dataInicio
-                        const fimFmt = request.dataFim ? formatDate(new Date(request.dataFim + 'T00:00:00')) : '??';       // Usa request.dataFim
-
-                        return (
-                            <AdminNotificationCard
-                                key={request.id} // <<< Usa request.id
-                                cardType='ferias'
-                                name={nome}
-                                date={dataCriacao} // Usando placeholder por enquanto
-                                dayStart={inicioFmt}
-                                dayEnd={fimFmt}
-                                observation={request.observacao ?? undefined} // Usa request.observacao (passa undefined se for null)
-                                openModal={() => openFeriasModal(request)} // Passa o objeto request inteiro
-                            />
-                        );
-                    })
-                }
+                
+                {vacationRequests.map(request => {
+                    const nome = request.colaborador?.nome || `Colab. ID: ${request.colaboradorId}`;
+                    const dataCriacao = '--/--/----'; 
+                    const inicioFmt = request.dataInicio ? formatDate(new Date(request.dataInicio + 'T00:00:00')) : '??';
+                    const fimFmt = request.dataFim ? formatDate(new Date(request.dataFim + 'T00:00:00')) : '??';
+                    
+                    return (
+                        <AdminNotificationCard
+                            key={request.id}
+                            cardType='ferias'
+                            name={nome}
+                            date={dataCriacao}
+                            dayStart={inicioFmt}
+                            dayEnd={fimFmt}
+                            observation={request.observacao ?? undefined}
+                            openModal={() => openFeriasModal(request)}
+                        />
+                    );
+                })}
             </div>
 
             {/* Modal para Aprovar/Rejeitar Férias */}
