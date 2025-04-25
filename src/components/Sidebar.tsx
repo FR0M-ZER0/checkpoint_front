@@ -1,7 +1,12 @@
 import { Link, useLocation, useNavigate } from 'react-router'
 import { useState, useEffect } from 'react'
 
-function Sidebar() {
+type SidebarProps = {
+    isDarkMode: boolean
+    setIsDarkMode: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+function Sidebar({ isDarkMode, setIsDarkMode }: SidebarProps) {
     const location = useLocation()
     const pathname = location.pathname
     const navigate = useNavigate()
@@ -92,7 +97,7 @@ function Sidebar() {
                         <span>Modo escuro</span>
                     </p>
                     <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" value="" className="sr-only peer" />
+                        <input type="checkbox" value="" className="sr-only peer" checked={isDarkMode} onChange={() => setIsDarkMode(prev => !prev)} />
                         <div className="w-9 h-4 bg-gray-400 rounded-full peer peer-checked:bg-blue-500 after:content-[''] after:absolute after:left-[2px] after:top-[2px] after:bg-white after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-5"></div>
                     </label>
                 </div>

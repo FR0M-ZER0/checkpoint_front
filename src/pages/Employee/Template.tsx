@@ -22,6 +22,11 @@ function Template({ children }: templateProps) {
     const totalUnread: number = notificationCount + responseCount
     const [userId, setUserId] = useState<string|null>('')
 
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+        const saved = localStorage.getItem('theme')
+        return saved === 'dark'
+    })
+
     useEffect(() => {
         dispatch({ type: "websocket/connect" })
         dispatch(fetchUnreadNotifications(userId))
@@ -51,6 +56,17 @@ function Template({ children }: templateProps) {
         prevResponseCount.current = responses.length
     }, [responses.length])
 
+    useEffect(() => {
+        const root = document.documentElement
+        if (isDarkMode) {
+            root.classList.add('dark')
+            localStorage.setItem('theme', 'dark')
+        } else {
+            root.classList.remove('dark')
+            localStorage.setItem('theme', 'light')
+        }
+    }, [isDarkMode])
+
     return (
         <div className='min-w-screen pb-[62px] md:pb-0 min-h-[calc(100vh+162px)] md:min-h-screen'>
             <div className='block md:hidden'>
@@ -59,7 +75,7 @@ function Template({ children }: templateProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-[256px_1fr] w-full">
                 <div className="hidden md:block">
-                    <SideBar />
+                    <SideBar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
                 </div>
                 <div className="w-full flex justify-center">
                     <div className='md:w-[1400px] w-[90%]'>
