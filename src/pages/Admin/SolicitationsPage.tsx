@@ -35,32 +35,82 @@ function NotificationsPage() {
     // Estado e funções para o FUTURO modal de aprovação/rejeição de férias
     const [isFeriasModalVisible, setIsFeriasModalVisible] = useState(false);
     const [selectedFeriasRequest, setSelectedFeriasRequest] = useState<SolicitacaoFeriasData | null>(null);
+    const [adminComment, setAdminComment] = useState<string>(''); 
+    const [modalError, setModalError] = useState<string | null>(null); 
 
     const openFeriasModal = (solicitacao: SolicitacaoFeriasData) => {
         setSelectedFeriasRequest(solicitacao);
+        setAdminComment(''); // Limpa comentário anterior
+        setModalError(null);  // Limpa erro anterior do modal
         setIsFeriasModalVisible(true);
-        // alert(`Modal para solicitação ${solicitacao.sol_fer_id} será implementado.`);
     };
     const closeFeriasModal = () => {
         setSelectedFeriasRequest(null);
         setIsFeriasModalVisible(false);
     };
     const handleApproveFerias = async (id: string | number) => {
-         // TODO: Chamar API PUT/POST para aprovar a solicitação com o ID
-         console.log("Aprovar solicitação ID:", id);
-         toast.success("Funcionalidade de aprovar ainda não implementada.");
-         closeFeriasModal();
-         // Após sucesso na API, remover da lista local ou re-buscar
-         // setVacationRequests(prev => prev.filter(req => req.sol_fer_id !== id));
+        if (!selectedFeriasRequest) return; // Segurança
+
+        setIsLoading(true);
+        setModalError(null);
+        try {
+           // CHAMA A API PARA APROVAR - AJUSTE O ENDPOINT E MÉTODO (PUT/PATCH)
+           // Exemplo: Enviando status e comentário no corpo
+           const response = await api.put(`/api/ferias/solicitacoes/${id}/aprovar`, { 
+               // O backend pode precisar do status ou só o ato da chamada já aprova
+               // status: 'APROVADO', 
+               comentarioGestor: adminComment // Envia o comentário
+           }); 
+           // OU: await api.patch(`/api/ferias/solicitacoes/${id}`, { status: 'APROVADO', comentarioGestor: adminComment });
+
+            // Verifique se a resposta da API foi OK (geralmente 200 ou 204)
+            // O corpo da resposta pode ou não ser útil aqui
+           // const updatedSolicitation = response.data; 
+
+           toast.success('Solicitação de férias APROVADA com sucesso!');
+           setVacationRequests(prev => prev.filter(req => req.id !== id)); // Remove da lista
+           closeFeriasModal(); // Fecha o modal
+
+        } catch (err: any) {
+           console.error("Erro ao aprovar solicitação:", err);
+           const errorMsg = err.response?.data?.erro || err.message || "Falha ao aprovar.";
+           setModalError(errorMsg); // Mostra erro NO MODAL
+        } finally {
+            setIsLoading(false);
+        }
     };
-     const handleRejectFerias = async (id: string | number) => {
-         // TODO: Chamar API PUT/POST para rejeitar a solicitação com o ID
-         console.log("Rejeitar solicitação ID:", id);
-         toast.info("Funcionalidade de rejeitar ainda não implementada.");
-         closeFeriasModal();
-          // Após sucesso na API, remover da lista local ou re-buscar
-         // setVacationRequests(prev => prev.filter(req => req.sol_fer_id !== id));
-     };
+
+    const handleRejectFerias = async (id: string | number) => {
+        if (!selectedFeriasRequest) return;
+
+        // Validação simples para comentário na rejeição (opcional, pode ser regra de negócio)
+        if (!adminComment || adminComment.trim() === '') {
+            setModalError('É necessário adicionar um comentário para rejeitar a solicitação.');
+            return;
+        }
+
+        setIsLoading(true);
+        setModalError(null);
+        try {
+            // CHAMA A API PARA REJEITAR - AJUSTE O ENDPOINT E MÉTODO (PUT/PATCH)
+            const response = await api.put(`/api/ferias/solicitacoes/${id}/rejeitar`, {
+                // status: 'REJEITADO', // O backend pode inferir pelo endpoint
+                comentarioGestor: adminComment
+            });
+            // OU: await api.patch(`/api/ferias/solicitacoes/${id}`, { status: 'REJEITADO', comentarioGestor: adminComment });
+
+            toast.info('Solicitação de férias REJEITADA.');
+            setVacationRequests(prev => prev.filter(req => req.id !== id)); // Remove da lista
+            closeFeriasModal();
+
+        } catch (err: any) {
+            console.error("Erro ao rejeitar solicitação:", err);
+            const errorMsg = err.response?.data?.erro || err.message || "Falha ao rejeitar.";
+            setModalError(errorMsg); // Mostra erro NO MODAL
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
 
     // Busca as solicitações de férias pendentes quando o componente monta
@@ -135,25 +185,59 @@ function NotificationsPage() {
 
             {/* Modal para Aprovar/Rejeitar Férias */}
             {isFeriasModalVisible && selectedFeriasRequest && (
+                // Passando a função correta para fechar
                 <Modal title="Detalhes da Solicitação de Férias" onClose={closeFeriasModal}>
-                    <div className='mb-6 text-left space-y-2'>
-                        {/* ***** ACESSANDO COM OS NOMES CORRETOS ***** */}
+                    {/* Detalhes da Solicitação */}
+                    <div className='mb-4 text-left space-y-1 border-b pb-3'> {/* Separador visual */}
                          <p><strong>Solicitante:</strong> {selectedFeriasRequest.colaborador?.nome || `Colab. ID: ${selectedFeriasRequest.colaboradorId}`}</p>
                          <p><strong>Período Solicitado:</strong> {selectedFeriasRequest.dataInicio ? formatDate(new Date(selectedFeriasRequest.dataInicio + 'T00:00:00')) : '??'} até {selectedFeriasRequest.dataFim ? formatDate(new Date(selectedFeriasRequest.dataFim + 'T00:00:00')) : '??'}</p>
-                         {selectedFeriasRequest.observacao && <p><strong>Observação:</strong> {selectedFeriasRequest.observacao}</p>}
+                         {selectedFeriasRequest.observacao && <p><strong>Observação Colab.:</strong> {selectedFeriasRequest.observacao}</p>}
                          <p><strong>Status Atual:</strong> {selectedFeriasRequest.status}</p>
+                    </div>
+
+                    {/* *** Campo de Comentário do Admin *** */}
+                    <div className="mb-4 w-full">
+                         <label htmlFor="adminComment" className="block text-sm font-medium text-gray-700 mb-1">
+                             Comentário/Justificativa (Obrigatório para rejeitar):
+                         </label>
+                         <textarea
+                             id="adminComment"
+                             rows={3}
+                             className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md p-2"
+                             placeholder="Adicione um comentário..."
+                             value={adminComment}
+                             onChange={(e) => setAdminComment(e.target.value)}
+                         />
                      </div>
-                     <div className='flex justify-center'>
+                     {/* ************************************ */}
+
+                     {/* Exibe erro da API dentro do modal */}
+                     {modalError && <p className="text-red-600 mb-3 text-center font-semibold">{modalError}</p>}
+
+                     {/* Botões de Ação */}
+                     <div className='flex flex-col sm:flex-row justify-center gap-3'> {/* Layout ajustado */}
                          <button
-                             className='bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg mr-4 cursor-pointer disabled:opacity-70'
-                             onClick={() => handleApproveFerias(selectedFeriasRequest.id)} // <<< Usa .id
+                             className='bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg cursor-pointer disabled:opacity-70 w-full sm:w-auto' // Estilo Approvado
+                             onClick={() => handleApproveFerias(selectedFeriasRequest.id)}
                              disabled={isLoading}
-                         > Aprovar </button>
+                         >
+                            {isLoading ? 'Processando...' : 'Aprovar'}
+                         </button>
                          <button
-                             className='bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg cursor-pointer disabled:opacity-70'
-                             onClick={() => handleRejectFerias(selectedFeriasRequest.id)} // <<< Usa .id
+                             className='bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg cursor-pointer disabled:opacity-70 w-full sm:w-auto' // Estilo Rejeitado
+                             onClick={() => handleRejectFerias(selectedFeriasRequest.id)}
                              disabled={isLoading}
-                         > Rejeitar </button>
+                         >
+                            {isLoading ? 'Processando...' : 'Rejeitar'}
+                         </button>
+                         <button
+                             className='bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg cursor-pointer disabled:opacity-70 w-full sm:w-auto' // Estilo Cancelar
+                             onClick={closeFeriasModal}
+                             disabled={isLoading}
+                             type="button" // Evita submit se estiver dentro de um form
+                         >
+                             Cancelar
+                         </button>
                      </div>
                 </Modal>
             )}
