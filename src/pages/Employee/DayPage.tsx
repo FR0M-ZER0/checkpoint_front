@@ -173,8 +173,10 @@ function DayPage() {
             <TemplateWithFilter showFilter={!isDesktop} filter={<DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>}>{
                 loading ? 
                 <>
-                    <DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>
-                    <div className='flex justify-between w-full mt-4'>
+                    <div className='mt-4'>
+                        <DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>
+                    </div>
+                    <div className='flex justify-between w-full'>
                         <div>
                             <p className=''><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
                             <p className='text-sm light-gray-text'><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
@@ -208,11 +210,11 @@ function DayPage() {
                     <div className='mt-4 w-full hidden md:block'>
                         <DateFilter currentDate={currentDate} onDateChange={handleDateChange}/>
                     </div>
-                    <div className={`h-[100px] w-[100px] rounded-full flex justify-center items-center ${circleColor} text-4xl`}>
-                        {icon}
-                    </div>
 
-                    <div className='md:flex-grow flex items-center'>
+                    <div className='md:flex-grow flex flex-col justify-center items-center'>
+                        <div className={`h-[100px] w-[100px] rounded-full flex justify-center items-center ${circleColor} text-4xl`}>
+                            {icon}
+                        </div>
                         <p className="mt-2">{message}</p>
                     </div>
                 </div>
