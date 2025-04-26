@@ -208,11 +208,14 @@ function Ferias() {
                 <h1 className="text-xl font-bold text-left md:text-center mb-4">Férias</h1>
                 <div className="flex flex-col items-center justify-center mb-4 gap-2">
                     <div className="text-center">
-                        <h2 className="text-lg font-semibold">Saldo disponível</h2>
+                        <h2 className="text-lg font-semibold">Solicitar férias</h2>
                         {saldoDisponivel === null ? (
                             <p className="text-xl text-gray-500">Carregando...</p>
                         ) : (
-                            <p className={`text-xl ${saldoDisponivel <= 0 ? 'text-red-500' : 'text-[#007D26]'}`}>{saldoDisponivel}d</p>
+                            <div className='flex flex-col items-center'>
+                                <p className='text-sm'>Saldo disponível</p>
+                                <p className={`text-xl ${saldoDisponivel <= 0 ? 'text-red-500' : 'text-[#007D26]'}`}>{saldoDisponivel}d</p>
+                            </div>
                         )}
                     </div>
                     {(diasSelecionados > 0 || saldoNegativoVenda > 0) && saldoDisponivel !== null && (
@@ -253,7 +256,9 @@ function Ferias() {
                         onChange={(e) => setObservacao(e.target.value)}
                     />
                 </div>
-                <SubmitButton text='Solicitar'/>
+                <div onClick={handleSolicitarFerias} className='w-[448px] mx-auto'>
+                    <SubmitButton text='Solicitar'/>
+                </div>
                 {erroSolicitacao && <p className="text-red-500 mt-2 text-center mb-4">{erroSolicitacao}</p>}
                 {feriasAgendadas.length > 0 && (
                     <div className="mt-4 bg-white shadow-md rounded-lg p-4 w-full max-w-md mx-auto">
