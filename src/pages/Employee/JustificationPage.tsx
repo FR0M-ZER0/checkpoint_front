@@ -20,7 +20,7 @@ function JustificationPage() {
     const [reason, setReason] = useState<string>('')
     const [justification, setJustification] = useState<string>('')
     const [absenceId, setAbsenceId] = useState<string>('')
-
+    const [userId, setUserId] = useState<string|null>('')
 
     const handleImageClick = (): void => {
         document.getElementById('arquivo')?.click()
@@ -81,8 +81,7 @@ function JustificationPage() {
 
     const fetchAbsences = async (): Promise<void> => {
         try {
-            // TODO: Mudar por um id dinâmico
-            const response = await api.get<Absence[]>('colaborador/falta/sem-solicitacao/1')
+            const response = await api.get<Absence[]>(`colaborador/falta/sem-solicitacao/${userId}`)
             setAbsences(response.data)
         } catch (err: unknown) {
             console.error(err)
@@ -91,6 +90,10 @@ function JustificationPage() {
 
     useEffect(() => {
         fetchAbsences()
+    }, [])
+
+    useEffect(() => {
+        setUserId(localStorage.getItem("id"))
     }, [])
 
     return (
