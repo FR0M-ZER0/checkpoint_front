@@ -5,6 +5,7 @@ import calendarSVG from '../../assets/calendar.svg'
 import api from '../../services/api'
 import { formatDate } from '../../utils/formatter'
 import { toast } from 'react-toastify'
+import { useMediaQuery } from '../../utils/hooks'
 
 interface Absence {
     id: number,
@@ -21,7 +22,8 @@ function JustificationPage() {
     const [justification, setJustification] = useState<string>('')
     const [absenceId, setAbsenceId] = useState<string>('')
     const [userId, setUserId] = useState<string|null>('')
-
+    const isDesktop = useMediaQuery('(min-width: 768px)')
+    
     const handleImageClick = (): void => {
         document.getElementById('arquivo')?.click()
     }
@@ -98,7 +100,7 @@ function JustificationPage() {
 
     return (
         <TemplateWithTitle title='Abonar ausência ou atraso'>
-            <form className='mt-8 w-full' onSubmit={handleSubmit}>
+            <form className='mt-8 w-full md:w-[1200px] md:mx-auto' onSubmit={handleSubmit}>
                 <div>
                     <label htmlFor="reason">Motivo <span className='main-red-text'>*</span></label>
                     <select className='w-full mt-2' name='reason' value={reason} onChange={(e) => setReason(e.target.value)}>
@@ -162,7 +164,7 @@ function JustificationPage() {
                         </select>
                     </div>
 
-                    <div className='w-1/2'>
+                    <div className='md:w-[200px] w-1/2'>
                         <img src={calendarSVG} alt="" />
                     </div>
                 </div>
@@ -176,7 +178,7 @@ function JustificationPage() {
                         }
                     </label>
                     <div className='relative'>
-                        <textarea name="justificativa" className='w-full mt-2' rows={6} onChange={(e) => setJustification(e.target.value)} value={justification}>
+                        <textarea name="justificativa" className='w-full mt-2' rows={isDesktop ? 10 : 6} onChange={(e) => setJustification(e.target.value)} value={justification}>
                         </textarea>
                         <p className='absolute bottom-[8px] left-[14px] light-gray-text'>
                             { fileName }
