@@ -192,7 +192,7 @@ function FolgaPage() {
                             onChange={(e) => setHorasSolicitadas(e.target.value ? Number(e.target.value) : 0)}
                             min={0}
                             max={23}
-                            className="w-16 p-2 border rounded-lg"
+                            className="w-16 p-2 border rounded-lg input-col"
                         />
                         <span>h</span>
                         <input
@@ -202,7 +202,7 @@ function FolgaPage() {
                             min={0}
                             max={59}
                             step={5}
-                            className="w-16 p-2 border rounded-lg"
+                            className="w-16 p-2 border rounded-lg input-col"
                         />
                         <span>min</span>
                     </div>

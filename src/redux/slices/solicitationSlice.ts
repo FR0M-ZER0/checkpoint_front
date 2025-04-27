@@ -12,20 +12,41 @@ export interface Solicitation {
     criadoEm: string
 }
 
+export interface VacationSolicitation {
+    id: string
+    dataInicio: string
+    dataFim: string
+    observacao: string
+    status: string
+    comentarioGestor: string
+    colaboradorId: string
+    criadoEm: string
+}
+
 interface SolicitationState {
     count: number
     solicitations: Solicitation[]
+    vacationSolicitations: VacationSolicitation[]
 }
 
 const initialState: SolicitationState = {
     count: 0,
-    solicitations: []
+    solicitations: [],
+    vacationSolicitations: []
 }
 
-export const fetchPendingSolicitations = createAsyncThunk(
-    'solicitations/fetchPending',
+export const fetchSolicitations = createAsyncThunk(
+    'solicitations/fetchAll',
     async () => {
-        const response = await api.get('/ajuste-ponto/solicitacao/pendentes')
+        const response = await api.get('/ajuste-ponto/solicitacao')
+        return response.data
+    }
+)
+
+export const fetchVacationSolicitations = createAsyncThunk(
+    'solicitations/fetchVacations',
+    async () => {
+        const response = await api.get('/solicitacao-ferias')
         return response.data
     }
 )
@@ -40,6 +61,7 @@ export const solicitationSlice = createSlice({
         resetSolicitation: (state) => {
             state.count = 0
             state.solicitations = []
+            state.vacationSolicitations = []
         },
         addSolicitation: (state, action) => {
             state.solicitations.unshift(action.payload)
@@ -54,9 +76,12 @@ export const solicitationSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-        .addCase(fetchPendingSolicitations.fulfilled, (state, action) => {
+        .addCase(fetchSolicitations.fulfilled, (state, action) => {
             state.solicitations = action.payload
             state.count = action.payload.length
+        })
+        .addCase(fetchVacationSolicitations.fulfilled, (state, action) => {
+            state.vacationSolicitations = action.payload
         })
     }
 })
