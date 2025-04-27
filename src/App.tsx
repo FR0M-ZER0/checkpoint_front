@@ -15,6 +15,13 @@ import DashboardPage from './pages/Admin/DashboardPage'
 import AdminNotificationsPage from './pages/Admin/SolicitationsPage'
 import MarkingsPage from './pages/Admin/MarkingsPage'
 import LoginPageAdmin from './pages/Admin/LoginPageAdmin'
+import DashboardLayout from './pages/Admin/Layout'
+import DashboardPageV2 from './pages/Admin/Dashboard';
+import SolicitacoesPage from './pages/Admin/SolicitacoesPage';
+import ColaboradoresPage from './pages/Admin/ColaboradoresPage';
+import MarcacoesPage from './pages/Admin/MarcacoesPage';
+import RelatoriosPage from './pages/Admin/RelatoriosPage';
+
 
 function App() {
 	return (
@@ -30,10 +37,35 @@ function App() {
 				<Route path="/espelho-ponto" element={<EspelhoPontoPage />} />
 
 				{/* Admin */}
-				<Route path="/admin/dashboard" element={<DashboardPage />} />
+				{/* <Route path="/admin/dashboard" element={<DashboardPage />} /> */}
+				<Route path="/admin/dashboard" element={
+					<DashboardLayout> 
+						<DashboardPageV2 /> 
+					</DashboardLayout>}
+				/>
+				<Route path="/admin/solicitacoes" element={
+					<DashboardLayout> 
+						<SolicitacoesPage /> 
+					</DashboardLayout>}
+				/>
+				<Route path="/admin/colaboradores" element={
+					<DashboardLayout> 
+						<ColaboradoresPage /> 
+					</DashboardLayout>}
+				/>
+				<Route path="/admin/marcacoes" element={
+					<DashboardLayout> 
+						<MarcacoesPage /> 
+					</DashboardLayout>}
+				/>
+				<Route path="/admin/relatorios" element={
+					<DashboardLayout> 
+						<RelatoriosPage /> 
+					</DashboardLayout>}
+				/>
 				<Route path="/admin/login" element={<LoginPageAdmin/>} />
-				<Route path="/admin/solicitações" element={<AdminNotificationsPage />} />
-				<Route path="/admin/marcações" element={<MarkingsPage />} />
+				{/* <Route path="/admin/solicitações" element={<AdminNotificationsPage />} />
+				<Route path="/admin/marcações" element={<MarkingsPage />} /> */}
 			</Routes>
 		</BrowserRouter>
 	)
