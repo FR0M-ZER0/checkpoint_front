@@ -1,10 +1,14 @@
 import React from 'react'
 
-function HoursState() {
+type HoursStateProp = {
+    totalTime: string
+}
+
+function HoursState({ totalTime }: HoursStateProp) {
     return (
         <div className='flex justify-between w-full'>
             <div>
-                <p className=''>06h:30min</p>
+                <p className=''>{totalTime}</p>
                 <p className='text-sm light-gray-text'>Horas trab.</p>
             </div>
             <div>
