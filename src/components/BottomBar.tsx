@@ -1,0 +1,61 @@
+import React, { useState } from 'react'
+import { Link } from 'react-router'
+import OptionsPage from '../pages/Employee/OptionsPage'
+import { AnimatePresence } from 'framer-motion'
+import { useSelector } from 'react-redux'
+import { RootState } from '../redux/store'
+
+function BottomBar() {
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const notificationCount: number = useSelector((state: RootState) => state.notifications.count)
+    const responseCount: number = useSelector((state: RootState) => state.responses.count)
+
+    const totalUnread: number = notificationCount + responseCount
+
+    const getCurrentDate = (): string => {
+        const today = new Date()
+        const year = today.getFullYear()
+        const month = (today.getMonth() + 1).toString().padStart(2, '0')
+        const day = today.getDate().toString().padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
+    const currentDate = getCurrentDate()
+    return (
+        <nav className='main-func-color w-full h-[62px] fixed bottom-0 flex main-white-text items-center justify-evenly'>
+            <span>
+                <Link to={'/'}>
+                    <i className="fa-solid fa-house-chimney text-2xl"></i>
+                </Link>
+            </span>
+            <span className="relative">
+                <Link to={'/notificacoes'}>
+                    <i className="fa-solid fa-bell text-2xl"></i>
+                    { totalUnread > 0 && (
+                        <span className="absolute top-[-5px] right-[-5px] bg-red-600 text-white text-xs rounded-full px-2">
+                            { totalUnread }
+                        </span>
+                    )}
+                </Link>
+            </span>
+            <span>
+                <Link to={`/dia/${currentDate}`}>
+                    <i className="fa-solid fa-clock text-2xl"></i>
+                </Link>
+            </span>
+            <span>
+                <Link to={'/espelho-ponto'}>
+                    <i className="fa-solid fa-calendar text-2xl"></i>
+                </Link>
+            </span>
+            <span>
+                <i className="fa-solid fa-bars text-2xl cursor-pointer" onClick={() => setIsMenuOpen(true)}></i>
+            </span>
+
+            <AnimatePresence>
+                { isMenuOpen && <OptionsPage onClose={() => setIsMenuOpen(false)} /> }
+            </AnimatePresence>
+        </nav>
+    )
+}
+
+export default BottomBar
