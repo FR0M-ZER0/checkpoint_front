@@ -16,20 +16,61 @@ export interface Solicitation {
     solicitacaoTipo?: string
 }
 
+export interface VacationSolicitation {
+    id: string
+    dataInicio: string
+    dataFim: string
+    observacao: string
+    status: string
+    comentarioGestor: string
+    colaboradorId: string
+    criadoEm: string
+}
+
+export interface FolgaSolicitation {
+    solFolId: string
+    solFolData: string
+    solFolObservacao: string
+    solFolStatus: string
+    colaboradorId: string
+    criadoEm: string
+    solFolSaldoGasto: string
+}
+
 interface SolicitationState {
     count: number
     solicitations: Solicitation[]
+    vacationSolicitations: VacationSolicitation[]
+    folgaSolicitations: FolgaSolicitation[]
 }
 
 const initialState: SolicitationState = {
     count: 0,
-    solicitations: []
+    solicitations: [],
+    vacationSolicitations: [],
+    folgaSolicitations: []
 }
 
-export const fetchPendingSolicitations = createAsyncThunk(
-    'solicitations/fetchPending',
+export const fetchSolicitations = createAsyncThunk(
+    'solicitations/fetchAll',
     async () => {
-        const response = await api.get('/ajuste-ponto/solicitacao/pendentes')
+        const response = await api.get('/ajuste-ponto/solicitacao')
+        return response.data
+    }
+)
+
+export const fetchVacationSolicitations = createAsyncThunk(
+    'solicitations/fetchVacations',
+    async () => {
+        const response = await api.get('/solicitacao-ferias')
+        return response.data
+    }
+)
+
+export const fetchFolgaSolicitations = createAsyncThunk(
+    'solicitations/fetchFolgas',
+    async () => {
+        const response = await api.get('/solicitacao-folga')
         return response.data
     }
 )
@@ -52,6 +93,8 @@ export const solicitationSlice = createSlice({
         resetSolicitation: (state) => {
             state.count = 0
             state.solicitations = []
+            state.vacationSolicitations = []
+            state.folgaSolicitations = []
         },
         addSolicitation: (state, action) => {
             state.solicitations.unshift(action.payload)
@@ -66,22 +109,17 @@ export const solicitationSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-        .addCase(fetchPendingSolicitations.fulfilled, (state, action) => {
-            state.solicitations = [...state.solicitations, ...action.payload]; // Merge with existing
-            state.count = state.solicitations.length;
-          })
-          .addCase(fetchPendingSolicitationsBreak.fulfilled, (state, action) => {
-            const transformedData = action.payload.map(item => ({
-              ...item,
-              solicitacaoTipo: item.solFolTipo, // Map API field to component field
-              periodo: item.solFolData,
-              observacao: item.solFolObservacao,
-              criadoEm: item.criadoEm // Ensure date field is present
-            }))
-            state.solicitations = transformedData;
-            state.count = state.solicitations.length;
-          })
-      }
+        .addCase(fetchSolicitations.fulfilled, (state, action) => {
+            state.solicitations = action.payload
+            state.count = action.payload.length
+        })
+        .addCase(fetchVacationSolicitations.fulfilled, (state, action) => {
+            state.vacationSolicitations = action.payload
+        })
+        .addCase(fetchFolgaSolicitations.fulfilled, (state, action) => {
+            state.folgaSolicitations = action.payload
+        })
+    }
 })
 
 export const { incrementSolicitation, resetSolicitation, addSolicitation, removeSolicitation } = solicitationSlice.actions

@@ -4,6 +4,7 @@ import AdminBottomBar from '../../components/AdminBottomBar'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { fetchPendingSolicitations, fetchPendingSolicitationsBreak } from '../../redux/slices/solicitationSlice'
+import { fetchSolicitations } from '../../redux/slices/solicitationSlice'
 
 type templateProps = {
     children?: ReactNode

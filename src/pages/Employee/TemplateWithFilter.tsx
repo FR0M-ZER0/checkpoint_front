@@ -1,18 +1,29 @@
 import React, { ReactNode } from 'react'
 import Template from './Template'
 
-type templateWithFilterProp = {
+type TemplateWithFilterProps = {
     children?: ReactNode,
-    filter: ReactNode
+    filter: ReactNode,
+    showFilter?: boolean
 }
 
-function TemplateWithFilter({ children, filter }: templateWithFilterProp) {
+function TemplateWithFilter({ children, filter, showFilter = true }: TemplateWithFilterProps) {
     return (
         <Template>
-            <div className='mt-4 w-full'>
-                { filter }
-            </div>
-            { children }
+            {
+                showFilter ? (
+                    <>
+                        <div className='mt-4 w-full'>
+                            {filter}
+                        </div>
+                        {children}
+                    </>
+                ) : (
+                    <>
+                        {children}
+                    </>
+                )
+            }
         </Template>
     )
 }
