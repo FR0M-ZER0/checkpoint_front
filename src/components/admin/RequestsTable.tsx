@@ -14,7 +14,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ChevronLeft, ChevronRight, Eye, MoreHorizontal } from "lucide-react"
 import { RequestDetailsDialog } from "./RequestDetailsDialog"
-import { AbonoFaltaSolicitation, FolgaSolicitation, removeSolicitation, Solicitation, VacationSolicitation } from "@/redux/slices/solicitationSlice"
+import { AbonoFaltaSolicitation, FolgaSolicitation, Solicitation, updateSolicitation, VacationSolicitation } from "@/redux/slices/solicitationSlice"
 import { formatDate } from "@/utils/formatter"
 import api from "@/services/api"
 import { toast } from "react-toastify"
@@ -136,7 +136,9 @@ export function RequestsTable({ type }: RequestsTableProps) {
 				handleStatusChange(id, "Aprovado")
 			}
 
-			dispatch(removeSolicitation(id))
+			dispatch(updateSolicitation({ id, changes: { status: 'Aprovado' } }))
+			setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Aprovado' } : r))
+
 		} catch (error) {
 			console.error(error)
 			toast.error('Erro ao aprovar solicitação')
@@ -158,7 +160,9 @@ export function RequestsTable({ type }: RequestsTableProps) {
 			}
 
 			toast.error('Solicitação rejeitada com sucesso')
-			dispatch(removeSolicitation(id))
+			dispatch(updateSolicitation({ id, changes: { status: 'Rejeitado' } }))
+			setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Rejeitado' } : r))
+
 		} catch (error) {
 			console.error(error)
 			toast.error('Erro ao rejeitar solicitação')

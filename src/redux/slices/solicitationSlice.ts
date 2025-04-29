@@ -132,6 +132,16 @@ export const solicitationSlice = createSlice({
                 (solicitation) => solicitation.id !== action.payload
             )
             state.count = state.solicitations.length
+        },
+        updateSolicitation: (state, action) => {
+            const { id, changes } = action.payload
+            const index = state.solicitations.findIndex(s => s.id === id)
+            if (index !== -1) {
+                state.solicitations[index] = {
+                    ...state.solicitations[index],
+                    ...changes
+                }
+            }
         }
     },
     extraReducers: (builder) => {
@@ -152,5 +162,5 @@ export const solicitationSlice = createSlice({
     }
 })
 
-export const { incrementSolicitation, resetSolicitation, addSolicitation, removeSolicitation } = solicitationSlice.actions
+export const { incrementSolicitation, resetSolicitation, addSolicitation, removeSolicitation, updateSolicitation } = solicitationSlice.actions
 export default solicitationSlice.reducer
