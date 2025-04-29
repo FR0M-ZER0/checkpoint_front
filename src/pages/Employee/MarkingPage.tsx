@@ -156,7 +156,7 @@ function MarkingPage() {
                     </div>
 
                     <form className='text-white w-full flex justify-between' onSubmit={(e) => handleSubmit(e)}>
-                        <button className='main-func-color px-8 py-2 rounded-lg cursor-pointer' type='submit'>
+                        <button className='main-func-color px-8 py-2 rounded-lg cursor-pointer mr-2' type='submit'>
                             Confirmar
                         </button>
 

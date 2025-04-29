@@ -438,7 +438,7 @@ function DayPage() {
                             modalType === 'edit' &&
                             <div className='mb-4'>
                                 <label htmlFor="markingTime">Horário</label>
-                                <input type="time" name="markingTime" className='w-full main-background-color' value={horario} onChange={e => setHorario(e.target.value)}/>
+                                <input type="time" name="markingTime" className='w-full main-background-color input-col' value={horario} onChange={e => setHorario(e.target.value)}/>
                             </div>
                         }
                         <div className='mb-[60px]'>
