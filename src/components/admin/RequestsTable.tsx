@@ -14,13 +14,13 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ChevronLeft, ChevronRight, Eye, MoreHorizontal } from "lucide-react"
 import { RequestDetailsDialog } from "./RequestDetailsDialog"
-import { FolgaSolicitation, removeSolicitation, Solicitation, VacationSolicitation } from "@/redux/slices/solicitationSlice"
+import { AbonoFaltaSolicitation, FolgaSolicitation, removeSolicitation, Solicitation, VacationSolicitation } from "@/redux/slices/solicitationSlice"
 import { formatDate } from "@/utils/formatter"
 import api from "@/services/api"
 import { toast } from "react-toastify"
 import { parseBRDate } from "@/utils/formatter"
 
-type RequestType = "ajustes" | "ferias" | "folgas" | "ausencias"
+type RequestType = "ajustes" | "ferias" | "folgas" | "ausencias" | "abonos"
 
 interface RequestsTableProps {
 	type: RequestType
@@ -40,7 +40,8 @@ export function RequestsTable({ type }: RequestsTableProps) {
 	const { solicitations } = useSelector((state: RootState) => state.solicitations)
 	const { vacationSolicitations } = useSelector((state: RootState) => state.solicitations)
 	const { folgaSolicitations } = useSelector((state: RootState) => state.solicitations)
-	const [requests, setRequests] = useState<Solicitation[] | VacationSolicitation[] | FolgaSolicitation[]>([])
+	const { abonoFaltaSolicitations } = useSelector((state: RootState) => state.solicitations)
+	const [requests, setRequests] = useState<Solicitation[] | VacationSolicitation[] | FolgaSolicitation[] | AbonoFaltaSolicitation[]>([])
 	const dispatch = useDispatch()
 
 	useEffect(() => {
@@ -60,10 +61,12 @@ export function RequestsTable({ type }: RequestsTableProps) {
 				status: folga.solFolStatus,
 			}))
 			setRequests(mappedFolgas)
+		} else if (type === "abonos") {
+			setRequests(abonoFaltaSolicitations)
 		} else {
 			setRequests([])
 		}
-	}, [type, solicitations, vacationSolicitations, folgaSolicitations])
+	}, [type, solicitations, vacationSolicitations, folgaSolicitations, abonoFaltaSolicitations])
 
 	const [selectedRequest, setSelectedRequest] = useState<Request | null>(null)
 	const [isDetailsOpen, setIsDetailsOpen] = useState(false)
@@ -123,6 +126,12 @@ export function RequestsTable({ type }: RequestsTableProps) {
 				})
 
 				toast.success('Folga criada com sucesso')
+			} else if (type === 'abonos') {
+				await api.put(`/abonar-falta/${id}`, { status: 'Aprovado' })
+				await api.put(`/falta/${solicitation.falta.id}`, {
+					justificado: true
+				})
+				toast.success('Falta justificada com sucesso')
 			} else {
 				handleStatusChange(id, "Aprovado")
 			}
@@ -142,6 +151,8 @@ export function RequestsTable({ type }: RequestsTableProps) {
 				await api.put(`/solicitacao-ferias/${id}`, { status: 'Rejeitado' })
 			} else if (type === 'folgas') {
 				await api.put(`/solicitacao-folga/${id}`, { status: 'Rejeitado' })
+			} else if (type === 'abonos') {
+				await api.put(`/solicitacao-abono/${id}`, { status: 'Rejeitado' })
 			} else {
 				handleStatusChange(id, "Rejeitado")
 			}
@@ -153,8 +164,7 @@ export function RequestsTable({ type }: RequestsTableProps) {
 			toast.error('Erro ao rejeitar solicitação')
 		}
 	}
-
-
+	console.log(abonoFaltaSolicitations)
 	return (
 		<>
 			<div className="rounded-md border">
@@ -170,6 +180,17 @@ export function RequestsTable({ type }: RequestsTableProps) {
 									<TableHead>Tipo</TableHead>
 									<TableHead>Horario</TableHead>
 									<TableHead>Observação</TableHead>
+									<TableHead>Status</TableHead>
+									<TableHead className="text-right">Ações</TableHead>
+								</TableRow>
+								: type === 'abonos' ?
+								<TableRow>
+									<TableHead>Colaborador</TableHead>
+									<TableHead>Tipo da Falta</TableHead>
+									<TableHead>Data da Solicitação</TableHead>
+									<TableHead>Data da Falta</TableHead>
+									<TableHead>Motivo</TableHead>
+									<TableHead>Justificativa</TableHead>
 									<TableHead>Status</TableHead>
 									<TableHead className="text-right">Ações</TableHead>
 								</TableRow>
@@ -230,7 +251,46 @@ export function RequestsTable({ type }: RequestsTableProps) {
 									</TableCell>
 								</TableRow>
 							))
-						) : (
+						) : type === 'abonos' ? 
+							(
+								paginatedRequests.map((request) => (
+									<TableRow key={request.id}>
+										<TableCell className="font-medium">{request.falta.colaborador?.nome}</TableCell>
+										<TableCell>{request.falta.tipo}</TableCell>
+										<TableCell>{formatDate(request.criadoEm)}</TableCell>
+										<TableCell>{formatDate(request.falta.criadoEm)}</TableCell>
+										<TableCell className="max-w-[200px] truncate">{request.motivo}</TableCell>
+										<TableCell className="max-w-[200px] truncate">{request.justificativa}</TableCell>
+										<TableCell>
+											<Badge
+												variant={request.status === "Rejeitado" ? "destructive" : "outline"}
+												className={request.status === "Aprovado" ? "bg-green-600 text-white" : ""}
+											>
+												{request.status}
+											</Badge>
+										</TableCell>
+										<TableCell className="text-right">
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<Button variant="ghost" size="icon" className="h-8 w-8">
+														<MoreHorizontal className="h-4 w-4" />
+													</Button>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent align="end">
+													<DropdownMenuLabel>Ações</DropdownMenuLabel>
+													<DropdownMenuSeparator />
+													<DropdownMenuItem onClick={() => handleViewDetails(request)}>
+														<Eye className="mr-2 h-4 w-4" />
+														Ver detalhes
+													</DropdownMenuItem>
+												</DropdownMenuContent>
+											</DropdownMenu>
+										</TableCell>
+									</TableRow>
+								))
+							)
+						:
+						(
 							paginatedRequests.map((request) => (
 								<TableRow key={request.id}>
 									<TableCell className="font-medium">{request.colaborador?.nome}</TableCell>

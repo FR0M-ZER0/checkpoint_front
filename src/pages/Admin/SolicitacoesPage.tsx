@@ -31,7 +31,7 @@ export default function SolicitacoesPage() {
 					<TabsTrigger value="ajustes">Ajustes de Ponto</TabsTrigger>
 					<TabsTrigger value="ferias">Férias</TabsTrigger>
 					<TabsTrigger value="folgas">Folgas</TabsTrigger>
-					<TabsTrigger value="ausencias">Ausências</TabsTrigger>
+					<TabsTrigger value="abonos">Faltas</TabsTrigger>
 				</TabsList>
 				<TabsContent value="ajustes" className="space-y-4">
 					<Card>
@@ -261,7 +261,7 @@ export default function SolicitacoesPage() {
 						</CardContent>
 					</Card>
 				</TabsContent>
-				<TabsContent value="ausencias" className="space-y-4">
+				<TabsContent value="abonos" className="space-y-4">
 					<Card>
 						<CardHeader>
 							<CardTitle>Justificativas de Ausências</CardTitle>
@@ -333,7 +333,7 @@ export default function SolicitacoesPage() {
 									</PopoverContent>
 								</Popover>
 							</div>
-							<RequestsTable type="ausencias" />
+							<RequestsTable type="abonos" />
 						</CardContent>
 					</Card>
 				</TabsContent>

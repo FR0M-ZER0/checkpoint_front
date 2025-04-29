@@ -37,18 +37,37 @@ export interface FolgaSolicitation {
     solFolSaldoGasto: string
 }
 
+export interface AbonoFaltaSolicitation {
+    id: string
+    motivo: string
+    justificativa: string
+    status: string
+    criadoEm: string
+    arquivoCaminho?: string
+    falta: {
+        id: string
+        criadoEm: string
+        tipo: string
+        colaborador: {
+            nome: string
+        }
+    }
+}
+
 interface SolicitationState {
     count: number
     solicitations: Solicitation[]
     vacationSolicitations: VacationSolicitation[]
     folgaSolicitations: FolgaSolicitation[]
+    abonoFaltaSolicitations: AbonoFaltaSolicitation[]
 }
 
 const initialState: SolicitationState = {
     count: 0,
     solicitations: [],
     vacationSolicitations: [],
-    folgaSolicitations: []
+    folgaSolicitations: [],
+    abonoFaltaSolicitations: []
 }
 
 export const fetchSolicitations = createAsyncThunk(
@@ -79,6 +98,14 @@ export const fetchPendingSolicitationsBreak = createAsyncThunk(
     'solicitations/fetchPendingBreak',
     async () => {
         const response = await api.get('/solicitacao-folga/pendentes')
+        return response.data
+    }
+)
+
+export const fetchAbonoFaltaSolicitations = createAsyncThunk(
+    'solicitations/fetchAbonoFalta',
+    async () => {
+        const response = await api.get('/abonar-falta')
         return response.data
     }
 )
@@ -118,6 +145,9 @@ export const solicitationSlice = createSlice({
         })
         .addCase(fetchFolgaSolicitations.fulfilled, (state, action) => {
             state.folgaSolicitations = action.payload
+        })
+        .addCase(fetchAbonoFaltaSolicitations.fulfilled, (state, action) => {
+            state.abonoFaltaSolicitations = action.payload
         })
     }
 })
