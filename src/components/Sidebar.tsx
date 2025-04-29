@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router'
 import { useState, useEffect } from 'react'
+import { RootState } from '@/redux/store'
+import { useSelector } from 'react-redux'
 
 type SidebarProps = {
     isDarkMode: boolean
@@ -12,6 +14,10 @@ function Sidebar({ isDarkMode, setIsDarkMode }: SidebarProps) {
     const navigate = useNavigate()
     const [name, setName] = useState<string|null>('')
     const [email, setEmail] = useState<string|null>('')
+    const notificationCount: number = useSelector((state: RootState) => state.notifications.count)
+    const responseCount: number = useSelector((state: RootState) => state.responses.count)
+
+    const totalUnread: number = notificationCount + responseCount
 
     const getCurrentDate = (): string => {
         const today = new Date()
@@ -64,9 +70,16 @@ function Sidebar({ isDarkMode, setIsDarkMode }: SidebarProps) {
                     <span>Marcação</span>
                 </Link>
 
-                <Link to='/notificacoes' className={getLinkClass('/notificacoes', 'hover:main-orange-text')}>
+                <Link to='/notificacoes' className={getLinkClass('/notificacoes', 'hover:main-orange-text') + " relative"}>
                     <i className="fa-solid fa-bell mr-3"></i>
-                    <span>Notificações</span>
+                    <div className='w-full flex justify-between'>
+                        <span>Notificações</span>
+                        {totalUnread > 0 && (
+                            <span className="ml-2 bg-red-600 text-white text-xs font-bold px-2 pt-0.5 rounded-full">
+                                {totalUnread}
+                            </span>
+                        )}
+                    </div>
                 </Link>
 
                 <Link to="/espelho-ponto" className={getLinkClass('/espelho-ponto', 'hover:dark-blue-text')}>
