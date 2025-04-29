@@ -8,6 +8,7 @@ import Modal from '../../components/Modal'
 import { markNotificationAsRead, Notification } from '../../redux/slices/notificationSlice'
 import { useDispatch } from 'react-redux'
 import { markResponseAsRead, Response } from '../../redux/slices/responseSlice'
+import { getNotificationStyles } from '@/utils/notificationStyle'
 
 function NotificationsPage() {
     const { notifications } = useSelector((state: RootState) => state.notifications)
@@ -59,18 +60,20 @@ function NotificationsPage() {
                 {
                     notifications
                         .filter(notification => !notification.lida)
-                        .map(notification => (
-                            <div className='mb-3'>
-                                <NotificationCard 
-                                    title={notification.tipo === 'falta' ? 'Você recebeu uma falta' : `Pedido de ${notification.tipo}`}
-                                    message={notification.mensagem}
-                                    date={formatDate(notification.criadoEm)}
-                                    // TODO: colocar uma cor diferente por tipo
-                                    color={'main-green-color'}
-                                    openModal={() => openModal(notification, 'notificação')}
-                                />
-                            </div>
-                    ))
+                        .map(notification => {
+                            const { background, text } = getNotificationStyles(notification.tipo)
+                            return (
+                                <div className='mb-3' key={notification.id}>
+                                    <NotificationCard 
+                                        title={notification.tipo === 'falta' ? 'Você recebeu uma falta' : `Pedido de ${notification.tipo}`}
+                                        message={notification.mensagem}
+                                        date={formatDate(notification.criadoEm)}
+                                        color={`${background} ${text}`}
+                                        openModal={() => openModal(notification, 'notificação')}
+                                    />
+                                </div>
+                            )
+                        })
                 }
             </div>
 
