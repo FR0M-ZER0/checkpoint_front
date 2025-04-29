@@ -83,7 +83,7 @@ function JustificationPage() {
 
     const fetchAbsences = async (): Promise<void> => {
         try {
-            const response = await api.get<Absence[]>(`colaborador/falta/sem-solicitacao/${userId}`)
+            const response = await api.get<Absence[]>(`/colaborador/falta/sem-solicitacao/${userId}`)
             setAbsences(response.data)
         } catch (err: unknown) {
             console.error(err)
@@ -91,12 +91,9 @@ function JustificationPage() {
     }
 
     useEffect(() => {
-        fetchAbsences()
-    }, [])
-
-    useEffect(() => {
         setUserId(localStorage.getItem("id"))
-    }, [])
+        fetchAbsences()
+    }, [userId])
 
     return (
         <TemplateWithTitle title='Abonar ausência ou atraso'>
