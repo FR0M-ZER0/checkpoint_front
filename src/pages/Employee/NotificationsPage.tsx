@@ -62,7 +62,7 @@ function NotificationsPage() {
                         .map(notification => (
                             <div className='mb-3'>
                                 <NotificationCard 
-                                    title={notification.tipo}
+                                    title={notification.tipo === 'falta' ? 'Você recebeu uma falta' : `Pedido de ${notification.tipo}`}
                                     message={notification.mensagem}
                                     date={formatDate(notification.criadoEm)}
                                     // TODO: colocar uma cor diferente por tipo
@@ -76,7 +76,7 @@ function NotificationsPage() {
 
             {
                 isModalVisible &&
-                <Modal title={`Pedido de ${selectedNotification?.tipo}`} onClose={closeModal}>
+                <Modal title={selectedNotification?.tipo === 'falta' ? `Você recebeu uma falta` : `Pedido de ${selectedNotification?.tipo}`} onClose={closeModal}>
                     <div>
                         <p className='mb-2'>{selectedNotification?.mensagem}</p>
                         <p className='text-sm light-gray-text'>{formatDate(selectedNotification ? selectedNotification?.criadoEm : '')}</p>
