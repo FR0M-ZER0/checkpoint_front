@@ -136,8 +136,10 @@ export function RequestsTable({ type }: RequestsTableProps) {
 				handleStatusChange(id, "Aprovado")
 			}
 
-			dispatch(updateSolicitation({ id, changes: { status: 'Aprovado' } }))
-			setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'Aprovado' } : r))
+			const novoStatus = type === 'ajustes' ? 'aceito' : 'Aprovado';
+
+			dispatch(updateSolicitation({ id, changes: { status: novoStatus } }));
+			setRequests(prev => prev.map(r => r.id === id ? { ...r, status: novoStatus } : r));
 
 		} catch (error) {
 			console.error(error)

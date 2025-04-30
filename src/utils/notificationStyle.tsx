@@ -3,11 +3,11 @@ export function getNotificationStyles(tipo: string): { background: string; text:
         case 'ferias':
             return { background: 'dark-green-color', text: 'main-white-text' }
         case 'folga':
-            return { background: 'main-orange-color', text: 'main-black-text' }
+            return { background: 'main-orange-color', text: 'main-white-text' }
         case 'falta':
             return { background: 'main-red-color', text: 'main-white-text' }
         case 'ponto':
-            return { background: 'light-blue-color', text: 'main-black-text' }
+            return { background: 'light-blue-color', text: 'main-white-text' }
         case 'horasExtras':
             return { background: 'dark-blue-color', text: 'main-white-text' }
         case 'abono':
