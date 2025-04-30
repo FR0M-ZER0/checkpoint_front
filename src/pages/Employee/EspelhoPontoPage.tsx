@@ -28,6 +28,7 @@ function EspelhoPontoPage() {
     const [loading, setLoading] = useState<boolean>(true)
     const [filterType, setFilterType] = useState<string>('')
     const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
+    const [saldoFerias, setSaldoFerias] = useState<number>(0)
 
     const fecthDays = async (): Promise<void> => {
         try {
@@ -75,6 +76,15 @@ function EspelhoPontoPage() {
         neutral: "bg-gray-300",
     }
 
+    const fetchSaldoFerias = async () => {
+        try {
+            const response = await api.get(`/api/ferias/saldo-calculado?colaboradorId=${userId}`);
+            setSaldoFerias(response.data?.saldo)
+        } catch (error: any) {
+            console.error("Erro ao buscar saldo:", error)
+        }
+    }
+
     const handlePrevYear = () => setCurrentYear(prev => prev - 1)
     const handleNextYear = () => setCurrentYear(prev => prev + 1)
 
@@ -92,7 +102,8 @@ function EspelhoPontoPage() {
 
     useEffect(() => {
         setUserId(localStorage.getItem("id"))
-    }, [])
+        fetchSaldoFerias()
+    }, [userId])
 
     useEffect(() => {
         if (userId) {
@@ -253,9 +264,12 @@ function EspelhoPontoPage() {
                         <div className="mr-4 h-14 w-14 bg-[#0A8246] flex justify-center items-center rounded-xl shadow-md">
                             <i className="fa-solid fa-champagne-glasses text-2xl"></i>
                         </div>
-                        <div>
+                        <div className="w-full">
                             <p className="quicksand text-sm font-semibold">Férias</p>
-                            <p className="font-bold text-lg">{values.totalFerias}d</p>
+                            <div className="flex justify-between items-center w-full">
+                                <p className="font-bold text-lg">{values.totalFerias}d</p>
+                                <p className="text-sm text-gray-200">Saldo disponível: {saldoFerias}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
