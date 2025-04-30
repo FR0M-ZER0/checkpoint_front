@@ -83,6 +83,10 @@ input {
   display: block;
 }
 
+button {
+  cursor: pointer;
+}
+
 .input-col, select, textarea {
   display: block;
   background-color: white;

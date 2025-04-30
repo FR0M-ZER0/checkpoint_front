@@ -61,6 +61,11 @@ function App() {
 						<RelatoriosPage /> 
 					</DashboardLayout>}
 				/>
+				<Route path="/admin/horas-extras" element={
+					<DashboardLayout> 
+						<HorasExtrasPage /> 
+					</DashboardLayout>}
+				/>
 				<Route path="/admin/login" element={<LoginPageAdmin/>} />
 			</Routes>
 		</BrowserRouter>
