@@ -29,6 +29,7 @@ function EspelhoPontoPage() {
     const [filterType, setFilterType] = useState<string>('')
     const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
     const [saldoFerias, setSaldoFerias] = useState<number>(0)
+    const [bancoHoras, setBancoHoras] = useState<string>('')
 
     const fecthDays = async (): Promise<void> => {
         try {
@@ -85,6 +86,15 @@ function EspelhoPontoPage() {
         }
     }
 
+    const fetchBancoHoras = async () => {
+        try {
+            const response = await api.get(`/horas-extras/colaborador/${userId}`)
+            setBancoHoras(response.data)
+        } catch (error: unknown) {
+            console.error(error)
+        }
+    }
+
     const handlePrevYear = () => setCurrentYear(prev => prev - 1)
     const handleNextYear = () => setCurrentYear(prev => prev + 1)
 
@@ -103,6 +113,7 @@ function EspelhoPontoPage() {
     useEffect(() => {
         setUserId(localStorage.getItem("id"))
         fetchSaldoFerias()
+        fetchBancoHoras()
     }, [userId])
 
     useEffect(() => {
@@ -265,18 +276,31 @@ function EspelhoPontoPage() {
                     </div>
 
                     <div
-                        onClick={() => setSelectedStatus(selectedStatus === 'ferias' ? null : 'ferias')}
+                        onClick={() => setSelectedStatus(selectedStatus === 'horas extras' ? null : 'horas extras')}
                         className="cursor-pointer flex items-center gap-2 dark-green-color text-white px-6 py-4 rounded-lg w-full status-card"
                     >
                         <div className="mr-4 h-14 w-14 bg-[#0A8246] flex justify-center items-center rounded-xl shadow-md">
                             <i className="fa-solid fa-champagne-glasses text-2xl"></i>
                         </div>
-                        <div className="w-full">
+                        <div>
                             <p className="quicksand text-sm font-semibold">Férias</p>
-                            <div className="flex justify-between items-center w-full">
-                                <p className="font-bold text-lg">{values.totalFerias}d</p>
-                                <p className="text-sm text-gray-200">Saldo disponível: {saldoFerias}</p>
+                            <div className="flex justify-between items-center">
+                                <p className="font-bold text-lg mr-4">{values.totalFerias}d</p>
+                                <p className="text-[.8rem] text-gray-200">Disp. {saldoFerias}d</p>
                             </div>
+                        </div>
+                    </div>
+
+                    <div
+                        onClick={() => setSelectedStatus(selectedStatus === 'ferias' ? null : 'ferias')}
+                        className="cursor-pointer flex items-center gap-2 dark-blue-color text-white px-6 py-4 rounded-lg w-full status-card"
+                    >
+                        <div className="mr-4 h-14 w-14 bg-[#013F82] flex justify-center items-center rounded-xl shadow-md">
+                            <i className="fa-solid fa-plus text-2xl"></i>
+                        </div>
+                        <div>
+                            <p className="quicksand text-sm font-semibold">Banco de horas</p>
+                            <p className="font-bold text-lg">{bancoHoras}</p>
                         </div>
                     </div>
                 </div>

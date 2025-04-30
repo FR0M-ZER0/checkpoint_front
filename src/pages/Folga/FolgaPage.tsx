@@ -3,6 +3,7 @@ import TemplateWithFilter from '../Employee/TemplateWithFilter';
 import Calendar, { CalendarProps } from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { formatDate } from '../../utils/formatter';
+import api from '@/services/api';
 
 function FolgaPage() {
     const COLABORADOR_ID = 2;
@@ -15,6 +16,9 @@ function FolgaPage() {
     const [observacao, setObservacao] = useState<string>('');
     const [carregando, setCarregando] = useState<boolean>(false);
 
+    const [userId, setUserId] = useState<string|null>('')
+    const [saldoFolgas, setSaldoFolgas] = useState<string>('')
+
     const handleDateChange: CalendarProps['onChange'] = (value, event) => {
         setDataFolga(value instanceof Date ? value : null);
     };
@@ -26,6 +30,21 @@ function FolgaPage() {
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
     };
+
+    const fetchSaldo = async () => {
+        try {
+            const response = await api.get(`/horas-extras/colaborador/${userId}`)
+            setSaldoFolgas(response.data)
+        } catch (error: unknown) {
+            console.error(error)
+        }
+
+    }
+
+    useEffect(() => {
+        setUserId(localStorage.getItem("id"))
+        fetchSaldo()
+    }, [userId])
 
     useEffect(() => {
     const carregarDadosPersistentes = async () => {
@@ -71,35 +90,32 @@ function FolgaPage() {
             setErroSolicitacao('Preencha todos os campos.');
             return;
         }
-    
-        // Converte saldo atual para minutos
+
         const { horas: horasAtuais, minutos: minutosAtuais } = saldoParaMinutos(saldoHoras);
         const totalAtualEmMinutos = horasAtuais * 60 + minutosAtuais;
-    
-        // Calcula o saldo solicitado em minutos
+
         const totalSolicitadoEmMinutos = horasSolicitadas * 60 + minutosSolicitados;
-    
-        // Verifica se tem saldo suficiente
+
         if (totalSolicitadoEmMinutos > totalAtualEmMinutos) {
             setErroSolicitacao('Saldo insuficiente para esta solicitação.');
             return;
         }
-    
+
         try {
             setCarregando(true);
             setErroSolicitacao('');
-    
-            const saldoGasto = `${horasSolicitadas}h ${minutosSolicitados.toString().padStart(2, '0')}min`;
-    
+
+            const saldoDecimal = (totalSolicitadoEmMinutos / 60).toFixed(2) + 'h';
+
             const corpoDaRequisicao = JSON.stringify({
-                colaboradorId: COLABORADOR_ID,
+                colaboradorId: userId,
                 solFolData: formatDateForAPI(dataFolga),
-                solFolSaldoGasto: saldoGasto,
+                solFolSaldoGasto: saldoDecimal,
                 solFolObservacao: observacao,
-                solFolStatus: "PENDENTE"
+                solFolStatus: "Pendente"
             });
-    
-            const response = await fetch('http://localhost:8080/api/folga', {
+
+            const response = await fetch('http://localhost:8080/solicitacao-folga', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -107,26 +123,23 @@ function FolgaPage() {
                 },
                 body: corpoDaRequisicao,
             });
-    
+
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(errorText || `Erro ${response.status}`);
             }
-    
-            // Atualiza o saldo localmente (opcional - pode confiar apenas na resposta do servidor)
-            const novoSaldoEmMinutos = totalAtualEmMinutos - totalSolicitadoEmMinutos;
-            setSaldoHoras(minutosParaSaldo(novoSaldoEmMinutos));
-    
-            // Atualiza a lista de folgas
+
             const novaFolga = await response.json();
             setFolgasAgendadas([...folgasAgendadas, novaFolga]);
-    
-            // Limpa os campos
+
+            const novoSaldoEmMinutos = totalAtualEmMinutos - totalSolicitadoEmMinutos;
+            setSaldoHoras(minutosParaSaldo(novoSaldoEmMinutos));
+
             setDataFolga(null);
             setHorasSolicitadas(0);
             setMinutosSolicitados(0);
             setObservacao('');
-    
+
         } catch (error) {
             console.error('Erro:', error);
             setErroSolicitacao(
@@ -165,8 +178,8 @@ function FolgaPage() {
                 <div className="flex flex-col items-center justify-center mb-4 gap-2">
                     <div className="text-center">
                         <h2 className="text-lg font-semibold">Saldo disponível</h2>
-                        <p className={`text-xl ${saldoHoras === "00h 00min" ? 'text-red-500' : 'text-[#007D26]'}`}>
-                            {saldoHoras}
+                        <p className={`text-xl ${saldoFolgas === "00h 00min" ? 'text-red-500' : 'text-[#007D26]'}`}>
+                            {saldoFolgas}
                         </p>
                         {saldoNegativo && <p className="text-red-500 text-xl">{saldoNegativo}</p>}
                     </div>
