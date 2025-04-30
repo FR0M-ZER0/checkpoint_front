@@ -18,6 +18,9 @@ function DayPage() {
     const [loading, setLoading] = useState<boolean>(true)
     const [dayType, setDayType] = useState<string>('')
     const [faltaDetails, setFaltaDetails] = useState<string>('')
+    const [observacoesDia, setObservacoesDia] = useState<string>('')
+    const [motivoFalta, setMotivoFalta] = useState<string>('')
+    const [justificativaFalta, setJustificativaFalta] = useState<string>('')
     const [totalWorkTime, setTotalWorkTime] = useState<string>('')
 
     const [markingStart, setMarkingStart] = useState<string>('')
@@ -128,10 +131,16 @@ function DayPage() {
                 setDonetimePause('')
                 setDonetimeResume('')
     
+                setObservacoesDia(data.observacao || '')
+
                 if (data.tipo === 'falta' && data.detalhes) {
-                    setFaltaDetails(data.detalhes.tipoFalta)
+                    setFaltaDetails(data.detalhes.tipoFalta || '')
+                    setMotivoFalta(data.detalhes.motivo || '')
+                    setJustificativaFalta(data.detalhes.justificativa || '')
                 } else {
                     setFaltaDetails('')
+                    setMotivoFalta('')
+                    setJustificativaFalta('')
                 }
             }
         } catch (err: unknown) {
@@ -255,6 +264,32 @@ function DayPage() {
                             {icon}
                         </div>
                         <p className="mt-2">{message}</p>
+                        {
+                            dayType === 'falta' && (
+                                <div className="mt-4 text-center">
+                                    {motivoFalta && (
+                                        <>
+                                            <p className="font-bold quicksand text-lg mt-6">Motivo</p>
+                                            <p className='text-sm'>{motivoFalta}</p>
+                                        </>
+                                    )}
+                                    {justificativaFalta && (
+                                        <>
+                                            <p className="font-bold quicksand mt-12 text-lg">Justificativa</p>
+                                            <p className='text-sm'>{justificativaFalta}</p>
+                                        </>
+                                    )}
+                                </div>
+                            )
+                        }
+                        {
+                            observacoesDia && (
+                                <div className="mt-4 text-center">
+                                    <p className="font-bold quicksand">Observações</p>
+                                    <p className='text-sm'>{observacoesDia}</p>
+                                </div>
+                            )
+                        }
                     </div>
                 </div>
             }
