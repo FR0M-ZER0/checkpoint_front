@@ -114,6 +114,7 @@ export function RequestsTable({ type }: RequestsTableProps) {
 					colaboradorId: solicitation.colaboradorId,
 					dataInicio: solicitation.dataInicio,
 					dataFim: solicitation.dataFim,
+					aprovado: true
 				})
 
 				toast.success('Férias criadas com sucesso')
