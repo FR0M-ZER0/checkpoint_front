@@ -226,29 +226,29 @@ function DayPage() {
                     </div>
                     <div className='flex justify-between w-full'>
                         <div>
-                            <p className=''><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
-                            <p className='text-sm light-gray-text'><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                            <p className=''><Skeleton width={150} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                            <p className='text-sm light-gray-text'><Skeleton width={150} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
                         </div>
                         <div>
-                            <p className='dark-green-text'><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
-                            <p className='text-sm light-gray-text'><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                            <p className='dark-green-text'><Skeleton width={150} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                            <p className='text-sm light-gray-text'><Skeleton width={150} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
                         </div>
                         <div>
-                            <p className='dark-green-text'><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
-                            <p className='text-sm light-gray-text'><Skeleton width={100} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                            <p className='dark-green-text'><Skeleton width={150} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
+                            <p className='text-sm light-gray-text'><Skeleton width={150} baseColor="#dedede" highlightColor="#c5c5c5" /></p>
                         </div>
                     </div>
 
                     <div className='w-full flex justify-evenly'>
                         <div className='flex flex-col'>
                             <div>
-                                <Skeleton width={80} height={80} baseColor="#dedede" highlightColor="#c5c5c5" count={4} />     
+                                <Skeleton width={120} height={120} baseColor="#dedede" highlightColor="#c5c5c5" count={4} />     
                             </div>
                         </div>
                         <div className='flex flex-col'>
                             <div className='flex'>
-                                <Skeleton width={80} height={80} baseColor="#dedede" highlightColor="#c5c5c5" count={4} />     
-                                <Skeleton width={80} height={80} baseColor="#dedede" highlightColor="#c5c5c5" count={4} />     
+                                <Skeleton width={120} height={120} baseColor="#dedede" highlightColor="#c5c5c5" count={4} />     
+                                <Skeleton width={120} height={120} baseColor="#dedede" highlightColor="#c5c5c5" count={4} />     
                             </div>
                         </div>
                     </div>

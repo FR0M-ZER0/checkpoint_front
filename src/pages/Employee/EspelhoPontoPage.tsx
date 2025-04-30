@@ -158,7 +158,14 @@ function EspelhoPontoPage() {
                     </div>
                 </div>
                 <div className="mt-8 w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <Skeleton height={150} baseColor="#dedede" highlightColor="#c5c5c5" count={3} />
+                    {Array.from({ length: 12 }).map((_, index) => (
+                        <Skeleton 
+                            key={index} 
+                            height={250} 
+                            baseColor="#dedede" 
+                            highlightColor="#c5c5c5" 
+                        />
+                    ))}
                 </div>
             </TemplateWithFilter>
         )
