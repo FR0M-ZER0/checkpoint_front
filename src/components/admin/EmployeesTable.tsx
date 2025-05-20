@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,139 +12,46 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import api from "@/services/api"
 
-const employees = [
-	{
-		id: 1,
-		name: "Ana Silva",
-		email: "ana.silva@empresa.com",
-		department: "TI",
-		position: "Desenvolvedora",
-		status: "Ativo",
-		avatar: "/placeholder-user.jpg",
-		initials: "AS",
-	},
-	{
-		id: 2,
-		name: "Carlos Oliveira",
-		email: "carlos.oliveira@empresa.com",
-		department: "RH",
-		position: "Analista de RH",
-		status: "Ativo",
-		avatar: "/placeholder-user.jpg",
-		initials: "CO",
-	},
-	{
-		id: 3,
-		name: "Mariana Santos",
-		email: "mariana.santos@empresa.com",
-		department: "Marketing",
-		position: "Gerente de Marketing",
-		status: "Desativado",
-		avatar: "/placeholder-user.jpg",
-		initials: "MS",
-	},
-	{
-		id: 4,
-		name: "Pedro Costa",
-		email: "pedro.costa@empresa.com",
-		department: "Financeiro",
-		position: "Contador",
-		status: "Ativo",
-		avatar: "/placeholder-user.jpg",
-		initials: "PC",
-	},
-	{
-		id: 5,
-		name: "Juliana Lima",
-		email: "juliana.lima@empresa.com",
-		department: "Vendas",
-		position: "Representante de Vendas",
-		status: "Férias",
-		avatar: "/placeholder-user.jpg",
-		initials: "JL",
-	},
-	{
-		id: 6,
-		name: "Roberto Almeida",
-		email: "roberto.almeida@empresa.com",
-		department: "TI",
-		position: "Analista de Sistemas",
-		status: "Ativo",
-		avatar: "/placeholder-user.jpg",
-		initials: "RA",
-	},
-	{
-		id: 7,
-		name: "Fernanda Gomes",
-		email: "fernanda.gomes@empresa.com",
-		department: "Marketing",
-		position: "Designer",
-		status: "Ativo",
-		avatar: "/placeholder-user.jpg",
-		initials: "FG",
-	},
-	{
-		id: 8,
-		name: "Lucas Mendes",
-		email: "lucas.mendes@empresa.com",
-		department: "Financeiro",
-		position: "Analista Financeiro",
-		status: "Desativado",
-		avatar: "/placeholder-user.jpg",
-		initials: "LM",
-	},
-	{
-		id: 9,
-		name: "Camila Rocha",
-		email: "camila.rocha@empresa.com",
-		department: "RH",
-		position: "Recrutadora",
-		status: "Ativo",
-		avatar: "/placeholder-user.jpg",
-		initials: "CR",
-	},
-	{
-		id: 10,
-		name: "Gabriel Souza",
-		email: "gabriel.souza@empresa.com",
-		department: "Vendas",
-		position: "Gerente de Contas",
-		status: "Ativo",
-		avatar: "/placeholder-user.jpg",
-		initials: "GS",
-	},
-	{
-		id: 11,
-		name: "Isabela Martins",
-		email: "isabela.martins@empresa.com",
-		department: "TI",
-		position: "QA Tester",
-		status: "Ativo",
-		avatar: "/placeholder-user.jpg",
-		initials: "IM",
-	},
-	{
-		id: 12,
-		name: "Thiago Ferreira",
-		email: "thiago.ferreira@empresa.com",
-		department: "Marketing",
-		position: "Analista de Mídias Sociais",
-		status: "Folga",
-		avatar: "/placeholder-user.jpg",
-		initials: "TF",
-	},
-]
+type Colaborador = {
+	id: number
+	nome: string
+	email: string
+	ativo: boolean
+	criadoEm: string
+}
 
 export function EmployeesTable() {
+	const [colaboradores, setColaboradores] = useState<Colaborador[]>([])
 	const [currentPage, setCurrentPage] = useState(1)
 	const itemsPerPage = 5
-	const totalPages = Math.ceil(employees.length / itemsPerPage)
 
-	const paginatedEmployees = employees.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+	useEffect(() => {
+		const fetchColaboradores = async () => {
+			try {
+				const response = await api.get("/colaborador")
+				setColaboradores(response.data)
+			} catch (error) {
+				console.error("Erro ao buscar colaboradores:", error)
+			}
+		}
+		fetchColaboradores()
+	}, [])
+
+	const totalPages = Math.ceil(colaboradores.length / itemsPerPage)
+	const paginatedEmployees = colaboradores.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
 	const handlePageChange = (page: number) => {
 		setCurrentPage(page)
+	}
+
+	const getInitials = (nome: string) => {
+		const names = nome.split(" ")
+		if (names.length === 1) return names[0][0].toUpperCase()
+		return (names[0][0] + names[names.length - 1][0]).toUpperCase()
 	}
 
 	return (
@@ -154,9 +61,8 @@ export function EmployeesTable() {
 					<TableHeader>
 						<TableRow>
 							<TableHead>Colaborador</TableHead>
-							<TableHead>Departamento</TableHead>
-							<TableHead>Cargo</TableHead>
 							<TableHead>Status</TableHead>
+							<TableHead>Criado em</TableHead>
 							<TableHead className="text-right">Ações</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -166,23 +72,24 @@ export function EmployeesTable() {
 								<TableCell>
 									<div className="flex items-center gap-3">
 										<Avatar>
-											<AvatarFallback>{employee.initials}</AvatarFallback>
+											<AvatarFallback>{getInitials(employee.nome)}</AvatarFallback>
 										</Avatar>
 										<div>
-											<p className="font-medium">{employee.name}</p>
+											<p className="font-medium">{employee.nome}</p>
 											<p className="text-sm text-muted-foreground">{employee.email}</p>
 										</div>
 									</div>
 								</TableCell>
-								<TableCell>{employee.department}</TableCell>
-								<TableCell>{employee.position}</TableCell>
 								<TableCell>
 									<Badge
-										variant={employee.status === "Desativado" ? "destructive" : "outline"}
-										className={employee.status === "Ativo" ? "bg-green-600 text-white" : ""}
+										variant={employee.ativo ? "outline" : "destructive"}
+										className={employee.ativo ? "bg-green-600 text-white" : ""}
 									>
-										{employee.status}
+										{employee.ativo ? "Ativo" : "Desativado"}
 									</Badge>
+								</TableCell>
+								<TableCell>
+									{format(new Date(employee.criadoEm), "dd/MM/yyyy HH:mm", { locale: ptBR })}
 								</TableCell>
 								<TableCell className="text-right">
 									<DropdownMenu>
