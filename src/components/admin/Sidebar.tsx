@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router";
-import { BarChart, ClipboardCheck, ClipboardList, FileText, Home, Menu, Settings, Users } from "lucide-react";
+import { AlarmClockPlus, BarChart, ClipboardCheck, ClipboardList, FileText, Home, Menu, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,11 @@ const navItems: NavItem[] = [
 		title: "Marcações de Ponto",
 		href: "/admin/marcacoes",
 		icon: ClipboardCheck,
+	},
+	{
+		title: "Horas extras",
+		href: "/admin/horas-extras",
+		icon: AlarmClockPlus,
 	},
 	{
 		title: "Relatórios",
