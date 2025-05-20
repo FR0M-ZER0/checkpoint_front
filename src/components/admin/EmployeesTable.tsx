@@ -27,7 +27,7 @@ type Colaborador = {
 export function EmployeesTable() {
 	const [colaboradores, setColaboradores] = useState<Colaborador[]>([])
 	const [currentPage, setCurrentPage] = useState(1)
-	const itemsPerPage = 5
+	const itemsPerPage = 15
 
 	useEffect(() => {
 		const fetchColaboradores = async () => {
