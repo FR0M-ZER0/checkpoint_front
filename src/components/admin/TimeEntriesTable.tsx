@@ -1,6 +1,5 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
 	DropdownMenu,
@@ -10,9 +9,11 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ChevronLeft, ChevronRight, Coffee, DoorOpen, Edit, LogOut, MoreHorizontal, Trash2 } from "lucide-react"
+import { BatteryPlus, ChevronLeft, ChevronRight, Coffee, DoorOpen, Edit, LogOut, MoreHorizontal, Trash2 } from "lucide-react"
 import { EditTimeEntryDialog } from "./EditTimeEntryDialog"
 import { DeleteTimeEntryDialog } from "./DeleteTimeEntryDialog"
+import api from "@/services/api"
+import { formatUSDateToBR, formatUSTimeToBR } from "@/utils/formatter"
 
 export type EntryType = "entrada" | "saida_almoco" | "retorno_almoco" | "saida"
 
@@ -22,230 +23,89 @@ export interface TimeEntry {
 	employeeName: string
 	employeeAvatar: string
 	employeeInitials: string
-	department: string
 	type: EntryType
 	time: string
 	date: string
-	createdBy: string
-	createdAt: string
-	modifiedBy?: string
-	modifiedAt?: string
 }
 
-const timeEntriesData: TimeEntry[] = [
-	{
-		id: 1,
-		employeeId: 1,
-		employeeName: "Ana Silva",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "AS",
-		department: "TI",
-		type: "entrada",
-		time: "08:00",
-		date: "26/04/2025",
-		createdBy: "Sistema",
-		createdAt: "26/04/2025 08:00",
-	},
-	{
-		id: 2,
-		employeeId: 1,
-		employeeName: "Ana Silva",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "AS",
-		department: "TI",
-		type: "saida_almoco",
-		time: "12:01",
-		date: "26/04/2025",
-		createdBy: "Sistema",
-		createdAt: "26/04/2025 12:01",
-	},
-	{
-		id: 3,
-		employeeId: 1,
-		employeeName: "Ana Silva",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "AS",
-		department: "TI",
-		type: "retorno_almoco",
-		time: "13:03",
-		date: "26/04/2025",
-		createdBy: "Sistema",
-		createdAt: "26/04/2025 13:03",
-	},
-	{
-		id: 4,
-		employeeId: 1,
-		employeeName: "Ana Silva",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "AS",
-		department: "TI",
-		type: "saida",
-		time: "17:05",
-		date: "26/04/2025",
-		createdBy: "Sistema",
-		createdAt: "26/04/2025 17:05",
-	},
-	{
-		id: 5,
-		employeeId: 2,
-		employeeName: "Carlos Oliveira",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "CO",
-		department: "RH",
-		type: "entrada",
-		time: "08:15",
-		date: "26/04/2025",
-		createdBy: "Sistema",
-		createdAt: "26/04/2025 08:15",
-	},
-	{
-		id: 6,
-		employeeId: 2,
-		employeeName: "Carlos Oliveira",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "CO",
-		department: "RH",
-		type: "saida_almoco",
-		time: "12:00",
-		date: "26/04/2025",
-		createdBy: "Sistema",
-		createdAt: "26/04/2025 12:00",
-	},
-	{
-		id: 7,
-		employeeId: 3,
-		employeeName: "Mariana Santos",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "MS",
-		department: "Marketing",
-		type: "entrada",
-		time: "09:00",
-		date: "26/04/2025",
-		createdBy: "Sistema",
-		createdAt: "26/04/2025 09:00",
-		modifiedBy: "Admin",
-		modifiedAt: "26/04/2025 09:30",
-	},
-	{
-		id: 8,
-		employeeId: 4,
-		employeeName: "Pedro Costa",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "PC",
-		department: "Financeiro",
-		type: "entrada",
-		time: "08:30",
-		date: "26/04/2025",
-		createdBy: "Admin",
-		createdAt: "26/04/2025 10:00",
-	},
-	{
-		id: 9,
-		employeeId: 5,
-		employeeName: "Juliana Lima",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "JL",
-		department: "Vendas",
-		type: "entrada",
-		time: "08:45",
-		date: "26/04/2025",
-		createdBy: "Sistema",
-		createdAt: "26/04/2025 08:45",
-	},
-	{
-		id: 10,
-		employeeId: 6,
-		employeeName: "Roberto Almeida",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "RA",
-		department: "TI",
-		type: "entrada",
-		time: "08:10",
-		date: "26/04/2025",
-		createdBy: "Sistema",
-		createdAt: "26/04/2025 08:10",
-	},
-	{
-		id: 11,
-		employeeId: 7,
-		employeeName: "Fernanda Gomes",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "FG",
-		department: "Marketing",
-		type: "entrada",
-		time: "09:15",
-		date: "26/04/2025",
-		createdBy: "Sistema",
-		createdAt: "26/04/2025 09:15",
-	},
-	{
-		id: 12,
-		employeeId: 8,
-		employeeName: "Lucas Mendes",
-		employeeAvatar: "/placeholder-user.jpg",
-		employeeInitials: "LM",
-		department: "Financeiro",
-		type: "entrada",
-		time: "08:05",
-		date: "26/04/2025",
-		createdBy: "Sistema",
-		createdAt: "26/04/2025 08:05",
-	},
-]
+interface MarcacaoResponseDTO {
+	id: string
+	colaboradorId: number
+	nomeColaborador: string
+	tipo: "ENTRADA" | "PAUSA" | "RETOMADA" | "SAIDA"
+	dataHora: string
+	processada: boolean
+}
 
 export function getEntryTypeInfo(type: EntryType) {
 	switch (type) {
 		case "entrada":
-			return {
-				color: "bg-green-500",
-				icon: <DoorOpen className="h-4 w-4" />,
-				name: "Entrada",
-			}
-		case "saida_almoco":
-			return {
-				color: "bg-yellow-400",
-				icon: <Coffee className="h-4 w-4" />,
-				name: "Saída para Almoço",
-			}
+			return { color: "bg-green-500", icon: <DoorOpen className="h-5 w-5" />, name: "Entrada" }
 		case "retorno_almoco":
-			return {
-				color: "bg-blue-500",
-				icon: <Coffee className="h-4 w-4" />,
-				name: "Retorno do Almoço",
-			}
+			return { color: "bg-yellow-400", icon: <BatteryPlus className="h-5 w-5" />, name: "Retomada" }
+		case "saida_almoco":
+			return { color: "bg-blue-500", icon: <Coffee className="h-5 w-5" />, name: "Pausa" }
 		case "saida":
-			return {
-				color: "bg-red-500",
-				icon: <LogOut className="h-4 w-4" />,
-				name: "Saída",
-			}
+			return { color: "bg-red-500", icon: <LogOut className="h-5 w-5" />, name: "Saída" }
 	}
 }
 
 export function TimeEntriesTable() {
-	const [timeEntries, setTimeEntries] = useState<TimeEntry[]>(timeEntriesData)
+	const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([])
 	const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null)
 	const [deletingEntry, setDeletingEntry] = useState<TimeEntry | null>(null)
-
 	const [currentPage, setCurrentPage] = useState(1)
-	const itemsPerPage = 5
-	const totalPages = Math.ceil(timeEntries.length / itemsPerPage)
 
+	const itemsPerPage = 15
+	const totalPages = Math.ceil(timeEntries.length / itemsPerPage)
 	const paginatedEntries = timeEntries.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
+	useEffect(() => {
+		async function fetchData() {
+			try {
+				const response = await api.get<MarcacaoResponseDTO[]>("/marcacoes/com-nome")
+				const mappedEntries: TimeEntry[] = response.data.map((m, index) => {
+					let entryType: EntryType
+					switch (m.tipo) {
+						case "ENTRADA": entryType = "entrada"; break
+						case "PAUSA": entryType = "saida_almoco"; break
+						case "RETOMADA": entryType = "retorno_almoco"; break
+						case "SAIDA": entryType = "saida"; break
+						default: entryType = "entrada"
+					}
+
+					const dateObj = new Date(m.dataHora)
+
+					return {
+						id: index + 1,
+						employeeId: m.colaboradorId,
+						employeeName: m.nomeColaborador,
+						employeeAvatar: "/placeholder-user.jpg",
+						employeeInitials: m.nomeColaborador.split(" ").map(n => n[0]).join("").slice(0, 2),
+						type: entryType,
+						time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+						date: dateObj.toLocaleDateString(),
+					}
+				})
+				setTimeEntries(mappedEntries)
+			} catch (error) {
+				console.error("Erro ao buscar marcações:", error)
+			}
+		}
+		fetchData()
+	}, [])
+
 	const handleDelete = (entryId: number) => {
-		setTimeEntries(timeEntries.filter((entry) => entry.id !== entryId))
+		setTimeEntries(prev => prev.filter(entry => entry.id !== entryId))
 		setDeletingEntry(null)
 	}
 
 	const handleEdit = (updatedEntry: TimeEntry) => {
-		setTimeEntries(timeEntries.map((entry) => (entry.id === updatedEntry.id ? updatedEntry : entry)))
+		setTimeEntries(prev => prev.map(entry => (entry.id === updatedEntry.id ? updatedEntry : entry)))
 		setEditingEntry(null)
 	}
 
-	const handlePageChange = (page: number) => {
-		setCurrentPage(page)
-	}
+	const handlePageChange = (page: number) => setCurrentPage(page)
 
 	return (
 		<>
@@ -254,26 +114,22 @@ export function TimeEntriesTable() {
 					<TableHeader>
 						<TableRow>
 							<TableHead>Colaborador</TableHead>
-							<TableHead>Departamento</TableHead>
 							<TableHead>Tipo</TableHead>
 							<TableHead>Data</TableHead>
 							<TableHead>Hora</TableHead>
-							<TableHead>Criado por</TableHead>
-							<TableHead>Modificado</TableHead>
 							<TableHead className="text-right">Ações</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{paginatedEntries.length === 0 ? (
 							<TableRow>
-								<TableCell colSpan={8} className="h-24 text-center">
+								<TableCell colSpan={5} className="h-24 text-center">
 									Nenhuma marcação encontrada.
 								</TableCell>
 							</TableRow>
 						) : (
 							paginatedEntries.map((entry) => {
 								const { color, icon, name } = getEntryTypeInfo(entry.type)
-
 								return (
 									<TableRow key={entry.id}>
 										<TableCell>
@@ -284,25 +140,14 @@ export function TimeEntriesTable() {
 												<span className="font-medium">{entry.employeeName}</span>
 											</div>
 										</TableCell>
-										<TableCell>{entry.department}</TableCell>
 										<TableCell>
 											<div className="flex items-center gap-2">
-												<div className={`${color} rounded-full p-1 flex items-center justify-center`}>{icon}</div>
+												<div className={`${color} rounded-full p-2 flex items-center justify-center`}>{icon}</div>
 												<span>{name}</span>
 											</div>
 										</TableCell>
-										<TableCell>{entry.date}</TableCell>
-										<TableCell>{entry.time}</TableCell>
-										<TableCell>{entry.createdBy}</TableCell>
-										<TableCell>
-											{entry.modifiedBy ? (
-												<Badge variant="outline" className="font-normal">
-													{entry.modifiedBy} ({entry.modifiedAt})
-												</Badge>
-											) : (
-												<span className="text-muted-foreground">-</span>
-											)}
-										</TableCell>
+										<TableCell>{formatUSDateToBR(entry.date)}</TableCell>
+										<TableCell>{formatUSTimeToBR(entry.time)}</TableCell>
 										<TableCell className="text-right">
 											<DropdownMenu>
 												<DropdownMenuTrigger asChild>
@@ -337,12 +182,7 @@ export function TimeEntriesTable() {
 
 			{totalPages > 1 && (
 				<div className="flex items-center justify-end space-x-2 py-4">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => handlePageChange(currentPage - 1)}
-						disabled={currentPage === 1}
-					>
+					<Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
 						<ChevronLeft className="h-4 w-4" />
 						<span className="sr-only">Página anterior</span>
 					</Button>
@@ -359,12 +199,7 @@ export function TimeEntriesTable() {
 							</Button>
 						))}
 					</div>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => handlePageChange(currentPage + 1)}
-						disabled={currentPage === totalPages}
-					>
+					<Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
 						<ChevronRight className="h-4 w-4" />
 						<span className="sr-only">Próxima página</span>
 					</Button>

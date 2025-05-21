@@ -58,15 +58,18 @@ export default function MarcacoesPage() {
 
 						<Select>
 							<SelectTrigger>
-								<SelectValue placeholder="Departamento" />
+								<SelectValue placeholder="Colaborador" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="all">Todos</SelectItem>
-								<SelectItem value="ti">TI</SelectItem>
-								<SelectItem value="rh">RH</SelectItem>
-								<SelectItem value="marketing">Marketing</SelectItem>
-								<SelectItem value="financeiro">Financeiro</SelectItem>
-								<SelectItem value="vendas">Vendas</SelectItem>
+								<SelectItem value="1">Ana Silva</SelectItem>
+								<SelectItem value="2">Carlos Oliveira</SelectItem>
+								<SelectItem value="3">Mariana Santos</SelectItem>
+								<SelectItem value="4">Pedro Costa</SelectItem>
+								<SelectItem value="5">Juliana Lima</SelectItem>
+								<SelectItem value="6">Roberto Almeida</SelectItem>
+								<SelectItem value="7">Fernanda Gomes</SelectItem>
+								<SelectItem value="8">Lucas Mendes</SelectItem>
 							</SelectContent>
 						</Select>
 

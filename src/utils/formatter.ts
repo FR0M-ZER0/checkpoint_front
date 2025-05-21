@@ -37,10 +37,36 @@ const parseBRDate = (dateStr: string) => {
     return `${year}-${month}-${day}`;
 };  
 
+const formatUSDateToBR = (dateString: string): string => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Data inválida';
+
+    return date.toLocaleDateString('pt-BR');
+};
+
+const formatUSTimeToBR = (timeString: string): string => {
+    const [time, modifier] = timeString.split(' ');
+
+    let [hours, minutes] = time.split(':').map(Number);
+
+    if (modifier === 'PM' && hours < 12) {
+        hours += 12;
+    } else if (modifier === 'AM' && hours === 12) {
+        hours = 0;
+    }
+
+    const hoursStr = String(hours).padStart(2, '0');
+    const minutesStr = String(minutes).padStart(2, '0');
+
+    return `${hoursStr}:${minutesStr}`;
+};
+
 export {
     formatDate,
     formatTime,
     formatTimeAndMinute,
     formatStringToTime,
-    parseBRDate
+    parseBRDate,
+    formatUSDateToBR,
+    formatUSTimeToBR
 };
