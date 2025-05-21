@@ -18,11 +18,7 @@ import api from "@/services/api"
 interface AddCollaboratorDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    onAdd: (collaborator: {
-        name: string
-        email: string
-        status: string
-    }) => void
+    onAdd: () => void
 }
 
 export function AddCollaboratorDialog({ open, onOpenChange, onAdd }: AddCollaboratorDialogProps) {
@@ -46,11 +42,7 @@ export function AddCollaboratorDialog({ open, onOpenChange, onAdd }: AddCollabor
 
             const novoColaborador = response.data
 
-            onAdd({
-                name: novoColaborador.nome,
-                email: novoColaborador.email,
-                status: novoColaborador.ativo ? "Ativo" : "Inativo"
-            })
+            onAdd?.()
 
             toast.success('Colaborador cadastrado')
 

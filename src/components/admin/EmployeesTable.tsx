@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -24,20 +24,29 @@ type Colaborador = {
 	criadoEm: string
 }
 
-export function EmployeesTable() {
+export type EmployeesTableHandle = {
+	refresh: () => void
+}
+
+export const EmployeesTable = forwardRef<EmployeesTableHandle>((_, ref) => {
 	const [colaboradores, setColaboradores] = useState<Colaborador[]>([])
 	const [currentPage, setCurrentPage] = useState(1)
 	const itemsPerPage = 15
 
-	useEffect(() => {
-		const fetchColaboradores = async () => {
-			try {
-				const response = await api.get("/colaborador")
-				setColaboradores(response.data)
-			} catch (error) {
-				console.error("Erro ao buscar colaboradores:", error)
-			}
+	useImperativeHandle(ref, () => ({
+		refresh: fetchColaboradores
+	}))
+
+	const fetchColaboradores = async () => {
+		try {
+			const response = await api.get("/colaborador")
+			setColaboradores(response.data)
+		} catch (error) {
+			console.error("Erro ao buscar colaboradores:", error)
 		}
+	}
+
+	useEffect(() => {
 		fetchColaboradores()
 	}, [])
 
@@ -107,6 +116,11 @@ export function EmployeesTable() {
 											<DropdownMenuItem>Ver solicitações</DropdownMenuItem>
 											<DropdownMenuSeparator />
 											<DropdownMenuItem>Editar colaborador</DropdownMenuItem>
+											{employee.status !== "Inativo" ? (
+											<DropdownMenuItem className="text-destructive">Desativar</DropdownMenuItem>
+											) : (
+											<DropdownMenuItem className="text-success">Ativar</DropdownMenuItem>
+											)}
 										</DropdownMenuContent>
 									</DropdownMenu>
 								</TableCell>
@@ -153,4 +167,4 @@ export function EmployeesTable() {
 			)}
 		</>
 	)
-}
+})
