@@ -15,6 +15,7 @@ import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import api from "@/services/api"
+import { EditCollaboratorDialog } from "./EditCollaboratorDialog"
 
 type Colaborador = {
 	id: number
@@ -30,6 +31,8 @@ export type EmployeesTableHandle = {
 
 export const EmployeesTable = forwardRef<EmployeesTableHandle>((_, ref) => {
 	const [colaboradores, setColaboradores] = useState<Colaborador[]>([])
+	const [selectedEmployee, setSelectedEmployee] = useState<Colaborador | null>(null)
+	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 	const [currentPage, setCurrentPage] = useState(1)
 	const itemsPerPage = 15
 
@@ -46,10 +49,6 @@ export const EmployeesTable = forwardRef<EmployeesTableHandle>((_, ref) => {
 		}
 	}
 
-	useEffect(() => {
-		fetchColaboradores()
-	}, [])
-
 	const totalPages = Math.ceil(colaboradores.length / itemsPerPage)
 	const paginatedEmployees = colaboradores.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
@@ -62,6 +61,21 @@ export const EmployeesTable = forwardRef<EmployeesTableHandle>((_, ref) => {
 		if (names.length === 1) return names[0][0].toUpperCase()
 		return (names[0][0] + names[names.length - 1][0]).toUpperCase()
 	}
+
+	const toggleActive = async (colaborador: Colaborador) => {
+		try {
+			await api.put(`/colaborador/${colaborador.id}`, {
+				ativo: !colaborador.ativo
+			})
+			await fetchColaboradores()
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	useEffect(() => {
+		fetchColaboradores()
+	}, [])
 
 	return (
 		<>
@@ -115,11 +129,26 @@ export const EmployeesTable = forwardRef<EmployeesTableHandle>((_, ref) => {
 											<DropdownMenuItem>Ver registros de ponto</DropdownMenuItem>
 											<DropdownMenuItem>Ver solicitações</DropdownMenuItem>
 											<DropdownMenuSeparator />
-											<DropdownMenuItem>Editar colaborador</DropdownMenuItem>
-											{employee.status !== "Inativo" ? (
-											<DropdownMenuItem className="text-destructive">Desativar</DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={() => {
+													setSelectedEmployee(employee)
+													setIsEditDialogOpen(true)
+												}}
+											>Editar colaborador</DropdownMenuItem>
+											{employee.ativo ? (
+												<DropdownMenuItem
+													className="text-destructive"
+													onClick={() => toggleActive(employee)}
+												>
+													Desativar
+												</DropdownMenuItem>
 											) : (
-											<DropdownMenuItem className="text-success">Ativar</DropdownMenuItem>
+												<DropdownMenuItem
+													className="text-green-700"
+													onClick={() => toggleActive(employee)}
+												>
+													Ativar
+												</DropdownMenuItem>
 											)}
 										</DropdownMenuContent>
 									</DropdownMenu>
@@ -165,6 +194,13 @@ export const EmployeesTable = forwardRef<EmployeesTableHandle>((_, ref) => {
 					</Button>
 				</div>
 			)}
+
+			<EditCollaboratorDialog 
+				employee={selectedEmployee}
+				open={isEditDialogOpen}
+				onOpenChange={setIsEditDialogOpen}
+				onSave={fetchColaboradores}
+			/>
 		</>
 	)
 })
