@@ -16,7 +16,7 @@ import { RootState } from "@/redux/store"
 export function DashboardHeader() {
 	const { count } = useSelector((state: RootState) => state.solicitations)
 	return (
-		<header className="sticky top-0 z-100 flex h-16 items-center gap-4 border-b bg-background px-6">
+		<header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background px-6">
 			<div className="flex items-center gap-2 font-semibold">
 				<span>Checkpoint - Área administrativa</span>
 			</div>
