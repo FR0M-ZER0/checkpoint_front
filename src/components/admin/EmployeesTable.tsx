@@ -29,7 +29,15 @@ export type EmployeesTableHandle = {
 	refresh: () => void
 }
 
-export const EmployeesTable = forwardRef<EmployeesTableHandle>((_, ref) => {
+type EmployeesTableProps = {
+	searchQuery: string
+	statusFilter: string
+	sortBy: string
+	sortOrder: "asc" | "desc"
+}
+
+export const EmployeesTable = forwardRef<EmployeesTableHandle, EmployeesTableProps>(
+	({ searchQuery, statusFilter, sortBy, sortOrder }, ref) => {
 	const [colaboradores, setColaboradores] = useState<Colaborador[]>([])
 	const [selectedEmployee, setSelectedEmployee] = useState<Colaborador | null>(null)
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -42,10 +50,26 @@ export const EmployeesTable = forwardRef<EmployeesTableHandle>((_, ref) => {
 
 	const fetchColaboradores = async () => {
 		try {
-			const response = await api.get("/colaborador")
+			let url = "/colaborador"
+
+			if (searchQuery) {
+				url = `/colaborador/buscar?nome=${encodeURIComponent(searchQuery)}`
+			}
+
+			else if (statusFilter !== "all") {
+				const ativo = statusFilter === "active" ? "true" : "false"
+				url = `/colaborador/status?ativo=${ativo}`
+			}
+
+			else if (sortBy) {
+				const campo = sortBy === "name" ? "nome" : "criadoEm"
+				url = `/colaborador/ordenar?campo=${campo}&ordem=${sortOrder}`
+			}
+
+			const response = await api.get(url)
 			setColaboradores(response.data)
-		} catch (error) {
-			console.error("Erro ao buscar colaboradores:", error)
+		} catch (err) {
+			console.error(err)
 		}
 	}
 
@@ -75,7 +99,7 @@ export const EmployeesTable = forwardRef<EmployeesTableHandle>((_, ref) => {
 
 	useEffect(() => {
 		fetchColaboradores()
-	}, [])
+	}, [searchQuery, statusFilter, sortBy, sortOrder])
 
 	return (
 		<>

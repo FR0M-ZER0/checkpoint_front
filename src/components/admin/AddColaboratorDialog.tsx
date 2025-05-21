@@ -33,14 +33,12 @@ export function AddCollaboratorDialog({ open, onOpenChange, onAdd }: AddCollabor
         if (!name || !email || !password) return
 
         try {
-            const response = await api.post("/colaborador", {
+            await api.post("/colaborador", {
                 nome: name,
                 email: email,
                 senhaHash: password,
                 ativo: status,
             })
-
-            const novoColaborador = response.data
 
             onAdd?.()
 

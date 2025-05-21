@@ -19,19 +19,6 @@ export default function ColaboradoresPage() {
 		tableRef.current?.refresh()
 	}
 
-	const handleSortChange = (field: string) => {
-		if (sortBy === field) {
-			setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-		} else {
-			setSortBy(field)
-			setSortOrder("asc")
-		}
-	}
-
-	const handleAddEmployee = (employee: any) => {
-		console.log("Added new employee:", employee)
-	}
-
 	return (
 		<div className="flex flex-col gap-6">
 			<div className="flex flex-col gap-2">
@@ -116,10 +103,10 @@ export default function ColaboradoresPage() {
 					</div>
 
 					<EmployeesTable
-						// statusFilter={statusFilter}
-						// sortBy={sortBy}
-						// sortOrder={sortOrder}
-						// onSortChange={handleSortChange}
+						searchQuery={searchQuery}
+						statusFilter={statusFilter}
+						sortBy={sortBy}
+						sortOrder={sortOrder}
 						ref={tableRef}
 					/>
 				</CardContent>
