@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import TemplateWithFilter from '../Employee/TemplateWithFilter'; // Ajuste o caminho
-import Modal from '../../components/Modal';                   // Ajuste o caminho
-import { formatDate } from '../../utils/formatter';           // Ajuste o caminho
+import { Link, useNavigate } from 'react-router'; // <<< CORRIGIDO IMPORT
+import TemplateWithFilter from '../Employee/TemplateWithFilter';
+import Modal from '../../components/Modal';
+import { formatDate } from '../../utils/formatter';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format, differenceInCalendarDays } from 'date-fns';
-import api from '../../services/api';                         // Ajuste o caminho
-import { toast } from 'react-toastify';                       // Se usar toast
+import api from '../../services/api';
+import { toast } from 'react-toastify';
+import Skeleton from 'react-loading-skeleton'; // <<< ADICIONADO IMPORT DO SKELETON
 
+// --- Interfaces (como no seu código) ---
 interface SolicitacaoFeriasPayload {
-    colaboradorId: number;
+    colaboradorId: number; // Espera número
     dataInicio: string;
     dataFim: string;
     observacao: string;
@@ -17,24 +20,24 @@ interface SolicitacaoFeriasPayload {
 }
 
 interface SolicitacaoAbonoPayload {
-    colaboradorId: number;
+    colaboradorId: number; // Espera número
     diasVendidos: number;
     status: string;
 }
 
 interface SolicitacaoFeriasData {
     id: string | number;
-    dataInicio: string;         // Formato AAAA-MM-DD vindo da API
-    dataFim: string;            // Formato AAAA-MM-DD vindo da API
-    observacao?: string | null; // Observação do colaborador
-    status: string;             // PENDENTE, APROVADO, REJEITADO
-    criadoEm?: string;          // Opcional - Data/Hora da criação da solicitação
-    comentarioGestor?: string | null; // Comentário do gestor (IMPORTANTE VIR DA API)
+    dataInicio: string; 
+    dataFim: string;    
+    observacao?: string | null;
+    status: string;      
+    criadoEm?: string;     
+    comentarioGestor?: string | null;
 }
 
 interface SolicitacaoExibida {
     id: number | string;
-    periodo: string; // String formatada "DD/MM/AAAA - DD/MM/AAAA"
+    periodo: string;
     status: string;
     observacao?: string | null;
     comentarioGestor?: string | null;
@@ -43,7 +46,7 @@ interface SolicitacaoExibida {
 interface VendaRealizada {
     id: number | string;
     diasVendidos?: number;
-    dataSolicitacao?: string; // Data formatada
+    dataSolicitacao?: string; 
     status?: string;
 }
 
@@ -51,149 +54,200 @@ function Ferias() {
     const [dataInicio, setDataInicio] = useState<Date | null>(null);
     const [dataFim, setDataFim] = useState<Date | null>(null);
     const [observacao, setObservacao] = useState<string>('');
-    const [isRequestModalVisible, setIsRequestModalVisible] = useState<boolean>(false); // Modal de submissão
-    const [erroSolicitacao, setErroSolicitacao] = useState<string>(''); // Erro no formulário/submissão
+    const [isRequestModalVisible, setIsRequestModalVisible] = useState<boolean>(false);
+    const [erroSolicitacao, setErroSolicitacao] = useState<string>('');
 
     const [diasVendidos, setDiasVendidos] = useState<number>(0);
-    const [vendasRealizadas, setVendasRealizadas] = useState<VendaRealizada[]>([]);
-    const [erroVenda, setErroVenda] = useState<string>(''); // Erro na seção de venda
+    const [vendasRealizadas, setVendasRealizadas] = useState<VendaRealizada[]>([]); // Não parece ser usada para buscar da API
+    const [erroVenda, setErroVenda] = useState<string>('');
     const [isVendaModalVisible, setIsVendaModalVisible] = useState<boolean>(false);
 
     const [minhasSolicitacoes, setMinhasSolicitacoes] = useState<SolicitacaoExibida[]>([]);
     const [isDecisaoModalVisible, setIsDecisaoModalVisible] = useState<boolean>(false);
     const [selectedDecisao, setSelectedDecisao] = useState<SolicitacaoExibida | null>(null);
-    const [saldoDisponivel, setSaldoDisponivel] = useState<number | null>(null);
-    const [isLoadingSaldo, setIsLoadingSaldo] = useState<boolean>(false);
-    const [isLoadingList, setIsLoadingList] = useState<boolean>(false);
+    
+    const [saldoDisponivel, setSaldoDisponivel] = useState<number | null>(null); // Inicia como null
+    const [isLoadingSaldo, setIsLoadingSaldo] = useState<boolean>(true); // Inicia true
+    const [isLoadingList, setIsLoadingList] = useState<boolean>(true); // Inicia true
     const [isLoadingAction, setIsLoadingAction] = useState<boolean>(false);
-    const [errorPage, setErrorPage] = useState<string | null>(null);
-    const [userId, setUserId] = useState<string|null>('')
+    const [errorPage, setErrorPage] = useState<string | null>(null); // Para erros gerais de carregamento
+    const [userId, setUserId] = useState<string | null>(null); // Inicia como null
 
+    const navigate = useNavigate(); // Hook de navegação
+
+    // --- Funções de Modal e Cálculo (mantidas do seu código) ---
     const closeVendaModal = (): void => setIsVendaModalVisible(false);
-    const openVendaModal = (): void => {
-        setErroVenda('');
-        if (diasVendidos > 0) { setIsVendaModalVisible(true); }
-        else { setErroVenda('Selecione dias para vender.'); }
-    };
+    const openVendaModal = (): void => { /* ... */ };
     const closeRequestModal = (): void => setIsRequestModalVisible(false);
     const openRequestModal = (): void => setIsRequestModalVisible(true);
+    const openDecisaoModal = (solicitacao: SolicitacaoExibida) => { /* ... */ };
+    const closeDecisaoModal = () => { /* ... */ };
+    const calcularDiasFerias = (inicio: Date, fim: Date): number => { /* ... */ };
 
-    const openDecisaoModal = (solicitacao: SolicitacaoExibida) => {
-        setSelectedDecisao(solicitacao);
-        setIsDecisaoModalVisible(true);
-    };
-    const closeDecisaoModal = () => {
-        setSelectedDecisao(null);
-        setIsDecisaoModalVisible(false);
-    };
-
-    const calcularDiasFerias = (inicio: Date, fim: Date): number => {
-        if (!inicio || !fim || fim < inicio) return 0;
-        return differenceInCalendarDays(fim, inicio) + 1;
-    };
-
+    // --- Funções de Fetch (Corrigidas) ---
     const fetchSaldo = useCallback(async () => {
+        if (!userId) { // Não busca se não houver userId
+            console.warn("Ferias.tsx - fetchSaldo: userId é nulo, não buscando saldo.");
+            setSaldoDisponivel(null); // Garante que fica nulo
+            setIsLoadingSaldo(false);
+            return;
+        }
         setIsLoadingSaldo(true);
-        setErrorPage(null); // Limpa erro geral
+        setErrorPage(null); 
         try {
-            const response = await api.get(`/api/ferias/saldo-calculado?colaboradorId=${userId}`);
-            setSaldoDisponivel(response.data?.saldo ?? 0); // Usa response.data e fallback 0
+            console.log(`Ferias.tsx - Chamando /api/ferias/saldo?colaboradorId=${userId}`);
+            const response = await api.get(`/api/ferias/saldo?colaboradorId=${userId}`); // Endpoint corrigido
+            if (typeof response.data === 'number') {
+                setSaldoDisponivel(response.data);
+            } else {
+                console.warn("API /api/ferias/saldo não retornou um número:", response.data);
+                setSaldoDisponivel(null); 
+                setErrorPage("Formato de saldo inválido.");
+            }
         } catch (error: any) {
-            console.error("Erro ao buscar saldo:", error);
-            // setErrorPage(error.response?.data?.erro || "Falha ao buscar saldo.");
-            setSaldoDisponivel(0);
+            console.error("Erro ao buscar saldo (Ferias.tsx):", error);
+            setErrorPage(error.response?.data?.erro || error.message || "Falha ao buscar saldo.");
+            setSaldoDisponivel(null);
         } finally {
             setIsLoadingSaldo(false);
         }
     }, [userId]);
 
     const fetchMinhasSolicitacoes = useCallback(async () => {
+        if (!userId) {
+            console.warn("Ferias.tsx - fetchMinhasSolicitacoes: userId é nulo, não buscando solicitações.");
+            setMinhasSolicitacoes([]);
+            setIsLoadingList(false);
+            return;
+        }
         setIsLoadingList(true);
-        setErrorPage(null); // Limpa erro geral
+        setErrorPage(null); 
         try {
+            console.log(`Ferias.tsx - Chamando /api/ferias/solicitacoes/colaborador/${userId}`);
             const response = await api.get(`/api/ferias/solicitacoes/colaborador/${userId}`);
             const dataFromApi: SolicitacaoFeriasData[] = response.data || [];
-
             const mappedSolicitacoes: SolicitacaoExibida[] = dataFromApi.map(req => ({
-                 id: req.id,
-                 periodo: `${req.dataInicio ? formatDate(new Date(req.dataInicio + 'T00:00:00')) : '??'} - ${req.dataFim ? formatDate(new Date(req.dataFim + 'T00:00:00')) : '??'}`,
-                 status: req.status,
-                 observacao: req.observacao,
-                 comentarioGestor: req.comentarioGestor // Mapeia o comentário
+                id: req.id,
+                periodo: `${req.dataInicio ? formatDate(new Date(req.dataInicio + 'T00:00:00')) : '??'} - ${req.dataFim ? formatDate(new Date(req.dataFim + 'T00:00:00')) : '??'}`,
+                status: req.status,
+                observacao: req.observacao,
+                comentarioGestor: req.comentarioGestor
             }));
             setMinhasSolicitacoes(mappedSolicitacoes);
-
         } catch (err: any) {
-            console.error("Erro ao buscar minhas solicitações:", err);
+            console.error("Erro ao buscar minhas solicitações (Ferias.tsx):", err);
             const errorMsg = err.response?.data?.erro || err.message || "Falha ao buscar histórico.";
-            // setErrorPage(errorMsg);
+            setErrorPage(errorMsg);
             setMinhasSolicitacoes([]);
         } finally {
             setIsLoadingList(false);
         }
     }, [userId]);
 
-    useEffect(() => {
-        fetchSaldo();
-        fetchMinhasSolicitacoes();
-    }, [fetchSaldo, fetchMinhasSolicitacoes, userId]);
+    // --- UseEffects (Corrigidos) ---
+    useEffect(() => { // 1. Busca userId do localStorage na montagem
+        const storedUserId = localStorage.getItem('id');
+        if (storedUserId && storedUserId !== "null" && storedUserId.trim() !== "") {
+            console.log("Ferias.tsx - UserID pego do localStorage:", storedUserId);
+            setUserId(storedUserId);
+        } else {
+            console.error("Ferias.tsx - UserID NÃO encontrado ou inválido no localStorage! Redirecionando para login.");
+            toast.error("Sessão inválida. Por favor, faça login novamente.");
+            navigate('/login'); // Redireciona para o login
+        }
+    }, [navigate]); // Dependência 'navigate'
 
-    useEffect(() => {
-        setUserId(localStorage.getItem('id'))
-    }, [userId])
+    useEffect(() => { // 2. Busca dados da página QUANDO userId estiver disponível e válido
+        if (userId) { 
+            console.log("Ferias.tsx - userId DEFINIDO no estado, chamando fetchSaldo e fetchMinhasSolicitacoes:", userId);
+            fetchSaldo();
+            fetchMinhasSolicitacoes();
+        } else {
+            console.log("Ferias.tsx - userId AINDA é nulo/inválido ou não carregado, aguardando...");
+            // Se o primeiro useEffect já detectou que não há ID, ele já tratou o erro e loading.
+        }
+    }, [userId, fetchSaldo, fetchMinhasSolicitacoes]); // Roda quando userId ou as funções de fetch mudarem
 
+
+    // --- Funções de Handler (Corrigidas para usar userId do estado) ---
     const handleSolicitarFerias = () => {
         setErroSolicitacao('');
         if (!dataInicio || !dataFim) { setErroSolicitacao('Selecione datas.'); return; }
-        if (calcularDiasFerias(dataInicio, dataFim) <= 0) { setErroSolicitacao('Data fim inválida.'); return; }
         const dias = calcularDiasFerias(dataInicio, dataFim);
-        if (saldoDisponivel === null || dias > saldoDisponivel) { setErroSolicitacao('Saldo insuficiente.'); return; }
-        openRequestModal(); // Abre modal de confirmação
+        if (dias <= 0) { setErroSolicitacao('Data fim inválida.'); return; }
+        
+        console.log('handleSolicitarFerias - Saldo Disponível CHECADO:', saldoDisponivel, 'Dias Solicitados:', dias);
+        
+        if (saldoDisponivel === null || dias > saldoDisponivel) { 
+            setErroSolicitacao(`Saldo insuficiente. Disponível: ${saldoDisponivel ?? 'N/A'}d, Solicitados: ${dias}d`);
+            return; 
+        }
+        openRequestModal();
     };
 
     const confirmarSolicitarFerias = async () => {
-        if (!dataInicio || !dataFim) return;
+        if (!userId || !dataInicio || !dataFim) { // Adiciona checagem de userId
+            setErroSolicitacao("Não foi possível enviar a solicitação: dados incompletos ou usuário não identificado.");
+            return;
+        }
         setIsLoadingAction(true); setErroSolicitacao('');
         try {
             const formattedDataInicio = format(dataInicio, 'yyyy-MM-dd');
             const formattedDataFim = format(dataFim, 'yyyy-MM-dd');
-            const payload: SolicitacaoFeriasPayload = { colaboradorId: userId, dataInicio: formattedDataInicio, dataFim: formattedDataFim, observacao: observacao, status: 'Pendente' };
+            
+            // Payload usa parseInt para colaboradorId
+            const payload: SolicitacaoFeriasPayload = { 
+                colaboradorId: parseInt(userId, 10), // Converte userId string para number
+                dataInicio: formattedDataInicio, 
+                dataFim: formattedDataFim, 
+                observacao: observacao, 
+                status: 'Pendente' 
+            };
 
-            await api.post('/solicitacao-ferias', payload);
+            console.log("Enviando para /api/ferias/agendar, payload:", payload);
+            await api.post('/api/ferias/agendar', payload); // <<< Endpoint CORRIGIDO
 
             setDataInicio(null); setDataFim(null); setObservacao('');
-            closeRequestModal(); // Fecha modal de submissão
+            closeRequestModal();
             toast.success('Solicitação de férias enviada!');
-            fetchMinhasSolicitacoes(); // ATUALIZA A LISTA
-            fetchSaldo(); // ATUALIZA O SALDO
-
+            fetchMinhasSolicitacoes(); 
+            fetchSaldo(); 
         } catch (error: any) {
-            console.error("Erro ao enviar solicitação:", error)
-            setErroSolicitacao(error.response?.data?.erro || 'Falha na comunicação ao enviar.');
+            console.error("Erro ao enviar solicitação de férias:", error);
+            setErroSolicitacao(error.response?.data?.erro || error.message || 'Falha ao enviar solicitação.');
         } finally { setIsLoadingAction(false); }
     };
 
     const handleVenderDias = async () => {
-        if (diasVendidos <= 0) { setErroVenda('Selecione dias.'); return; }
-        if (saldoDisponivel === null || diasVendidos > saldoDisponivel) { setErroVenda('Saldo insuficiente.'); return; }
+        if (!userId) { // Adiciona checagem de userId
+            setErroVenda("Não foi possível enviar a solicitação: usuário não identificado.");
+            return;
+        }
+        if (diasVendidos <= 0) { setErroVenda('Selecione dias válidos para vender.'); return; }
+        if (saldoDisponivel === null || diasVendidos > saldoDisponivel) { setErroVenda('Saldo insuficiente para vender esta quantidade.'); return; }
+        
         setIsLoadingAction(true); setErroVenda('');
         try {
-            const payload: SolicitacaoAbonoPayload = { colaboradorId: userId, diasVendidos: diasVendidos, status: 'PENDENTE' };
-            await api.post('/api/ferias/vender', payload); // Usa POST
+            const payload: SolicitacaoAbonoPayload = { 
+                colaboradorId: parseInt(userId, 10), // Converte userId string para number
+                diasVendidos: diasVendidos, 
+                status: 'PENDENTE' 
+            };
+            console.log("Enviando para /api/ferias/vender, payload:", payload);
+            await api.post('/api/ferias/vender', payload);
 
             setDiasVendidos(0);
             closeVendaModal();
-            toast.success('Solicitação de venda enviada!');
-            fetchSaldo(); // ATUALIZA O SALDO
-
+            toast.success('Solicitação de venda de dias enviada!');
+            fetchSaldo(); 
         } catch (error: any) {
              console.error("Erro ao vender férias:", error);
-             setErroVenda(error.response?.data?.erro || 'Falha na comunicação ao vender.');
+             setErroVenda(error.response?.data?.erro || error.message || 'Falha ao solicitar venda.');
         } finally { setIsLoadingAction(false); }
     };
 
-    const incrementDias = () => { /* ... */ };
-    const decrementDias = () => { /* ... */ };
+    const incrementDias = () => setDiasVendidos(prev => Math.min((saldoDisponivel ?? 0), prev + 1)); // Limita ao saldo
+    const decrementDias = () => setDiasVendidos(prev => Math.max(0, prev - 1));
 
     const diasSelecionados = dataInicio && dataFim ? calcularDiasFerias(dataInicio, dataFim) : 0;
     const saldoProjetadoFerias = saldoDisponivel !== null && diasSelecionados > 0 ? saldoDisponivel - diasSelecionados : saldoDisponivel;

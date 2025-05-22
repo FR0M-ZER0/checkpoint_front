@@ -18,6 +18,12 @@ function LoginPage() {
 
 		try {
 			const response = await api.post('/login', formData)
+			console.log("Resposta completa do backend (/login):", response);
+			console.log("Dados da resposta (response.data):", response.data);
+			if (response.data) {
+				console.log("ID do colaborador recebido:", response.data.id);
+				console.log("Nome do colaborador recebido:", response.data.nome);
+			}
 			localStorage.setItem("id", response.data.id)
 			localStorage.setItem("nome", response.data.nome)
 			localStorage.setItem("email", response.data.email)
