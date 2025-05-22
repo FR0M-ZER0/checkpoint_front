@@ -85,70 +85,114 @@ function FolgaPage() {
     carregarDadosPersistentes();
 }, [COLABORADOR_ID]); // Adicione COLABORADOR_ID como dependência
 
-    const handleSolicitarFolga = async () => {
-        if (!dataFolga || horasSolicitadas === null || minutosSolicitados === null) {
-            setErroSolicitacao('Preencha todos os campos.');
-            return;
+const handleSolicitarFolga = async () => {
+    // Suas validações originais, usando setErroSolicitacao
+    if (!dataFolga || horasSolicitadas === null || minutosSolicitados === null) {
+        setErroSolicitacao('Preencha todos os campos.');
+        return;
+    }
+    const horas = horasSolicitadas ?? 0;
+    const minutos = minutosSolicitados ?? 0;
+    if (horas < 0 || minutos < 0 || (horas === 0 && minutos === 0)) { 
+        setErroSolicitacao('Horas/minutos inválidos.'); 
+        return; 
+    }
+
+    // Sua lógica de conversão e validação de saldo original
+    const saldoConvertido = saldoParaMinutos(saldoHoras); 
+    if (!saldoConvertido) { 
+        setErroSolicitacao('Não foi possível ler o saldo de horas atual para validação.');
+        return; 
+    }
+    const { horas: horasAtuais, minutos: minutosAtuais } = saldoConvertido;
+
+    if (isNaN(horasAtuais) || isNaN(minutosAtuais)) {
+        setErroSolicitacao('Formato de saldo de horas inválido.');
+        return;
+    }
+
+    const totalAtualEmMinutos = horasAtuais * 60 + minutosAtuais;
+    const totalSolicitadoEmMinutos = horas * 60 + minutos;
+
+    if (totalSolicitadoEmMinutos > totalAtualEmMinutos) {
+        setErroSolicitacao('Saldo insuficiente para esta solicitação.');
+        return;
+    }
+
+    try {
+        setCarregando(true); // Seu estado 'carregando'
+        setErroSolicitacao(''); // Seu estado 'erroSolicitacao'
+
+        const saldoGastoFormatado = `${horas}h ${String(minutos).padStart(2, '0')}min`;
+        
+        // ***** ALTERAÇÃO PRINCIPAL AQUI *****
+        // 1. Formata a data para "dd/MM/yyyy" (conforme @JsonFormat da sua entidade SolicitacaoFolga)
+        //    usando SUA função original formatDateForAPI.
+        const dataFormatada = formatDateForAPI(dataFolga); 
+        if (!dataFormatada && dataFolga) { // Checa se formatDateForAPI retornou vazio para uma data válida
+             throw new Error("Erro ao formatar a data da folga.");
+        }
+        
+        // 2. Monta o payload com os NOMES EXATOS da entidade SolicitacaoFolga
+        const corpoDaRequisicao = JSON.stringify({
+            colaboradorId: COLABORADOR_ID,          // Sua constante COLABORADOR_ID
+            solFolData: dataFormatada,              // Nome do campo e data formatada
+            solFolSaldoGasto: saldoGastoFormatado,    // Nome do campo
+            solFolObservacao: observacao,           // Nome do campo
+            solFolStatus: "PENDENTE"                // Nome do campo
+        });
+        // ************************************
+
+        console.log("Enviando payload para /api/folga:", corpoDaRequisicao);
+
+        // Mantém seu fetch original
+        const response = await fetch('http://localhost:8080/api/folga', { // Endpoint para criar SolicitacaoFolga
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: corpoDaRequisicao,
+        });
+
+        if (!response.ok) {
+             let errorMsg = `Erro ${response.status}`;
+             try { 
+                 const errorData = await response.json(); 
+                 errorMsg = errorData?.erro || `Erro ao processar a resposta: ${errorMsg}`; 
+             } catch (e) {
+                 const textError = await response.text();
+                 errorMsg = textError || errorMsg;
+             }
+             throw new Error(errorMsg);
         }
 
-        const { horas: horasAtuais, minutos: minutosAtuais } = saldoParaMinutos(saldoHoras);
-        const totalAtualEmMinutos = horasAtuais * 60 + minutosAtuais;
+        // Sua lógica de sucesso original
+        const novaSolicitacao = await response.json(); 
+        setFolgasAgendadas([...folgasAgendadas, novaSolicitacao]);
 
-        const totalSolicitadoEmMinutos = horasSolicitadas * 60 + minutosSolicitados;
+        // Sua atualização local de saldo original
+        const novoSaldoEmMinutos = totalAtualEmMinutos - totalSolicitadoEmMinutos;
+        setSaldoHoras(minutosParaSaldo(novoSaldoEmMinutos));
 
-        if (totalSolicitadoEmMinutos > totalAtualEmMinutos) {
-            setErroSolicitacao('Saldo insuficiente para esta solicitação.');
-            return;
-        }
+        // Sua limpeza de formulário original
+        setDataFolga(null);
+        setHorasSolicitadas(0);
+        setMinutosSolicitados(0);
+        setObservacao('');
+        alert('Solicitação de folga enviada com sucesso!'); 
 
-        try {
-            setCarregando(true);
-            setErroSolicitacao('');
+        // Se a função carregarDadosPersistentes estiver definida no escopo do componente
+        // e você quiser rebuscar tudo do backend após o sucesso:
+        // carregarDadosPersistentes(); // Você precisaria garantir que COLABORADOR_ID ou userId está correto aqui
 
-            const saldoDecimal = (totalSolicitadoEmMinutos / 60).toFixed(2) + 'h';
-
-            const corpoDaRequisicao = JSON.stringify({
-                colaboradorId: userId,
-                solFolData: formatDateForAPI(dataFolga),
-                solFolSaldoGasto: saldoDecimal,
-                solFolObservacao: observacao,
-                solFolStatus: "Pendente"
-            });
-
-            const response = await fetch('http://localhost:8080/solicitacao-folga', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: corpoDaRequisicao,
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || `Erro ${response.status}`);
-            }
-
-            const novaFolga = await response.json();
-            setFolgasAgendadas([...folgasAgendadas, novaFolga]);
-
-            const novoSaldoEmMinutos = totalAtualEmMinutos - totalSolicitadoEmMinutos;
-            setSaldoHoras(minutosParaSaldo(novoSaldoEmMinutos));
-
-            setDataFolga(null);
-            setHorasSolicitadas(0);
-            setMinutosSolicitados(0);
-            setObservacao('');
-
-        } catch (error) {
-            console.error('Erro:', error);
-            setErroSolicitacao(
-                error instanceof Error ? error.message : 'Erro ao solicitar folga'
-            );
-        } finally {
-            setCarregando(false);
-        }
-    };
+    } catch (error) {
+        console.error('Erro ao solicitar folga:', error);
+        setErroSolicitacao( error instanceof Error ? error.message : 'Erro ao solicitar folga' ); // Usa seu setErroSolicitacao
+    } finally {
+        setCarregando(false); // Usa seu estado 'carregando'
+    }
+};
 
     // Função auxiliar para converter "XXh YYmin" em minutos
     const saldoParaMinutos = (saldo: string): { horas: number, minutos: number } => {

@@ -324,4 +324,4 @@ function Ferias() {
     );
 }
 
-export default Ferias; // Exporta como Ferias
+export default Ferias;

@@ -69,13 +69,14 @@ function EspelhoPontoPage() {
     ]
 
     const weekdays: string[] = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sab", "Dom"]
-    const statusColors: statusColorsType & { neutral: string } = {
-        normal: "light-blue-color",
+    const statusColors: statusColorsType & { neutral: string; descanso_escala?: string } = { // Adicionado descanso_escala aqui
+        normal: "light-blue-color", // Suas classes de cor
         ferias: "dark-green-color",
         folga: "main-orange-color",
         falta: "main-red-color",
         neutral: "bg-gray-300",
-    }
+        descanso_escala: "bg-purple-500"
+    };
 
     const fetchSaldoFerias = async () => {
         try {
