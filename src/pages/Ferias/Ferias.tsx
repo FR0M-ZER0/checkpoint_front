@@ -4,7 +4,7 @@ import Modal from '../../components/Modal';                   // Ajuste o caminh
 import { formatDate } from '../../utils/formatter';           // Ajuste o caminho
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { format, differenceInCalendarDays } from 'date-fns';
+import { format, differenceInCalendarDays, getDay } from 'date-fns';
 import api from '../../services/api';                         // Ajuste o caminho
 import { toast } from 'react-toastify';                       // Se usar toast
 
@@ -89,7 +89,22 @@ function Ferias() {
 
     const calcularDiasFerias = (inicio: Date, fim: Date): number => {
         if (!inicio || !fim || fim < inicio) return 0;
-        return differenceInCalendarDays(fim, inicio) + 1;
+
+        const totalDays = differenceInCalendarDays(fim, inicio) + 1;
+        const startDay = getDay(inicio);
+        const fullWeeks = Math.floor(totalDays / 7);
+        const remainingDays = totalDays % 7;
+
+        let weekendCount = fullWeeks * 2;
+
+        for (let i = 0; i < remainingDays; i++) {
+            const dayOfWeek = (startDay + i) % 7;
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                weekendCount++;
+            }
+        }
+
+        return totalDays - weekendCount;
     };
 
     const fetchSaldo = useCallback(async () => {
