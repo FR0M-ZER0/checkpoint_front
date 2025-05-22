@@ -18,7 +18,7 @@ import { formatUSDateToBR, formatUSTimeToBR } from "@/utils/formatter"
 export type EntryType = "entrada" | "saida_almoco" | "retorno_almoco" | "saida"
 
 export interface TimeEntry {
-	id: number
+	id: string
 	employeeId: number
 	employeeName: string
 	employeeAvatar: string
@@ -64,7 +64,7 @@ export function TimeEntriesTable() {
 		async function fetchData() {
 			try {
 				const response = await api.get<MarcacaoResponseDTO[]>("/marcacoes/com-nome")
-				const mappedEntries: TimeEntry[] = response.data.map((m, index) => {
+				const mappedEntries: TimeEntry[] = response.data.map((m) => {
 					let entryType: EntryType
 					switch (m.tipo) {
 						case "ENTRADA": entryType = "entrada"; break
@@ -73,11 +73,10 @@ export function TimeEntriesTable() {
 						case "SAIDA": entryType = "saida"; break
 						default: entryType = "entrada"
 					}
-
 					const dateObj = new Date(m.dataHora)
 
 					return {
-						id: index + 1,
+						id: m.id,
 						employeeId: m.colaboradorId,
 						employeeName: m.nomeColaborador,
 						employeeAvatar: "/placeholder-user.jpg",
@@ -95,14 +94,56 @@ export function TimeEntriesTable() {
 		fetchData()
 	}, [])
 
-	const handleDelete = (entryId: number) => {
-		setTimeEntries(prev => prev.filter(entry => entry.id !== entryId))
-		setDeletingEntry(null)
+	async function deleteTimeEntry(entryId: string) {
+		try {
+			await api.delete(`/marcacoes/${entryId}`)
+			return true
+		} catch (error) {
+			console.error("Erro ao deletar marcação:", error)
+			return false
+		}
 	}
 
-	const handleEdit = (updatedEntry: TimeEntry) => {
-		setTimeEntries(prev => prev.map(entry => (entry.id === updatedEntry.id ? updatedEntry : entry)))
-		setEditingEntry(null)
+	async function updateTimeEntry(updatedEntry: TimeEntry) {
+		let marcacaoTipo
+		switch (updatedEntry.type) {
+			case "entrada": marcacaoTipo = "ENTRADA"; break
+			case "saida_almoco": marcacaoTipo = "PAUSA"; break
+			case "retorno_almoco": marcacaoTipo = "RETOMADA"; break
+			case "saida": marcacaoTipo = "SAIDA"; break
+			default: marcacaoTipo = "ENTRADA"
+		}
+		try {
+			await api.put(`/marcacoes/${updatedEntry.id}/data-horario-tipo`, {
+				novoTipo: marcacaoTipo,
+				novaDataHora: `${updatedEntry.date.split("T")[0]}T${updatedEntry.time}:00`
+			})
+			console.log(`oia eu aqui: ${updatedEntry.date.split("T")[0]}T${updatedEntry.time}:00`)
+			return true
+		} catch (error) {
+			console.error("Erro ao atualizar marcação:", error)
+			return false
+		}
+	}
+
+	const handleDelete = async (entryId: string) => {
+		const success = await deleteTimeEntry(entryId);
+		if (success) {
+			setTimeEntries(prev => prev.filter(entry => entry.id !== entryId))
+			setDeletingEntry(null);
+		} else {
+			alert("Não foi possível excluir a marcação. Tente novamente.")
+		}
+	}
+
+	const handleEdit = async (updatedEntry: TimeEntry) => {
+		const success = await updateTimeEntry(updatedEntry)
+		if (success) {
+			setTimeEntries(prev => prev.map(entry => (entry.id === updatedEntry.id ? updatedEntry : entry)))
+			setEditingEntry(null)
+		} else {
+			alert("Não foi possível atualizar a marcação. Tente novamente.")
+		}
 	}
 
 	const handlePageChange = (page: number) => setCurrentPage(page)
@@ -153,7 +194,6 @@ export function TimeEntriesTable() {
 												<DropdownMenuTrigger asChild>
 													<Button variant="ghost" size="icon" className="h-8 w-8">
 														<MoreHorizontal className="h-4 w-4" />
-														<span className="sr-only">Abrir menu</span>
 													</Button>
 												</DropdownMenuTrigger>
 												<DropdownMenuContent align="end">
@@ -184,24 +224,20 @@ export function TimeEntriesTable() {
 				<div className="flex items-center justify-end space-x-2 py-4">
 					<Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
 						<ChevronLeft className="h-4 w-4" />
-						<span className="sr-only">Página anterior</span>
 					</Button>
-					<div className="flex items-center gap-1">
-						{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-							<Button
-								key={page}
-								variant={currentPage === page ? "default" : "outline"}
-								size="sm"
-								className="h-8 w-8 p-0"
-								onClick={() => handlePageChange(page)}
-							>
-								{page}
-							</Button>
-						))}
-					</div>
+					{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+						<Button
+							key={page}
+							variant={currentPage === page ? "default" : "outline"}
+							size="sm"
+							className="h-8 w-8 p-0"
+							onClick={() => handlePageChange(page)}
+						>
+							{page}
+						</Button>
+					))}
 					<Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
 						<ChevronRight className="h-4 w-4" />
-						<span className="sr-only">Próxima página</span>
 					</Button>
 				</div>
 			)}

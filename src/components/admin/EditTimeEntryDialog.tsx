@@ -48,13 +48,16 @@ export function EditTimeEntryDialog({ entry, open, onOpenChange, onSave }: EditT
 
 		if (!date) return
 
+		const [hours, minutes] = time.split(":")
+		const updatedDate = new Date(date)
+		updatedDate.setHours(Number(hours))
+		updatedDate.setMinutes(Number(minutes))
+
 		const updatedEntry: TimeEntry = {
 			...entry,
 			type: entryType as any,
-			date: format(date, "dd/MM/yyyy"),
+			date: updatedDate.toISOString(),
 			time: time,
-			modifiedBy: "Admin",
-			modifiedAt: format(new Date(), "dd/MM/yyyy HH:mm"),
 		}
 
 		onSave(updatedEntry)
@@ -91,18 +94,18 @@ export function EditTimeEntryDialog({ entry, open, onOpenChange, onSave }: EditT
 									</SelectItem>
 									<SelectItem value="saida_almoco">
 										<div className="flex items-center gap-2">
-											<div className="bg-yellow-400 rounded-full p-1 flex items-center justify-center">
+											<div className="bg-blue-500 rounded-full p-1 flex items-center justify-center">
 												{getEntryTypeInfo("saida_almoco").icon}
 											</div>
-											<span>Saída para Almoço</span>
+											<span>Pausa</span>
 										</div>
 									</SelectItem>
 									<SelectItem value="retorno_almoco">
 										<div className="flex items-center gap-2">
-											<div className="bg-blue-500 rounded-full p-1 flex items-center justify-center">
+											<div className="bg-yellow-400 rounded-full p-1 flex items-center justify-center">
 												{getEntryTypeInfo("retorno_almoco").icon}
 											</div>
-											<span>Retorno do Almoço</span>
+											<span>Retomada</span>
 										</div>
 									</SelectItem>
 									<SelectItem value="saida">

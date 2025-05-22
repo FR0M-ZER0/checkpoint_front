@@ -14,7 +14,7 @@ interface DeleteTimeEntryDialogProps {
 	entry: TimeEntry
 	open: boolean
 	onOpenChange: (open: boolean) => void
-	onDelete: () => void
+	onDelete: (id: string) => void
 }
 
 export function DeleteTimeEntryDialog({ entry, open, onOpenChange, onDelete }: DeleteTimeEntryDialogProps) {
@@ -48,8 +48,8 @@ export function DeleteTimeEntryDialog({ entry, open, onOpenChange, onDelete }: D
 				<AlertDialogFooter>
 					<AlertDialogCancel>Cancelar</AlertDialogCancel>
 					<AlertDialogAction
-						onClick={onDelete}
-						className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						onClick={() => onDelete(entry.id)}
+						className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
 					>
 						Excluir
 					</AlertDialogAction>
