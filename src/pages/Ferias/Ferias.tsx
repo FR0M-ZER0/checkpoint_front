@@ -161,6 +161,8 @@ function Ferias() {
         setErroSolicitacao('');
         if (!dataInicio || !dataFim) { setErroSolicitacao('Selecione datas.'); return; }
         if (calcularDiasFerias(dataInicio, dataFim) <= 0) { setErroSolicitacao('Data fim inválida.'); return; }
+        const diaFim = dataFim.getDay();
+        if (diaFim === 0 || diaFim === 6) {setErroSolicitacao('Data fim inválida.'); return; }
         const dias = calcularDiasFerias(dataInicio, dataFim);
         if (saldoDisponivel === null || dias > saldoDisponivel) { setErroSolicitacao('Saldo insuficiente.'); return; }
         openRequestModal(); // Abre modal de confirmação
