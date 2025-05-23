@@ -75,7 +75,7 @@ export function TimeEntriesTable({ searchQuery, date, markingType, colaborador }
 				url = `/marcacoes/buscar?nome=${encodeURIComponent(searchQuery)}`
 			} else if (markingType && markingType !== "all") {
 				url = `/marcacoes/buscar-por-tipo?tipo=${markingType}`
-			} else if (colaborador) {
+			} else if (colaborador && colaborador !== "all") {
 				url = `/marcacoes/colaborador/${colaborador}`
 			} else if (date) {
 				const year = date.getFullYear()

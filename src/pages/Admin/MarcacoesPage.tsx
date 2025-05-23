@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,12 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { AddTimeEntryDialog } from "@/components/admin/AddTimeEntryDialog"
+import api from "@/services/api"
+
+type Employee = {
+	id: string
+	nome: string
+}
 
 export default function MarcacoesPage() {
 	const [date, setDate] = useState<Date>()
@@ -18,6 +24,20 @@ export default function MarcacoesPage() {
 	const [searchQuery, setSearchQuery] = useState<string>("")
 	const [markingType, setMarkingType] = useState<string>("all")
 	const [colaborador, setColaborador] = useState<string>("")
+	const [employees, setEmployees] = useState<Employee[]>([])
+
+	const fetchEmployees = async () => {
+		try {
+			const response = await api.get('/colaborador')
+			setEmployees(response.data)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	useEffect(() => {
+		fetchEmployees()
+	}, [])
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -70,15 +90,12 @@ export default function MarcacoesPage() {
 								<SelectValue placeholder="Colaborador" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">Todos</SelectItem>
-								<SelectItem value="1">Ana Silva</SelectItem>
-								<SelectItem value="2">Carlos Oliveira</SelectItem>
-								<SelectItem value="3">Mariana Santos</SelectItem>
-								<SelectItem value="4">Pedro Costa</SelectItem>
-								<SelectItem value="5">Juliana Lima</SelectItem>
-								<SelectItem value="6">Roberto Almeida</SelectItem>
-								<SelectItem value="7">Fernanda Gomes</SelectItem>
-								<SelectItem value="8">Lucas Mendes</SelectItem>
+								<SelectItem value="all" key={"all"}>Todos</SelectItem>
+								{
+									employees.map(employee => (
+										<SelectItem value={employee.id} key={employee.id}>{employee.nome}</SelectItem>
+									))
+								}
 							</SelectContent>
 						</Select>
 
