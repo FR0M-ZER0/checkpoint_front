@@ -14,7 +14,10 @@ import { AddTimeEntryDialog } from "@/components/admin/AddTimeEntryDialog"
 
 export default function MarcacoesPage() {
 	const [date, setDate] = useState<Date>()
-	const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+	const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>(false)
+	const [searchQuery, setSearchQuery] = useState<string>("")
+	const [markingType, setMarkingType] = useState<string>("all")
+	const [colaborador, setColaborador] = useState<string>("")
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -40,23 +43,29 @@ export default function MarcacoesPage() {
 					<div className="mb-6 grid gap-4 md:grid-cols-4">
 						<div className="relative">
 							<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-							<Input type="search" placeholder="Buscar colaborador..." className="pl-8" />
+							<Input 
+								type="search" 
+								placeholder="Buscar colaborador..."
+								className="pl-8" 
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+							/>
 						</div>
 
-						<Select>
+						<Select value={markingType} onValueChange={setMarkingType}>
 							<SelectTrigger>
 								<SelectValue placeholder="Tipo de marcação" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="all">Todas</SelectItem>
-								<SelectItem value="entrada">Entrada</SelectItem>
-								<SelectItem value="saida_almoco">Retomada</SelectItem>
-								<SelectItem value="retorno_almoco">Pausa</SelectItem>
-								<SelectItem value="saida">Saída</SelectItem>
+								<SelectItem value="ENTRADA">Entrada</SelectItem>
+								<SelectItem value="PAUSA">Pausa</SelectItem>
+								<SelectItem value="RETOMADA">Retomada</SelectItem>
+								<SelectItem value="SAIDA">Saída</SelectItem>
 							</SelectContent>
 						</Select>
 
-						<Select>
+						<Select value={colaborador} onValueChange={setColaborador}>
 							<SelectTrigger>
 								<SelectValue placeholder="Colaborador" />
 							</SelectTrigger>
@@ -89,7 +98,12 @@ export default function MarcacoesPage() {
 						</Popover>
 					</div>
 
-					<TimeEntriesTable />
+					<TimeEntriesTable
+						searchQuery={searchQuery}
+						date={date}
+						markingType={markingType}
+						colaborador={colaborador}
+					/>
 				</CardContent>
 			</Card>
 

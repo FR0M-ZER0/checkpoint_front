@@ -50,7 +50,14 @@ export function getEntryTypeInfo(type: EntryType) {
 	}
 }
 
-export function TimeEntriesTable() {
+type TimeEntriesTableProps = {
+	searchQuery: string
+	date: Date | undefined
+	markingType: string
+	colaborador: string
+}
+
+export function TimeEntriesTable({ searchQuery, date, markingType, colaborador }: TimeEntriesTableProps) {
 	const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([])
 	const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null)
 	const [deletingEntry, setDeletingEntry] = useState<TimeEntry | null>(null)
@@ -60,39 +67,55 @@ export function TimeEntriesTable() {
 	const totalPages = Math.ceil(timeEntries.length / itemsPerPage)
 	const paginatedEntries = timeEntries.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
-	useEffect(() => {
-		async function fetchData() {
-			try {
-				const response = await api.get<MarcacaoResponseDTO[]>("/marcacoes/com-nome")
-				const mappedEntries: TimeEntry[] = response.data.map((m) => {
-					let entryType: EntryType
-					switch (m.tipo) {
-						case "ENTRADA": entryType = "entrada"; break
-						case "PAUSA": entryType = "saida_almoco"; break
-						case "RETOMADA": entryType = "retorno_almoco"; break
-						case "SAIDA": entryType = "saida"; break
-						default: entryType = "entrada"
-					}
-					const dateObj = new Date(m.dataHora)
+	async function fetchData() {
+		try {
+			let url = "/marcacoes/com-nome"
 
-					return {
-						id: m.id,
-						employeeId: m.colaboradorId,
-						employeeName: m.nomeColaborador,
-						employeeAvatar: "/placeholder-user.jpg",
-						employeeInitials: m.nomeColaborador.split(" ").map(n => n[0]).join("").slice(0, 2),
-						type: entryType,
-						time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-						date: dateObj.toLocaleDateString(),
-					}
-				})
-				setTimeEntries(mappedEntries)
-			} catch (error) {
-				console.error("Erro ao buscar marcações:", error)
+			if (searchQuery) {
+				url = `/marcacoes/buscar?nome=${encodeURIComponent(searchQuery)}`
+			} else if (markingType && markingType !== "all") {
+				url = `/marcacoes/buscar-por-tipo?tipo=${markingType}`
+			} else if (colaborador) {
+				url = `/marcacoes/colaborador/${colaborador}`
+			} else if (date) {
+				const year = date.getFullYear()
+				const month = String(date.getMonth() + 1).padStart(2, '0')
+				const day = String(date.getDate()).padStart(2, '0')
+
+				url = `/marcacoes/data/${year}-${month}-${day}`
 			}
+			const response = await api.get<MarcacaoResponseDTO[]>(url)
+			const mappedEntries: TimeEntry[] = response.data.map((m) => {
+				let entryType: EntryType
+				switch (m.tipo) {
+					case "ENTRADA": entryType = "entrada"; break
+					case "PAUSA": entryType = "saida_almoco"; break
+					case "RETOMADA": entryType = "retorno_almoco"; break
+					case "SAIDA": entryType = "saida"; break
+					default: entryType = "entrada"
+				}
+				const dateObj = new Date(m.dataHora)
+
+				return {
+					id: m.id,
+					employeeId: m.colaboradorId,
+					employeeName: m.nomeColaborador,
+					employeeAvatar: "/placeholder-user.jpg",
+					employeeInitials: m.nomeColaborador.split(" ").map(n => n[0]).join("").slice(0, 2),
+					type: entryType,
+					time: dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+					date: dateObj.toLocaleDateString(),
+				}
+			})
+			setTimeEntries(mappedEntries)
+		} catch (error) {
+			console.error("Erro ao buscar marcações:", error)
 		}
+	}
+
+	useEffect(() => {
 		fetchData()
-	}, [])
+	}, [searchQuery, markingType, colaborador, date])
 
 	async function deleteTimeEntry(entryId: string) {
 		try {
@@ -118,7 +141,6 @@ export function TimeEntriesTable() {
 				novoTipo: marcacaoTipo,
 				novaDataHora: `${updatedEntry.date.split("T")[0]}T${updatedEntry.time}:00`
 			})
-			console.log(`oia eu aqui: ${updatedEntry.date.split("T")[0]}T${updatedEntry.time}:00`)
 			return true
 		} catch (error) {
 			console.error("Erro ao atualizar marcação:", error)
