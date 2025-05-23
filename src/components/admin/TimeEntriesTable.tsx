@@ -40,13 +40,13 @@ interface MarcacaoResponseDTO {
 export function getEntryTypeInfo(type: EntryType) {
 	switch (type) {
 		case "entrada":
-			return { color: "bg-green-500", icon: <DoorOpen className="h-5 w-5" />, name: "Entrada" }
+			return { color: "bg-green-500", icon: <DoorOpen className="h-5 w-5 text-black" />, name: "Entrada" }
 		case "retorno_almoco":
-			return { color: "bg-yellow-400", icon: <BatteryPlus className="h-5 w-5" />, name: "Retomada" }
+			return { color: "bg-yellow-400", icon: <BatteryPlus className="h-5 w-5 text-black" />, name: "Retomada" }
 		case "saida_almoco":
-			return { color: "bg-blue-500", icon: <Coffee className="h-5 w-5" />, name: "Pausa" }
+			return { color: "bg-blue-500", icon: <Coffee className="h-5 w-5 text-black" />, name: "Pausa" }
 		case "saida":
-			return { color: "bg-red-500", icon: <LogOut className="h-5 w-5" />, name: "Saída" }
+			return { color: "bg-red-500", icon: <LogOut className="h-5 w-5 text-black" />, name: "Saída" }
 	}
 }
 

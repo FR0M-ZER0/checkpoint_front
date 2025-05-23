@@ -1,6 +1,6 @@
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
 	Dialog,
@@ -20,37 +20,77 @@ import { ptBR } from "date-fns/locale"
 import { CalendarIcon, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import api from "@/services/api"
 
 interface AddTimeEntryDialogProps {
 	open: boolean
 	onOpenChange: (open: boolean) => void
 }
 
-const employees = [
-	{ id: 1, name: "Ana Silva", department: "TI" },
-	{ id: 2, name: "Carlos Oliveira", department: "RH" },
-	{ id: 3, name: "Mariana Santos", department: "Marketing" },
-	{ id: 4, name: "Pedro Costa", department: "Financeiro" },
-	{ id: 5, name: "Juliana Lima", department: "Vendas" },
-]
+type Colaborador = {
+	id: number
+	nome: string
+}
 
 export function AddTimeEntryDialog({ open, onOpenChange }: AddTimeEntryDialogProps) {
 	const [employeeId, setEmployeeId] = useState<string>("")
 	const [entryType, setEntryType] = useState<string>("")
 	const [date, setDate] = useState<Date>()
 	const [time, setTime] = useState<string>("")
+	const [colaboradores, setColaboradores] = useState<Colaborador[]>([])
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault()
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
 
-		setEmployeeId("")
-		setEntryType("")
-		setDate(undefined)
-		setTime("")
+		if (!date || !time || !employeeId || !entryType) {
+			console.error("Todos os campos são obrigatórios.");
+			return;
+		}
 
+		const [hours, minutes] = time.split(":");
+		const combinedDate = new Date(date);
+		combinedDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-		onOpenChange(false)
+		// ✅ Formatar manualmente: "YYYY-MM-DDTHH:mm:ss"
+		const formattedDateTime = 
+			combinedDate.getFullYear() + "-" +
+			String(combinedDate.getMonth() + 1).padStart(2, "0") + "-" +
+			String(combinedDate.getDate()).padStart(2, "0") + "T" +
+			String(combinedDate.getHours()).padStart(2, "0") + ":" +
+			String(combinedDate.getMinutes()).padStart(2, "0") + ":" +
+			"00";  // segundos fixos como 00
+
+		try {
+			await api.post("/marcacoes/com-data", {
+				colaboradorId: employeeId,
+				tipo: entryType.toUpperCase(),
+				dataHora: formattedDateTime
+			});
+
+			setEmployeeId("");
+			setEntryType("");
+			setDate(undefined);
+			setTime("");
+
+			onOpenChange(false);
+		} catch (error) {
+			console.error("Erro ao adicionar marcação:", error);
+		}
 	}
+
+
+	const fetchColaboradores = async () => {
+		try {
+			const response = await api.get('/colaborador')
+			setColaboradores(response.data)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	useEffect(() => {
+		fetchColaboradores()
+	}, [])
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -68,9 +108,9 @@ export function AddTimeEntryDialog({ open, onOpenChange }: AddTimeEntryDialogPro
 									<SelectValue placeholder="Selecione um colaborador" />
 								</SelectTrigger>
 								<SelectContent>
-									{employees.map((employee) => (
-										<SelectItem key={employee.id} value={employee.id.toString()}>
-											{employee.name} ({employee.department})
+									{colaboradores.map((colaborador) => (
+										<SelectItem key={colaborador.id} value={String(colaborador.id)}>
+											{colaborador.nome}
 										</SelectItem>
 									))}
 								</SelectContent>
@@ -92,20 +132,20 @@ export function AddTimeEntryDialog({ open, onOpenChange }: AddTimeEntryDialogPro
 											<span>Entrada</span>
 										</div>
 									</SelectItem>
-									<SelectItem value="saida_almoco">
-										<div className="flex items-center gap-2">
-											<div className="bg-yellow-400 rounded-full p-1 flex items-center justify-center">
-												{getEntryTypeInfo("saida_almoco").icon}
-											</div>
-											<span>Saída para Almoço</span>
-										</div>
-									</SelectItem>
-									<SelectItem value="retorno_almoco">
+									<SelectItem value="pausa">
 										<div className="flex items-center gap-2">
 											<div className="bg-blue-500 rounded-full p-1 flex items-center justify-center">
+												{getEntryTypeInfo("saida_almoco").icon}
+											</div>
+											<span>Pausa</span>
+										</div>
+									</SelectItem>
+									<SelectItem value="retomada">
+										<div className="flex items-center gap-2">
+											<div className="bg-yellow-400 rounded-full p-1 flex items-center justify-center">
 												{getEntryTypeInfo("retorno_almoco").icon}
 											</div>
-											<span>Retorno do Almoço</span>
+											<span>Retomada</span>
 										</div>
 									</SelectItem>
 									<SelectItem value="saida">
