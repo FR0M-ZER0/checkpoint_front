@@ -14,10 +14,13 @@ type valueType = {
 }
 
 type statusColorsType = {
-    normal: string,
-    ferias: string,
-    folga: string,
-    falta: string,
+    normal?: string;
+    ferias?: string;
+    folga?: string;
+    falta?: string;
+    descanso_escala?: string;
+    neutral?: string;
+    default?: string;
 }
 
 function EspelhoPontoPage() {
@@ -69,14 +72,15 @@ function EspelhoPontoPage() {
     ]
 
     const weekdays: string[] = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sab", "Dom"]
-    const statusColors: statusColorsType & { neutral: string; descanso_escala?: string } = { // Adicionado descanso_escala aqui
-        normal: "light-blue-color", // Suas classes de cor
-        ferias: "dark-green-color",
-        folga: "main-orange-color",
-        falta: "main-red-color",
-        neutral: "bg-gray-300",
-        descanso_escala: "bg-purple-500"
-    };
+const statusColors: statusColorsType & { neutral: string; descanso_escala?: string } = {
+    normal: "light-blue-color",
+    ferias: "dark-green-color",
+    folga: "main-orange-color",
+    falta: "main-red-color",
+    neutral: "bg-gray-300",
+    descanso_escala: "bg-purple-500", 
+    default: "bg-gray-200"
+};
 
     const fetchSaldoFerias = async () => {
         try {
@@ -318,7 +322,7 @@ function EspelhoPontoPage() {
                         const formattedDay = String(day).padStart(2, "0")
                         const formattedMonth = String(index + 1).padStart(2, "0")
                         const formattedDate = `${currentYear}-${formattedMonth}-${formattedDay}`
-                        const status = data[formattedDate] || "neutral"
+                        const status = data[formattedDate]?.toLowerCase() || "neutral";
                         return { day, status, date: formattedDate }
                     })
 
