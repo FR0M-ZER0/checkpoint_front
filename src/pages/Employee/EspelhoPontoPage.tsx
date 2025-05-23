@@ -276,7 +276,7 @@ function EspelhoPontoPage() {
                     </div>
 
                     <div
-                        onClick={() => setSelectedStatus(selectedStatus === 'horas extras' ? null : 'horas extras')}
+                        onClick={() => setSelectedStatus(selectedStatus === 'ferias' ? null : 'ferias')}
                         className="cursor-pointer flex items-center gap-2 dark-green-color text-white px-6 py-4 rounded-lg w-full status-card"
                     >
                         <div className="mr-4 h-14 w-14 bg-[#0A8246] flex justify-center items-center rounded-xl shadow-md">
@@ -292,7 +292,7 @@ function EspelhoPontoPage() {
                     </div>
 
                     <div
-                        onClick={() => setSelectedStatus(selectedStatus === 'ferias' ? null : 'ferias')}
+                        onClick={() => setSelectedStatus(selectedStatus === 'horas extras' ? null : 'horas extras')}
                         className="cursor-pointer flex items-center gap-2 dark-blue-color text-white px-6 py-4 rounded-lg w-full status-card"
                     >
                         <div className="mr-4 h-14 w-14 bg-[#013F82] flex justify-center items-center rounded-xl shadow-md">
