@@ -181,7 +181,6 @@ export function RequestsTable({ type }: RequestsTableProps) {
 							type === 'ajustes' ?
 								<TableRow>
 									<TableHead>Colaborador</TableHead>
-									<TableHead>Departamento</TableHead>
 									<TableHead>Período</TableHead>
 									<TableHead>Data da Solicitação</TableHead>
 									<TableHead>Tipo</TableHead>
@@ -204,7 +203,6 @@ export function RequestsTable({ type }: RequestsTableProps) {
 								:
 								<TableRow>
 									<TableHead>Colaborador</TableHead>
-									<TableHead>Departamento</TableHead>
 									<TableHead>Data</TableHead>
 									<TableHead>Data da Solicitação</TableHead>
 									<TableHead>Observação</TableHead>
@@ -224,7 +222,6 @@ export function RequestsTable({ type }: RequestsTableProps) {
 							paginatedRequests.map((request) => (
 								<TableRow key={request.id}>
 									<TableCell className="font-medium">{request.colaboradorNome}</TableCell>
-									<TableCell>{request.department}</TableCell>
 									<TableCell>{request.periodo}</TableCell>
 									<TableCell>{formatDate(request.criadoEm)}</TableCell>
 									<TableCell>{request.tipo}</TableCell>
@@ -301,7 +298,6 @@ export function RequestsTable({ type }: RequestsTableProps) {
 							paginatedRequests.map((request) => (
 								<TableRow key={request.id}>
 									<TableCell className="font-medium">{request.colaborador?.nome}</TableCell>
-									<TableCell>{request.department}</TableCell>
 									{
 										type === 'ferias' ?
 										<TableCell>
