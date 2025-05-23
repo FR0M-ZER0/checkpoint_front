@@ -1,90 +1,89 @@
-import React from 'react'
+import React from 'react';
+
+type CardVariant = 'ponto' | 'ferias' | 'folga' | 'abono' | 'default';
 
 type AdminNotificationCardProp = {
-    /**
-     * Padrão
-     */
-    type: string
-    date: string
-    name: string
-    observation?: string
-
-    /**
-     * Usado em todos os pedidos que precisam de dia (folga, férias, abono) :D
-     */
-    dayStart?: string
-    dayEnd?: string
-
-    /**
-     * Abono de falta
-     */
-    file?: string
-    reason?: string
-    justification?: string
-
-
-    /**
-     * Para ajustes de marcações
-     */
-    period?: string
-    markingTime?: string
-    markingType?: string
-
-    openModal: () => void
+    name: string;
+    date: string;
+    cardType: CardVariant;
+    openModal: () => void;
+    observation?: string;
+    dayStart?: string;
+    dayEnd?: string;
+    period?: string;
 }
 
-function AdminNotificationCard({ type, date, name, observation, dayStart, dayEnd, file, reason, justification, period, markingTime, markingType, openModal }: AdminNotificationCardProp) {
+const getCardStyles = (variant: CardVariant): string => {
+    switch (variant) {
+        case 'ferias':
+            return 'bg-green-500 hover:bg-green-600 text-white';
+        case 'folga':
+            return 'bg-orange-500 hover:bg-orange-600 text-white';
+        case 'ponto':
+            return 'bg-blue-500 hover:bg-blue-600 text-white';
+        default:
+            return 'bg-gray-400 hover:bg-gray-500 text-white';
+    }
+};
+
+function AdminNotificationCard({
+    name,
+    date,
+    cardType,
+    openModal,
+    observation,
+    dayStart,
+    dayEnd,
+    period
+}: AdminNotificationCardProp) {
+    const cardStyles = getCardStyles(cardType);
+    const title = cardType.charAt(0).toUpperCase() + cardType.slice(1);
+
     return (
-        <div className='w-full rounded-xl p-3 notification-admin-color flex justify-between' onClick={openModal}>
-            <div className='flex flex-col mr-4'>
-                <div className='w-[54px] h-[54px] rounded-full bg-white flex items-center justify-center'>
-                    <i className="fa-solid fa-user-secret text-4xl text-gray-400"></i>
+        <div
+            className={`w-full rounded-xl p-3 flex justify-between shadow-md cursor-pointer ${cardStyles}`}
+            onClick={openModal}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && openModal()}
+        >
+            {/* Left Section: Icon + Name/Date */}
+            <div className='flex flex-col mr-4 flex-shrink-0 w-16'>
+                <div className='w-[54px] h-[54px] rounded-full bg-white flex items-center justify-center mb-2'>
+                    <i className={`fa-solid ${
+                        cardType === 'ferias' ? 'fa-plane-departure' :
+                        cardType === 'folga' ? 'fa-calendar-minus' :
+                        'fa-user-secret'
+                    } text-4xl text-gray-400`}/>
                 </div>
-
-                <div className='light-gray-text text-sm mt-4'>
-                    <p>
-                        { name }
-                    </p>
-
-                    <p className='text-light'>
-                        { date }
-                    </p>
+                <div className='text-xs text-center'>
+                    <p className='font-semibold truncate' title={name}>{name}</p>
+                    <p className='opacity-90'>{date}</p>
                 </div>
             </div>
 
-            <div className='flex-grow'>
-                <p>
-                    { type }
-                </p>
+            {/* Right Section: Details */}
+            <div className='flex-grow min-w-0'>
+                <p className='font-semibold truncate' title={title}>{title}</p>
 
-                {
-                    period &&
-                    <p className='text-sm'>
-                        Em { period }
-                    </p>
-                }
+                {/* Date/Period Display */}
+                {cardType === 'ferias' && dayStart && dayEnd && (
+                    <p className='text-sm mt-1'>{dayStart} até {dayEnd}</p>
+                )}
+                {cardType === 'ponto' && period && (
+                    <p className='text-sm mt-1'>Em {period}</p>
+                )}
 
-                {
-                    dayStart && dayEnd &&
-                    <p>
-                        { dayStart } até { dayEnd }
-                    </p>
-                }
-
-                {
-                    observation &&
-                    <div className='mt-4'>
-                        <p className='font-bold'>
-                            Observação:
-                        </p>
-                        <p className='text-sm line-clamp-2'>
-                            { observation }
-                        </p>
+                {/* Observation */}
+                {observation && (
+                    <div className='mt-2'>
+                        <p className='text-xs font-medium opacity-90'>Observação:</p>
+                        <p className='text-sm line-clamp-2' title={observation}>{observation}</p>
                     </div>
-                }
+                )}
             </div>
         </div>
-    )
+    );
 }
 
-export default AdminNotificationCard
+export default AdminNotificationCard;

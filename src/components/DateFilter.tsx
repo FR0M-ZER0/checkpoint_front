@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { formatDate } from '../utils/formatter'
 
-function DateFilter({ onDateChange }: { onDateChange: (newDate: string) => void }) {
-    // Estamos pegando o dia de amanhã porque por algum motivo ele mostra o dia de hoje como se fosse o de ontem (deve ser por causa do fuso horário)
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    const tomorrowFormatted = tomorrow.toISOString().split('T')[0]
-    
-    const [dayName, setDayName] = useState<string>('')
-    const [currentDate, setCurrentDate] = useState<string>(tomorrowFormatted)
-    const d: Date = new Date(currentDate)
+type DateFilterProps = {
+  currentDate: string,
+  onDateChange: (newDate: string) => void
+}
+
+function DateFilter({ currentDate, onDateChange }: DateFilterProps) {
+    const [localDate, setLocalDate] = useState<string>(currentDate)
+    const d: Date = new Date(localDate + 'T00:00:00')
     const dateInputRef = useRef<HTMLInputElement>(null)
+    console.log(`O d é ${d}`)
+
+    useEffect(() => {
+        setLocalDate(currentDate)
+    }, [currentDate])
 
     const handleDateClick = () => {
         dateInputRef.current?.showPicker()
@@ -18,45 +22,34 @@ function DateFilter({ onDateChange }: { onDateChange: (newDate: string) => void 
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newDate = e.target.value
-        const newDate2 = new Date(e.target.value)
-        // TODO: Pelo visto, o toISOString diminui ou aumenta em um dia a data, que ao passar em setCurrentDate, também sofre outro altereção
-        newDate2.setDate(newDate2.getDate() + 1)
-        const formattedDate = newDate2.toISOString().split('T')[0]
-        setCurrentDate(formattedDate)
+        setLocalDate(newDate)
         onDateChange(newDate)
     }
 
     const goBack = () => {
-        const newDate = new Date(currentDate)
-        newDate.setDate(newDate.getDate() - 1)
-        const newDate2 = new Date(currentDate)
-        newDate2.setDate(newDate2.getDate() - 2)
-        const formattedDate = newDate.toISOString().split('T')[0]
-        const formattedDate2 = newDate2.toISOString().split('T')[0]
-        // Por algum motivo ele sempre está pegando um dia após o anterior, por isso a necessidade do formattedDate2, que ajusta para ele pegar dois dias antes
-        setCurrentDate(formattedDate)
-        onDateChange(formattedDate2)
+        const newDateObj = new Date(localDate)
+        newDateObj.setDate(newDateObj.getDate() - 1)
+        const formattedDate = newDateObj.toISOString().split('T')[0]
+        setLocalDate(formattedDate)
+        onDateChange(formattedDate)
     }
 
     const goForward = () => {
-        const newDate = new Date(currentDate)
-        newDate.setDate(newDate.getDate() + 1)
-        const newDate2 = new Date(currentDate)
-        newDate2.setDate(newDate2.getDate())
-        const formattedDate = newDate.toISOString().split('T')[0]
-        const formattedDate2 = newDate2.toISOString().split('T')[0]
-        // Mesmo coisa com o que está acontecendo acima
-        setCurrentDate(formattedDate)
-        onDateChange(formattedDate2)
+        const newDateObj = new Date(localDate)
+        newDateObj.setDate(newDateObj.getDate() + 1)
+        const formattedDate = newDateObj.toISOString().split('T')[0]
+        setLocalDate(formattedDate)
+        onDateChange(formattedDate)
     }
 
+    const [dayName, setDayName] = useState<string>('')
     useEffect(() => {
         const diasDaSemana: Array<string> = [
             'domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 
             'quinta-feira', 'sexta-feira', 'sábado'
         ]        
         setDayName(diasDaSemana[d.getDay()])
-    }, [currentDate])
+    }, [localDate])
 
     return (
         <div className='flex justify-center items-center w-full text-center relative'>
@@ -70,7 +63,7 @@ function DateFilter({ onDateChange }: { onDateChange: (newDate: string) => void 
                 type="date" 
                 ref={dateInputRef}
                 className="opacity-0 absolute right-[50px] w-[10px]"
-                value={currentDate}
+                value={localDate}
                 onChange={handleDateChange}
             />
             <i className="fa-solid fa-calendar-days text-2xl cursor-pointer absolute right-0" onClick={handleDateClick}></i>

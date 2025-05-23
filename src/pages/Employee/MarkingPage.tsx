@@ -6,6 +6,7 @@ import Modal from '../../components/Modal'
 import { formatDate, formatTime, formatTimeAndMinute } from '../../utils/formatter'
 import api from '../../services/api'
 import { toast } from 'react-toastify'
+import { useMediaQuery } from '../../utils/hooks'
 
 function MarkingPage() {
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
@@ -18,6 +19,7 @@ function MarkingPage() {
     const [markingEnd, setMarkingEnd] = useState<string>('')
     const [userId, setUserId] = useState<string|null>('')
     const d: Date = new Date()
+    const isDesktop = useMediaQuery('(min-width: 768px)')
 
     const closeModal = (): void => {
         setIsModalVisible(false)
@@ -52,10 +54,27 @@ function MarkingPage() {
     const fetchTodayMarkings = async (): Promise<void> => {
         try {
             const response = await api.get(`/marcacoes/colaborador/${userId}/hoje`)
-            setMarkingStart(formatTimeAndMinute(response.data[0].dataHora))
-            setMarkingPause(formatTimeAndMinute(response.data[1].dataHora))
-            setMarkingResume(formatTimeAndMinute(response.data[2].dataHora))
-            setMarkingEnd(formatTimeAndMinute(response.data[3].dataHora))
+            const data = response.data
+
+            data.forEach((marcacao: any) => {
+                const formattedTime = formatTimeAndMinute(marcacao.dataHora)
+                switch (marcacao.tipo) {
+                    case 'ENTRADA':
+                        setMarkingStart(formattedTime)
+                        break
+                    case 'PAUSA':
+                        setMarkingPause(formattedTime)
+                        break
+                    case 'RETOMADA':
+                        setMarkingResume(formattedTime)
+                        break
+                    case 'SAIDA':
+                        setMarkingEnd(formattedTime)
+                        break
+                    default:
+                        break
+                }
+            })
         } catch (err: unknown) {
             console.error(err)
         }
@@ -76,6 +95,7 @@ function MarkingPage() {
 
     return (
         <TemplateWithFilter
+            showFilter={!isDesktop}
             filter={
                 <div className='flex w-full flex-col text-center justify-center'>
                     <p className='font-light'>{ formatDate(d) }</p>
@@ -83,50 +103,49 @@ function MarkingPage() {
                 </div>
             }
         >
-            <main className='w-full flex-col text-center'>
+            <main className='w-full min-h-screen flex flex-col items-center md:justify-center text-center md:px-4'>
+                <div className='md:flex hidden w-full flex-col text-center justify-center'>
+                    <p className='font-light text-lg'>{ formatDate(d) }</p>
+                    <p className='text-2xl'>{ dayName }</p>
+                </div>
                 <Clock/>
-                <div onClick={() => openModal('ENTRADA')} className='mt-12'>
-                    <PointCard
-                        icon={
-                            <i className="fa-solid fa-door-open text-6xl"></i>
-                        }
-                        period='Início'
-                        time={markingStart}
-                        color='main-green-color'
-                    />
-                </div>
 
-                <div className='mt-4' onClick={() => openModal('PAUSA')}>
-                    <PointCard
-                        icon={
-                            <i className="fa-solid fa-mug-hot text-6xl"></i>
-                        }
-                        period='Pausa'
-                        time={markingPause}
-                        color='main-blue-color'
-                    />
-                </div>
+                <div className='mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl'>
+                    <div onClick={() => openModal('ENTRADA')}>
+                        <PointCard
+                            icon={<i className="fa-solid fa-door-open text-6xl"></i>}
+                            period='Início'
+                            time={markingStart}
+                            color='main-green-color'
+                        />
+                    </div>
 
-                <div className='mt-4' onClick={() => openModal('RETOMADA')}>
-                    <PointCard
-                        icon={
-                            <i className="fa-solid fa-battery-full text-6xl"></i>
-                        }
-                        period='Retomada'
-                        time={markingResume}
-                        color='main-yellow-color'
-                    />
-                </div>
+                    <div onClick={() => openModal('PAUSA')}>
+                        <PointCard
+                            icon={<i className="fa-solid fa-mug-hot text-6xl"></i>}
+                            period='Pausa'
+                            time={markingPause}
+                            color='main-blue-color'
+                        />
+                    </div>
 
-                <div className='mt-4' onClick={() => openModal('SAIDA')}>
-                    <PointCard
-                        icon={
-                            <i className="fa-solid fa-door-closed text-6xl"></i>
-                        }
-                        period='Saída'
-                        time={markingEnd}
-                        color='main-red-color'
-                    />
+                    <div onClick={() => openModal('RETOMADA')}>
+                        <PointCard
+                            icon={<i className="fa-solid fa-battery-full text-6xl"></i>}
+                            period='Retomada'
+                            time={markingResume}
+                            color='main-yellow-color'
+                        />
+                    </div>
+
+                    <div onClick={() => openModal('SAIDA')}>
+                        <PointCard
+                            icon={<i className="fa-solid fa-door-closed text-6xl"></i>}
+                            period='Saída'
+                            time={markingEnd}
+                            color='main-red-color'
+                        />
+                    </div>
                 </div>
             </main>
             {
@@ -137,7 +156,7 @@ function MarkingPage() {
                     </div>
 
                     <form className='text-white w-full flex justify-between' onSubmit={(e) => handleSubmit(e)}>
-                        <button className='main-func-color px-8 py-2 rounded-lg cursor-pointer' type='submit'>
+                        <button className='main-func-color px-8 py-2 rounded-lg cursor-pointer mr-2' type='submit'>
                             Confirmar
                         </button>
 

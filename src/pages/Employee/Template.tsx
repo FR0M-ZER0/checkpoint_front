@@ -1,4 +1,4 @@
-import React, { ReactNode, useState, useEffect, useRef } from 'react'
+import { ReactNode, useState, useEffect, useRef } from 'react'
 import TopBar from '../../components/TopBar'
 import BottomBar from '../../components/BottomBar'
 import { toast, ToastContainer } from 'react-toastify'
@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { fetchUnreadNotifications } from '../../redux/slices/notificationSlice'
 import { RootState } from '../../redux/store'
 import { fetchUnreadResponses } from '../../redux/slices/responseSlice'
+import SideBar from '../../components/Sidebar'
 
 type templateProps = {
     children?: ReactNode
@@ -20,6 +21,11 @@ function Template({ children }: templateProps) {
 
     const totalUnread: number = notificationCount + responseCount
     const [userId, setUserId] = useState<string|null>('')
+
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+        const saved = localStorage.getItem('theme')
+        return saved === 'dark'
+    })
 
     useEffect(() => {
         dispatch({ type: "websocket/connect" })
@@ -50,13 +56,38 @@ function Template({ children }: templateProps) {
         prevResponseCount.current = responses.length
     }, [responses.length])
 
+    useEffect(() => {
+        const root = document.documentElement
+        if (isDarkMode) {
+            root.classList.add('dark')
+            localStorage.setItem('theme', 'dark')
+        } else {
+            root.classList.remove('dark')
+            localStorage.setItem('theme', 'light')
+        }
+    }, [isDarkMode])
+
     return (
-        <div className='min-w-screen pb-[62px]' style={{ minHeight: 'calc(100vh + 162px)' }}>
-            <TopBar/>
-            <div className='w-[90%] flex flex-col items-center' style={{margin: "0 auto"}}>
-                { children }
+        <div className='min-w-screen pb-[62px] md:pb-0 min-h-[calc(100vh+162px)] md:min-h-screen'>
+            <div className='block md:hidden'>
+                <TopBar/>
             </div>
-            <BottomBar/>
+
+            <div className="grid grid-cols-1 md:grid-cols-[256px_1fr] w-full">
+                <div className="hidden md:block">
+                    <SideBar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+                </div>
+                <div className="w-full flex justify-center">
+                    <div className='md:w-[1400px] w-[90%]'>
+                        {children}
+                    </div>
+                </div>
+            </div>
+
+
+            <div className="block md:hidden">
+                <BottomBar/>
+            </div>
             <ToastContainer
                 hideProgressBar={true}
                 pauseOnFocusLoss={false}
