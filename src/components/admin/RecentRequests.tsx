@@ -1,88 +1,67 @@
+import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Check, X } from "lucide-react"
+import api from "@/services/api"
+import { formatDate } from "@/utils/formatter"
+import { useNavigate } from "react-router"
 
-const recentRequests = [
-	{
-		id: 1,
-		employee: {
-			name: "Ana Silva",
-			avatar: "/placeholder-user.jpg",
-			initials: "AS",
-		},
-		type: "Ajuste de Ponto",
-		date: "24/04/2025",
-		status: "Pendente",
-	},
-	{
-		id: 2,
-		employee: {
-			name: "Carlos Oliveira",
-			avatar: "/placeholder-user.jpg",
-			initials: "CO",
-		},
-		type: "Férias",
-		date: "23/04/2025",
-		status: "Pendente",
-	},
-	{
-		id: 3,
-		employee: {
-			name: "Mariana Santos",
-			avatar: "/placeholder-user.jpg",
-			initials: "MS",
-		},
-		type: "Folga",
-		date: "22/04/2025",
-		status: "Pendente",
-	},
-	{
-		id: 4,
-		employee: {
-			name: "Pedro Costa",
-			avatar: "/placeholder-user.jpg",
-			initials: "PC",
-		},
-		type: "Ausência",
-		date: "21/04/2025",
-		status: "Pendente",
-	},
-]
+type Request = {
+	id: number | string
+	colaboradorNome: string
+	tipo: string
+	criadoEm: string
+	status: string
+}
 
 export function RecentRequests() {
+	const [requests, setRequests] = useState<Request[]>([])
+	const navigate = useNavigate()
+
+	const handleButtonClick = () => {
+		navigate('/admin/solicitacoes')
+	}
+
+	const fetchRequests = async () => {
+		try {
+			const response = await api.get('/ultimas-solicitacoes-pendentes')
+			setRequests(response.data)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	const getInitials = (nome: string) => {
+		const names = nome.split(" ")
+		if (names.length === 1) return names[0][0].toUpperCase()
+		return (names[0][0] + names[names.length - 1][0]).toUpperCase()
+	}
+
+	useEffect(() => {
+		fetchRequests()
+	}, [])
+
 	return (
 		<div className="space-y-4">
-			{recentRequests.map((request) => (
+			{requests.map((request) => (
 				<div key={request.id} className="flex items-center justify-between space-x-4 rounded-md border p-4">
 					<div className="flex items-center space-x-4">
 						<Avatar>
-							<AvatarImage src={request.employee.avatar || "/placeholder.svg"} alt={request.employee.name} />
-							<AvatarFallback>{request.employee.initials}</AvatarFallback>
+							<AvatarFallback>{getInitials(request.colaboradorNome)}</AvatarFallback>
 						</Avatar>
 						<div>
-							<p className="text-sm font-medium leading-none">{request.employee.name}</p>
-							<p className="text-sm text-muted-foreground">{request.type}</p>
+							<p className="text-sm font-medium leading-none">{request.colaboradorNome}</p>
+							<p className="text-sm text-muted-foreground">{request.tipo}</p>
 						</div>
 					</div>
 					<div className="flex items-center space-x-2">
-						<Badge variant="outline">{request.date}</Badge>
+						<Badge variant="outline">{formatDate(request.criadoEm)}</Badge>
 						<Badge>{request.status}</Badge>
-						<div className="flex space-x-1">
-							<Button variant="outline" size="icon" className="h-8 w-8">
-								<Check className="h-4 w-4 text-green-500" />
-								<span className="sr-only">Aprovar</span>
-							</Button>
-							<Button variant="outline" size="icon" className="h-8 w-8">
-								<X className="h-4 w-4 text-red-500" />
-								<span className="sr-only">Rejeitar</span>
-							</Button>
-						</div>
 					</div>
 				</div>
 			))}
 			<div className="flex justify-center">
-				<Button variant="outline" size="sm">
+				<Button variant="outline" size="sm" onClick={handleButtonClick}>
 					Ver todas as solicitações
 				</Button>
 			</div>
