@@ -9,9 +9,11 @@ import NotificationsPage from './pages/Employee/NotificationsPage';
 import Ferias from './pages/Ferias/Ferias';
 import FolgaPage from './pages/Folga/FolgaPage';
 import EspelhoPontoPage from './pages/Employee/EspelhoPontoPage';
+import VerificarCodigo from './pages/Employee/VerificarCodigo';
 
 // Páginas de admin
 import LoginPageAdmin from './pages/Admin/LoginPageAdmin'
+import VerificarCodigoAdmin from './pages/Admin/VerificarCodigoAdmin';
 import HorasExtrasPage from './pages/Admin/HorasExtras';
 import DashboardLayout from './pages/Admin/Layout'
 import DashboardPageV2 from './pages/Admin/Dashboard';
@@ -26,6 +28,7 @@ function App() {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/login" element={<LoginPage />} />
+				<Route path="/verificar-codigo" element={<VerificarCodigo />} />
 				<Route path="/" element={<MarkingPage />} />
 				<Route path="/dia/:date" element={<DayPage />} />
 				<Route path="/ferias" element={<Ferias />} />
@@ -67,6 +70,8 @@ function App() {
 					</DashboardLayout>}
 				/>
 				<Route path="/admin/login" element={<LoginPageAdmin/>} />
+				<Route path="/verificar-codigo-admin" element={<VerificarCodigoAdmin />} />
+
 			</Routes>
 		</BrowserRouter>
 	)

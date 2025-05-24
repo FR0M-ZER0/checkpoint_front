@@ -7,10 +7,13 @@ import { useNavigate } from 'react-router'
 function LoginPage() {
 	const [email, setEmail] = useState<string>('')
 	const [password, setPassword] = useState<string>('')
+	const [loading, setLoading] = useState<boolean>(false)
 	const navigate = useNavigate()
 
 	const handleSubmit = async (e: React.FormEvent): Promise<void> => {
 		e.preventDefault()
+		setLoading(true) // desativa o botão
+
 		const formData = {
 			email,
 			senhaHash: password
@@ -18,21 +21,24 @@ function LoginPage() {
 
 		try {
 			const response = await api.post('/login', formData)
-			console.log("Resposta completa do backend (/login):", response);
-			console.log("Dados da resposta (response.data):", response.data);
-			if (response.data) {
-				console.log("ID do colaborador recebido:", response.data.id);
-				console.log("Nome do colaborador recebido:", response.data.nome);
+
+			if (response.status === 202) {
+				localStorage.setItem("email_2fa", email)
+				toast.info("Código enviado por e-mail")
+				navigate('/verificar-codigo')
+			} else {
+				localStorage.setItem("id", response.data.id)
+				localStorage.setItem("nome", response.data.nome)
+				localStorage.setItem("email", response.data.email)
+				localStorage.setItem("criado_em", response.data.criadoEm)
+				localStorage.setItem("ativo", response.data.ativo)
+				navigate('/')
 			}
-			localStorage.setItem("id", response.data.id)
-			localStorage.setItem("nome", response.data.nome)
-			localStorage.setItem("email", response.data.email)
-			localStorage.setItem("criado_em", response.data.criadoEm)
-			localStorage.setItem("ativo", response.data.ativo)
-			navigate('/')
 		} catch (err: unknown) {
 			toast.error('Suas credenciais estão erradas')
 			console.error(err)
+		} finally {
+			setLoading(false) // reativa o botão em caso de erro
 		}
 	}
 
@@ -49,9 +55,7 @@ function LoginPage() {
 			{/* Formulário de Login */}
 			<form onSubmit={handleSubmit} className="w-full max-w-md">
 				<div className="mb-6">
-					<label htmlFor="email">
-						Email
-					</label>
+					<label htmlFor="email">Email</label>
 					<input
 						type="email"
 						id="email"
@@ -64,9 +68,7 @@ function LoginPage() {
 				</div>
 
 				<div className="mb-6">
-					<label htmlFor="password">
-						Senha
-					</label>
+					<label htmlFor="password">Senha</label>
 					<input
 						type="password"
 						id="password"
@@ -78,7 +80,6 @@ function LoginPage() {
 					/>
 				</div>
 
-				{/* Link "Esqueci minha senha" */}
 				<div className="mb-8 text-center">
 					<a
 						href="/recuperar-senha"
@@ -90,9 +91,12 @@ function LoginPage() {
 
 				<button
 					type="submit"
-					className="w-full main-func-color font-semibold main-white-text py-3 rounded-lg transition duration-200"
+					disabled={loading}
+					className={`w-full main-func-color font-semibold main-white-text py-3 rounded-lg transition duration-200 ${
+						loading ? 'opacity-50 cursor-not-allowed' : ''
+					}`}
 				>
-					Entrar
+					{loading ? 'Entrando...' : 'Entrar'}
 				</button>
 			</form>
 
