@@ -42,11 +42,6 @@ const navItems: NavItem[] = [
 		icon: FileText,
 	},
 	{
-		title: "Análises",
-		href: "/admin/analises",
-		icon: BarChart,
-	},
-	{
 		title: "Configurações",
 		href: "/admin/configuracoes",
 		icon: Settings,
