@@ -136,36 +136,6 @@ export function GenerateReportDialog({ open, onOpenChange, reportType }: Generat
 								</PopoverContent>
 							</Popover>
 						</div>
-
-						<div className="grid gap-2">
-							<Label htmlFor="format">Formato do Arquivo</Label>
-							<Select value={fileFormat} onValueChange={setFileFormat} required>
-								<SelectTrigger id="format">
-									<SelectValue placeholder="Selecione o formato" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="pdf">PDF</SelectItem>
-									<SelectItem value="excel">Excel (.xlsx)</SelectItem>
-									<SelectItem value="csv">CSV</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-
-						{reportType === "presenca" && (
-							<div className="grid gap-2">
-								<Label htmlFor="report-detail">Detalhamento</Label>
-								<Select defaultValue="completo">
-									<SelectTrigger id="report-detail">
-										<SelectValue placeholder="Selecione o nível de detalhamento" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="resumo">Resumo</SelectItem>
-										<SelectItem value="completo">Completo</SelectItem>
-										<SelectItem value="detalhado">Detalhado com horários</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-						)}
 					</div>
 					<DialogFooter>
 						<Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
