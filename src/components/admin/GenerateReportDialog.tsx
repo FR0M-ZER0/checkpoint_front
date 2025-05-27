@@ -65,32 +65,41 @@ export function GenerateReportDialog({ open, onOpenChange, reportType }: Generat
 		const dataInicio = date.from.toISOString().split("T")[0]
 		const dataFim = date.to ? date.to.toISOString().split("T")[0] : dataInicio
 
+		const params: Record<string, string> = {
+			dataInicio,
+			dataFim,
+		}
+
+		if (selectedEmployee !== "all") {
+			params.colaboradorId = selectedEmployee
+		}
+
+		let endpoint = ""
+
 		if (reportType === "presenca") {
-			const params: Record<string, string> = {
-				dataInicio,
-				dataFim,
-			}
+			endpoint = "/marcacoes/relatorio-marcacoes"
+		} else if (reportType === "faltas") {
+			endpoint = "/relatorio-faltas"
+		} else {
+			console.warn("Tipo de relatório não implementado:", reportType)
+			return
+		}
 
-			if (selectedEmployee !== "all") {
-				params.colaboradorId = selectedEmployee
-			}
+		try {
+			const response = await api.get(endpoint, {
+				params,
+				responseType: "blob",
+			})
 
-			try {
-				const response = await api.get("/marcacoes/relatorio-marcacoes", {
-					params,
-					responseType: "blob",
-				})
-
-				const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }))
-				const link = document.createElement("a")
-				link.href = url
-				link.setAttribute("download", `relatorio-${getReportTitle().toLowerCase()}.pdf`)
-				document.body.appendChild(link)
-				link.click()
-				link.remove()
-			} catch (error) {
-				console.error("Erro ao gerar relatório:", error)
-			}
+			const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }))
+			const link = document.createElement("a")
+			link.href = url
+			link.setAttribute("download", `relatorio-${getReportTitle().toLowerCase()}.pdf`)
+			document.body.appendChild(link)
+			link.click()
+			link.remove()
+		} catch (error) {
+			console.error("Erro ao gerar relatório:", error)
 		}
 
 		setSelectedEmployee("all")

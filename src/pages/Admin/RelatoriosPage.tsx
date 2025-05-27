@@ -90,42 +90,6 @@ function getEntryTypeInfo(type: EntryType) {
 	}
 }
 
-
-const faltasTableData = [
-	{
-		id: 1,
-		employee: "Ana Silva",
-		date: "15/04/2025",
-		type: "Falta Injustificada",
-		status: "Registrada",
-		justification: "-",
-	},
-	{
-		id: 2,
-		employee: "Carlos Oliveira",
-		date: "12/04/2025",
-		type: "Falta Médica",
-		status: "Justificada",
-		justification: "Atestado médico apresentado",
-	},
-	{
-		id: 3,
-		employee: "Pedro Costa",
-		date: "10/04/2025",
-		type: "Falta Injustificada",
-		status: "Registrada",
-		justification: "-",
-	},
-	{
-		id: 4,
-		employee: "Mariana Santos",
-		date: "08/04/2025",
-		type: "Falta Familiar",
-		status: "Justificada",
-		justification: "Problema familiar urgente",
-	},
-]
-
 const feriasTableData = [
 	{
 		id: 1,
@@ -223,9 +187,13 @@ export default function RelatoriosPage() {
 	const [reportType, setReportType] = useState<string>("")
 
 	const [presencaDate, setPresencaDate] = useState<Date>()
-	const [faltasDate, setFaltasDate] = useState<Date>()
 	const [feriasDate, setFeriasDate] = useState<Date>()
 	const [folgasDate, setFolgasDate] = useState<Date>()
+
+	const [faltasDate, setFaltasDate] = useState<Date>()
+	const [faltasStatus, setFaltasStatus] = useState<string>("todos")
+	const [faltasTipo, setFaltasTipo] = useState<string>("todos")
+	const [faltasTableData, setFaltasTableData] = useState<any[]>([])
 
 	const [attendanceData, setAttendanceData] = useState<Employee[]>([])
 
@@ -239,11 +207,35 @@ export default function RelatoriosPage() {
 			console.error(err)
 		}
 	}
-	
+
+	const fetchFaltasData = async () => {
+		try {
+			const params: any = {}
+			if (faltasDate) {
+				params.data = faltasDate.toISOString().split('T')[0]
+			}
+			if (faltasStatus !== "todos") {
+				params.justificado = faltasStatus === "justificada"
+			}
+			if (faltasTipo !== "todos") {
+				params.tipo = faltasTipo === "ausencia" ? "Ausencia" : "Atraso"
+			}
+
+			const response = await api.get('/falta/filtro', { params })
+			setFaltasTableData(response.data)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
 
 	useEffect(() => {
 		fetchAttendanceData(presencaDate)
 	}, [presencaDate])
+
+	useEffect(() => {
+		fetchFaltasData()
+	}, [faltasDate, faltasStatus, faltasTipo])
 
 	const handleGenerateReport = (type: string) => {
 		setReportType(type)
@@ -435,7 +427,7 @@ export default function RelatoriosPage() {
 								</div>
 								<div className="flex flex-col gap-2">
 									<label className="text-sm font-medium">Status</label>
-									<Select defaultValue="todos">
+									<Select value={faltasStatus} onValueChange={setFaltasStatus}>
 										<SelectTrigger>
 											<SelectValue placeholder="Selecione o status" />
 										</SelectTrigger>
@@ -443,6 +435,19 @@ export default function RelatoriosPage() {
 											<SelectItem value="todos">Todos</SelectItem>
 											<SelectItem value="justificada">Justificada</SelectItem>
 											<SelectItem value="injustificada">Injustificada</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+								<div className="flex flex-col gap-2">
+									<label className="text-sm font-medium">Tipo</label>
+									<Select value={faltasTipo} onValueChange={setFaltasTipo}>
+										<SelectTrigger>
+											<SelectValue placeholder="Selecione o tipo" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="todos">Todos</SelectItem>
+											<SelectItem value="ausencia">Ausência</SelectItem>
+											<SelectItem value="atraso">Atraso</SelectItem>
 										</SelectContent>
 									</Select>
 								</div>
@@ -455,27 +460,36 @@ export default function RelatoriosPage() {
 											<TableHead>Data</TableHead>
 											<TableHead>Tipo</TableHead>
 											<TableHead>Status</TableHead>
-											<TableHead>Justificativa</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
-										{faltasTableData.map((falta) => (
-											<TableRow key={falta.id}>
-												<TableCell className="font-medium">{falta.employee}</TableCell>
-												<TableCell>{falta.date}</TableCell>
-												<TableCell>
-													<Badge variant={falta.type === "Falta Injustificada" ? "destructive" : "outline"}>
-														{falta.type}
-													</Badge>
+										{faltasTableData.length === 0 ? (
+											<TableRow>
+												<TableCell colSpan={5} className="text-center py-4">
+													Não há faltas encontradas com os filtros selecionados.
 												</TableCell>
-												<TableCell>
-													<Badge variant={falta.status === "Justificada" ? "success" : "destructive"}>
-														{falta.status}
-													</Badge>
-												</TableCell>
-												<TableCell className="max-w-[200px] truncate">{falta.justification}</TableCell>
 											</TableRow>
-										))}
+										) : (
+											faltasTableData.map((falta) => (
+												<TableRow key={falta.id}>
+													<TableCell className="font-medium">{falta.colaborador?.nome ?? "Desconhecido"}</TableCell>
+													<TableCell>{new Date(falta.criadoEm).toLocaleDateString()}</TableCell>
+													<TableCell>
+														<Badge variant={falta.tipo === "Ausencia" ? "destructive" : "outline"}>
+															{falta.tipo}
+														</Badge>
+													</TableCell>
+													<TableCell>
+														<Badge variant={falta.justificado ? "success" : "destructive"}>
+															{falta.justificado ? "Justificada" : "Injustificada"}
+														</Badge>
+													</TableCell>
+													<TableCell className="max-w-[200px] truncate">
+														{falta.solicitacaoAbonoFalta ? falta.solicitacaoAbonoFalta.justificativa : "Sem justificativa"}
+													</TableCell>
+												</TableRow>
+											))
+										)}
 									</TableBody>
 								</Table>
 							</div>
