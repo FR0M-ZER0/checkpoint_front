@@ -466,7 +466,7 @@ export default function RelatoriosPage() {
 										{faltasTableData.length === 0 ? (
 											<TableRow>
 												<TableCell colSpan={5} className="text-center py-4">
-													Não há faltas encontradas com os filtros selecionados.
+													Não há faltas encontradas.
 												</TableCell>
 											</TableRow>
 										) : (
@@ -483,9 +483,6 @@ export default function RelatoriosPage() {
 														<Badge variant={falta.justificado ? "success" : "destructive"}>
 															{falta.justificado ? "Justificada" : "Injustificada"}
 														</Badge>
-													</TableCell>
-													<TableCell className="max-w-[200px] truncate">
-														{falta.solicitacaoAbonoFalta ? falta.solicitacaoAbonoFalta.justificativa : "Sem justificativa"}
 													</TableCell>
 												</TableRow>
 											))
