@@ -1,5 +1,5 @@
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
 	Dialog,
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import type { DateRange } from "react-day-picker"
 import { format } from "date-fns"
+import api from "@/services/api"
 
 interface GenerateReportDialogProps {
 	open: boolean
@@ -25,17 +26,10 @@ interface GenerateReportDialogProps {
 	reportType: string
 }
 
-const employees = [
-	{ id: "all", name: "Todos os colaboradores" },
-	{ id: "1", name: "Ana Silva" },
-	{ id: "2", name: "Carlos Oliveira" },
-	{ id: "3", name: "Mariana Santos" },
-	{ id: "4", name: "Pedro Costa" },
-	{ id: "5", name: "Juliana Lima" },
-	{ id: "6", name: "Roberto Almeida" },
-	{ id: "7", name: "Fernanda Gomes" },
-	{ id: "8", name: "Lucas Mendes" },
-]
+type Colaborador = {
+	id: number
+	nome: string
+}
 
 const reportTypeNames: Record<string, string> = {
 	presenca: "Presença",
@@ -46,32 +40,72 @@ const reportTypeNames: Record<string, string> = {
 
 export function GenerateReportDialog({ open, onOpenChange, reportType }: GenerateReportDialogProps) {
 	const [selectedEmployee, setSelectedEmployee] = useState("all")
-	const [fileFormat, setFileFormat] = useState("pdf")
+	const [employees, setEmployees] = useState<Colaborador[]>([])
 	const [date, setDate] = useState<DateRange | undefined>({
 		from: undefined,
 		to: undefined,
 	})
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const fetchEmployees = async () => {
+		try {
+			const response = await api.get('/colaborador')
+			setEmployees(response.data)
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
-		// Validação básica
-		if (!date?.from || !date?.to) {
+		if (!date?.from) {
 			return
 		}
 
-		// Reset form
+		const dataInicio = date.from.toISOString().split("T")[0]
+		const dataFim = date.to ? date.to.toISOString().split("T")[0] : dataInicio
+
+		if (reportType === "presenca") {
+			const params: Record<string, string> = {
+				dataInicio,
+				dataFim,
+			}
+
+			if (selectedEmployee !== "all") {
+				params.colaboradorId = selectedEmployee
+			}
+
+			try {
+				const response = await api.get("/marcacoes/relatorio-marcacoes", {
+					params,
+					responseType: "blob",
+				})
+
+				const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }))
+				const link = document.createElement("a")
+				link.href = url
+				link.setAttribute("download", `relatorio-${getReportTitle().toLowerCase()}.pdf`)
+				document.body.appendChild(link)
+				link.click()
+				link.remove()
+			} catch (error) {
+				console.error("Erro ao gerar relatório:", error)
+			}
+		}
+
 		setSelectedEmployee("all")
-		setFileFormat("pdf")
 		setDate({ from: undefined, to: undefined })
 
-		// Close dialog
 		onOpenChange(false)
 	}
 
 	const getReportTitle = () => {
 		return reportTypeNames[reportType] || "Relatório"
 	}
+
+	useEffect(() => {
+		fetchEmployees()
+	}, [])
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -87,13 +121,14 @@ export function GenerateReportDialog({ open, onOpenChange, reportType }: Generat
 						<div className="grid gap-2">
 							<Label htmlFor="employee">Colaborador</Label>
 							<Select value={selectedEmployee} onValueChange={setSelectedEmployee} required>
-								<SelectTrigger id="employee">
+								<SelectTrigger>
 									<SelectValue placeholder="Selecione um colaborador" />
 								</SelectTrigger>
 								<SelectContent>
+									<SelectItem value="all">Todos</SelectItem>
 									{employees.map((employee) => (
-										<SelectItem key={employee.id} value={employee.id}>
-											{employee.name}
+										<SelectItem key={employee.id} value={String(employee.id)}>
+											{employee.nome}
 										</SelectItem>
 									))}
 								</SelectContent>
