@@ -80,6 +80,8 @@ export function GenerateReportDialog({ open, onOpenChange, reportType }: Generat
 			endpoint = "/marcacoes/relatorio-marcacoes"
 		} else if (reportType === "faltas") {
 			endpoint = "/relatorio-faltas"
+		} else if (reportType === "ferias") {
+			endpoint = "/api/ferias/relatorio-ferias"
 		} else {
 			console.warn("Tipo de relatório não implementado:", reportType)
 			return
