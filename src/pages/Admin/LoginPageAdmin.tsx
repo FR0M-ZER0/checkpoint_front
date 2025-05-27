@@ -55,7 +55,7 @@ function LoginPage() {
 						onChange={(e) => setEmail(e.target.value)}
 						placeholder="Digite seu email"
 						required
-						className="w-full rounded-lg focus:border-blue-500 focus:outline-none mt-2"
+						className="w-full rounded-lg focus:border-blue-500 focus:outline-none mt-2 input-col"
 					/>
 				</div>
 
@@ -70,7 +70,7 @@ function LoginPage() {
 						onChange={(e) => setPassword(e.target.value)}
 						placeholder="Digite sua senha"
 						required
-						className="w-full rounded-lg focus:border-blue-500 focus:outline-none mt-2"
+						className="w-full rounded-lg focus:border-blue-500 focus:outline-none mt-2 input-col"
 					/>
 				</div>
 

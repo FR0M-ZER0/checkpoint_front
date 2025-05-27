@@ -1,10 +1,8 @@
 const formatDate = (val: Date | string): string => {
-    // Se já for uma string no formato dd/MM/yyyy, retorna direto
     if (typeof val === 'string' && val.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
         return val;
     }
     
-    // Se for Date ou string ISO, converte
     const date = new Date(val);
     if (isNaN(date.getTime())) {
         return 'Data inválida';
@@ -16,7 +14,7 @@ const formatDate = (val: Date | string): string => {
 const formatTime = (date: Date): string => {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${hours}h:${minutes}min`; // Removi o espaço após "h:" para consistência
+    return `${hours}h:${minutes}min`;
 };
 
 const formatTimeAndMinute = (dateString: Date | string): string => {
@@ -34,9 +32,41 @@ const formatStringToTime = (dateString: string): string => {
     return `${hours}h:${minutes}min`;
 };
 
+const parseBRDate = (dateStr: string) => {
+    const [day, month, year] = dateStr.split("/");
+    return `${year}-${month}-${day}`;
+};  
+
+const formatUSDateToBR = (dateString: string): string => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Data inválida';
+
+    return date.toLocaleDateString('pt-BR');
+};
+
+const formatUSTimeToBR = (timeString: string): string => {
+    const [time, modifier] = timeString.split(' ');
+
+    let [hours, minutes] = time.split(':').map(Number);
+
+    if (modifier === 'PM' && hours < 12) {
+        hours += 12;
+    } else if (modifier === 'AM' && hours === 12) {
+        hours = 0;
+    }
+
+    const hoursStr = String(hours).padStart(2, '0');
+    const minutesStr = String(minutes).padStart(2, '0');
+
+    return `${hoursStr}:${minutesStr}`;
+};
+
 export {
     formatDate,
     formatTime,
     formatTimeAndMinute,
-    formatStringToTime
+    formatStringToTime,
+    parseBRDate,
+    formatUSDateToBR,
+    formatUSTimeToBR
 };

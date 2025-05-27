@@ -1,16 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react'; // Adicionado useCallback
-import TemplateWithFilter from '../Employee/TemplateWithFilter';
-import Modal from '../../components/Modal';
-import { formatDate } from '../../utils/formatter'; // Verifique se formata para AAAA-MM-DD
+import React, { useState, useEffect, useCallback } from 'react';
+import TemplateWithFilter from '../Employee/TemplateWithFilter'; // Ajuste o caminho
+import Modal from '../../components/Modal';                   // Ajuste o caminho
+import { formatDate } from '../../utils/formatter';           // Ajuste o caminho
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format, differenceInCalendarDays } from 'date-fns';
+import api from '../../services/api';                         // Ajuste o caminho
+import { toast } from 'react-toastify';                       // Se usar toast
 
-// Defina tipos para clareza (opcional mas recomendado)
 interface SolicitacaoFeriasPayload {
     colaboradorId: number;
-    dataInicio: string; // Formato AAAA-MM-DD
-    dataFim: string;    // Formato AAAA-MM-DD
+    dataInicio: string;
+    dataFim: string;
     observacao: string;
     status: string;
 }
@@ -18,405 +19,309 @@ interface SolicitacaoFeriasPayload {
 interface SolicitacaoAbonoPayload {
     colaboradorId: number;
     diasVendidos: number;
-    // outros campos se necessários, como dataSolicitacao (backend pode definir)
     status: string;
 }
 
-// -- Componente Principal --
+interface SolicitacaoFeriasData {
+    id: string | number;
+    dataInicio: string;         // Formato AAAA-MM-DD vindo da API
+    dataFim: string;            // Formato AAAA-MM-DD vindo da API
+    observacao?: string | null; // Observação do colaborador
+    status: string;             // PENDENTE, APROVADO, REJEITADO
+    criadoEm?: string;          // Opcional - Data/Hora da criação da solicitação
+    comentarioGestor?: string | null; // Comentário do gestor (IMPORTANTE VIR DA API)
+}
+
+interface SolicitacaoExibida {
+    id: number | string;
+    periodo: string; // String formatada "DD/MM/AAAA - DD/MM/AAAA"
+    status: string;
+    observacao?: string | null;
+    comentarioGestor?: string | null;
+}
+
+interface VendaRealizada {
+    id: number | string;
+    diasVendidos?: number;
+    dataSolicitacao?: string; // Data formatada
+    status?: string;
+}
+
 function Ferias() {
-    // --- Estados existentes ---
     const [dataInicio, setDataInicio] = useState<Date | null>(null);
     const [dataFim, setDataFim] = useState<Date | null>(null);
-    const [feriasAgendadas, setFeriasAgendadas] = useState<any[]>([]); // Mudar para array de objetos se o backend retornar a lista
-    const [erroSolicitacao, setErroSolicitacao] = useState<string>('');
-    const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-    const [diasVendidos, setDiasVendidos] = useState<number>(0);
-    const [saldoDisponivel, setSaldoDisponivel] = useState<number | null>(null); // Iniciar como null para indicar carregamento
-    const [erroVenda, setErroVenda] = useState<string>('');
-    const [diasSolicitadosVenda, setDiasSolicitadosVenda] = useState<number>(0); // Considere se este estado é realmente necessário ou se pode ser derivado
-
-    // --- Novo estado para observação ---
     const [observacao, setObservacao] = useState<string>('');
+    const [isRequestModalVisible, setIsRequestModalVisible] = useState<boolean>(false); // Modal de submissão
+    const [erroSolicitacao, setErroSolicitacao] = useState<string>(''); // Erro no formulário/submissão
 
-    // --- Constante para o ID do colaborador (MUDAR PARA ID 2) ---
-    // IMPORTANTE: Em uma aplicação real, este ID viria do usuário logado (contexto, Redux, etc.)
-    const COLABORADOR_ID = 2;
+    const [diasVendidos, setDiasVendidos] = useState<number>(0);
+    const [vendasRealizadas, setVendasRealizadas] = useState<VendaRealizada[]>([]);
+    const [erroVenda, setErroVenda] = useState<string>(''); // Erro na seção de venda
+    const [isVendaModalVisible, setIsVendaModalVisible] = useState<boolean>(false);
 
-    // --- Funções do Modal (sem alterações) ---
-    const closeModal = (): void => setIsModalVisible(false);
-    const openModal = (): void => {
-        // Resetar erro da venda ao abrir o modal
+    const [minhasSolicitacoes, setMinhasSolicitacoes] = useState<SolicitacaoExibida[]>([]);
+    const [isDecisaoModalVisible, setIsDecisaoModalVisible] = useState<boolean>(false);
+    const [selectedDecisao, setSelectedDecisao] = useState<SolicitacaoExibida | null>(null);
+    const [saldoDisponivel, setSaldoDisponivel] = useState<number | null>(null);
+    const [isLoadingSaldo, setIsLoadingSaldo] = useState<boolean>(false);
+    const [isLoadingList, setIsLoadingList] = useState<boolean>(false);
+    const [isLoadingAction, setIsLoadingAction] = useState<boolean>(false);
+    const [errorPage, setErrorPage] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string|null>('')
+
+    const closeVendaModal = (): void => setIsVendaModalVisible(false);
+    const openVendaModal = (): void => {
         setErroVenda('');
-        setIsModalVisible(true);
+        if (diasVendidos > 0) { setIsVendaModalVisible(true); }
+        else { setErroVenda('Selecione dias para vender.'); }
+    };
+    const closeRequestModal = (): void => setIsRequestModalVisible(false);
+    const openRequestModal = (): void => setIsRequestModalVisible(true);
+
+    const openDecisaoModal = (solicitacao: SolicitacaoExibida) => {
+        setSelectedDecisao(solicitacao);
+        setIsDecisaoModalVisible(true);
+    };
+    const closeDecisaoModal = () => {
+        setSelectedDecisao(null);
+        setIsDecisaoModalVisible(false);
     };
 
-    // --- Função para calcular dias (sem alterações) ---
     const calcularDiasFerias = (inicio: Date, fim: Date): number => {
-        // Retorna 0 se as datas forem inválidas ou se fim for antes de inicio
-        if (!inicio || !fim || fim < inicio) {
-            return 0;
-        }
-        // Calcula a diferença em dias de calendário (ex: 14/Mai - 10/Mai = 4)
-        // e soma 1 para incluir o dia inicial.
+        if (!inicio || !fim || fim < inicio) return 0;
         return differenceInCalendarDays(fim, inicio) + 1;
     };
 
-    // --- Função para buscar saldo (agora reutilizável) ---
-    // Usamos useCallback para evitar recriar a função a cada renderização,
-    // útil se for passada como dependência para outros useEffects.
     const fetchSaldo = useCallback(async () => {
-        // Resetar erro ao buscar saldo
-        setErroSolicitacao('');
-        setErroVenda('');
+        setIsLoadingSaldo(true);
+        setErrorPage(null); // Limpa erro geral
         try {
-            // *** MUDANÇA: Usando COLABORADOR_ID ***
-            const response = await fetch(`http://localhost:8080/api/ferias/saldo?colaboradorId=${COLABORADOR_ID}`);
-
-            if (response.ok) {
-                const saldo = await response.json();
-                setSaldoDisponivel(saldo);
-            } else {
-                // Tenta ler a mensagem de erro do backend
-                const errorData = await response.json().catch(() => null); // Evita erro se corpo não for JSON
-                const errorMessage = errorData?.erro || `Erro ${response.status} ao buscar saldo.`;
-                console.error('Erro ao buscar saldo de férias:', errorMessage);
-                setErroSolicitacao(errorMessage); // Mostra erro em algum lugar
-                setSaldoDisponivel(0); // Define um valor padrão em caso de erro
-            }
-        } catch (error) {
-            console.error('Erro de rede ao buscar saldo:', error);
-            setErroSolicitacao('Não foi possível conectar ao servidor para buscar saldo.');
+            const response = await api.get(`/api/ferias/saldo-calculado?colaboradorId=${userId}`);
+            setSaldoDisponivel(response.data?.saldo ?? 0); // Usa response.data e fallback 0
+        } catch (error: any) {
+            console.error("Erro ao buscar saldo:", error);
+            // setErrorPage(error.response?.data?.erro || "Falha ao buscar saldo.");
             setSaldoDisponivel(0);
+        } finally {
+            setIsLoadingSaldo(false);
         }
-    }, [COLABORADOR_ID]); // Depende do COLABORADOR_ID (se ele pudesse mudar)
+    }, [userId]);
 
-    // --- useEffect para buscar saldo inicial ---
+    const fetchMinhasSolicitacoes = useCallback(async () => {
+        setIsLoadingList(true);
+        setErrorPage(null); // Limpa erro geral
+        try {
+            const response = await api.get(`/api/ferias/solicitacoes/colaborador/${userId}`);
+            const dataFromApi: SolicitacaoFeriasData[] = response.data || [];
+
+            const mappedSolicitacoes: SolicitacaoExibida[] = dataFromApi.map(req => ({
+                 id: req.id,
+                 periodo: `${req.dataInicio ? formatDate(new Date(req.dataInicio + 'T00:00:00')) : '??'} - ${req.dataFim ? formatDate(new Date(req.dataFim + 'T00:00:00')) : '??'}`,
+                 status: req.status,
+                 observacao: req.observacao,
+                 comentarioGestor: req.comentarioGestor // Mapeia o comentário
+            }));
+            setMinhasSolicitacoes(mappedSolicitacoes);
+
+        } catch (err: any) {
+            console.error("Erro ao buscar minhas solicitações:", err);
+            const errorMsg = err.response?.data?.erro || err.message || "Falha ao buscar histórico.";
+            // setErrorPage(errorMsg);
+            setMinhasSolicitacoes([]);
+        } finally {
+            setIsLoadingList(false);
+        }
+    }, [userId]);
+
     useEffect(() => {
         fetchSaldo();
-    }, [fetchSaldo]); // Executa quando fetchSaldo é criado/atualizado
+        fetchMinhasSolicitacoes();
+    }, [fetchSaldo, fetchMinhasSolicitacoes, userId]);
 
-    // --- Função para SOLICITAR FÉRIAS (com API) ---
-    const handleSolicitarFerias = async () => {
-        setErroSolicitacao(''); // Limpa erros anteriores
+    useEffect(() => {
+        setUserId(localStorage.getItem('id'))
+    }, [userId])
 
-        // Validações básicas
-        if (!dataInicio || !dataFim) {
-            setErroSolicitacao('Selecione as datas de início e fim.');
-            return;
-        }
-        if (dataInicio >= dataFim) {
-            setErroSolicitacao('A data de início deve ser anterior à data de fim.');
-            return;
-        }
-        // Remover validação de 3 períodos aqui, backend deve cuidar disso se necessário
+    const handleSolicitarFerias = () => {
+        setErroSolicitacao('');
+        if (!dataInicio || !dataFim) { setErroSolicitacao('Selecione datas.'); return; }
+        if (calcularDiasFerias(dataInicio, dataFim) <= 0) { setErroSolicitacao('Data fim inválida.'); return; }
+        const dias = calcularDiasFerias(dataInicio, dataFim);
+        if (saldoDisponivel === null || dias > saldoDisponivel) { setErroSolicitacao('Saldo insuficiente.'); return; }
+        openRequestModal(); // Abre modal de confirmação
+    };
 
-        const diasSolicitados = calcularDiasFerias(dataInicio, dataFim);
-
-        // Validação de saldo (ainda útil no frontend para feedback rápido)
-        // Adicionado check para saldoDisponivel não ser null
-        if (saldoDisponivel === null || diasSolicitados > saldoDisponivel) {
-            setErroSolicitacao('Saldo de férias insuficiente para o período solicitado.');
-            return;
-        }
-
-        // *** INÍCIO DA INTEGRAÇÃO COM API ***
+    const confirmarSolicitarFerias = async () => {
+        if (!dataInicio || !dataFim) return;
+        setIsLoadingAction(true); setErroSolicitacao('');
         try {
-            // Formatar datas para AAAA-MM-DD
             const formattedDataInicio = format(dataInicio, 'yyyy-MM-dd');
             const formattedDataFim = format(dataFim, 'yyyy-MM-dd');
+            const payload: SolicitacaoFeriasPayload = { colaboradorId: userId, dataInicio: formattedDataInicio, dataFim: formattedDataFim, observacao: observacao, status: 'Pendente' };
 
-            // Montar o payload
-            const payload: SolicitacaoFeriasPayload = {
-                colaboradorId: COLABORADOR_ID,
-                dataInicio: formattedDataInicio,
-                dataFim: formattedDataFim,
-                observacao: observacao, // Incluir observação do estado
-                status: 'PENDENTE'     // Definir status inicial
-            };
+            await api.post('/solicitacao-ferias', payload);
 
-            console.log('Enviando solicitação de férias:', payload); // Log para debug
+            setDataInicio(null); setDataFim(null); setObservacao('');
+            closeRequestModal(); // Fecha modal de submissão
+            toast.success('Solicitação de férias enviada!');
+            fetchMinhasSolicitacoes(); // ATUALIZA A LISTA
+            fetchSaldo(); // ATUALIZA O SALDO
 
-            // Fazer a chamada POST
-            const response = await fetch('http://localhost:8080/api/ferias/agendar', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
-
-            // Tratar a resposta
-            if (response.ok) {
-                const solicitacaoSalva = await response.json();
-                console.log('Solicitação de férias salva:', solicitacaoSalva);
-
-                // Atualizar estado local APÓS sucesso
-                // Idealmente, buscaria a lista atualizada do backend,
-                // mas por simplicidade, adicionamos localmente.
-                const periodo = `${formatDate(dataInicio)} - ${formatDate(dataFim)}`; // Usa sua função formatDate
-                setFeriasAgendadas(prevAgendadas => [...prevAgendadas, { id: solicitacaoSalva.id, periodo: periodo, ...solicitacaoSalva }]); // Adiciona objeto completo se quiser
-                
-                // Limpar formulário
-                setDataInicio(null);
-                setDataFim(null);
-                setObservacao(''); // Limpar observação
-                setErroSolicitacao('');
-
-                // ATUALIZAR SALDO buscando do backend novamente (MAIS SEGURO)
-                fetchSaldo();
-                
-                alert('Solicitação de férias enviada com sucesso!');
-
-
-            } else {
-                // Erro do backend (ex: 400 Bad Request com JSON de erro)
-                const errorData = await response.json().catch(() => ({ erro: `Erro ${response.status} ao solicitar férias.` }));
-                console.error('Erro na solicitação de férias:', errorData.erro);
-                setErroSolicitacao(errorData.erro || 'Ocorreu um erro ao processar sua solicitação.');
-            }
-
-        } catch (error) {
-            // Erro de rede ou outro erro inesperado
-            console.error('Erro de rede ao solicitar férias:', error);
-            setErroSolicitacao('Erro ao conectar com o servidor para solicitar férias.');
-        }
-        // *** FIM DA INTEGRAÇÃO COM API ***
+        } catch (error: any) {
+            console.error("Erro ao enviar solicitação:", error)
+            setErroSolicitacao(error.response?.data?.erro || 'Falha na comunicação ao enviar.');
+        } finally { setIsLoadingAction(false); }
     };
 
-    // --- Função para VENDER DIAS (com API) ---
     const handleVenderDias = async () => {
-        setErroVenda(''); // Limpa erros anteriores
-
-        // Validações básicas
-        if (diasVendidos <= 0) { // Não precisa validar > 10 aqui, backend faz isso melhor
-             setErroVenda('Selecione a quantidade de dias a vender.');
-             return;
-        }
-        if (saldoDisponivel === null || diasVendidos > saldoDisponivel) {
-            setErroVenda('Saldo de férias insuficiente para vender.');
-            return;
-        }
-
-        // *** INÍCIO DA INTEGRAÇÃO COM API ***
+        if (diasVendidos <= 0) { setErroVenda('Selecione dias.'); return; }
+        if (saldoDisponivel === null || diasVendidos > saldoDisponivel) { setErroVenda('Saldo insuficiente.'); return; }
+        setIsLoadingAction(true); setErroVenda('');
         try {
-            // Montar payload
-            const payload: SolicitacaoAbonoPayload = {
-                colaboradorId: COLABORADOR_ID,
-                diasVendidos: diasVendidos,
-                status: 'PENDENTE' // Ou como seu backend esperar
-            };
+            const payload: SolicitacaoAbonoPayload = { colaboradorId: userId, diasVendidos: diasVendidos, status: 'PENDENTE' };
+            await api.post('/api/ferias/vender', payload); // Usa POST
 
-            console.log('Enviando solicitação de venda:', payload); // Log para debug
+            setDiasVendidos(0);
+            closeVendaModal();
+            toast.success('Solicitação de venda enviada!');
+            fetchSaldo(); // ATUALIZA O SALDO
 
-            // Fazer a chamada POST
-            const response = await fetch('http://localhost:8080/api/ferias/vender', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
-
-            // Tratar resposta
-            if (response.ok) {
-                const abonoSalvo = await response.json();
-                console.log('Solicitação de venda salva:', abonoSalvo);
-
-                // Atualizar estado local APÓS sucesso
-                setDiasSolicitadosVenda(prevVendidos => prevVendidos + diasVendidos); // Atualiza total vendido (se usar esse estado)
-                setDiasVendidos(0);   // Reseta contador
-                setErroVenda('');
-                closeModal();         // Fecha o modal
-
-                 // ATUALIZAR SALDO buscando do backend novamente
-                fetchSaldo();
-
-                alert('Solicitação de venda de férias enviada com sucesso!');
-
-            } else {
-                 // Erro do backend (ex: 400 Bad Request com JSON de erro - limite excedido, saldo insuficiente)
-                 const errorData = await response.json().catch(() => ({ erro: `Erro ${response.status} ao vender férias.` }));
-                 console.error('Erro na venda de férias:', errorData.erro);
-                 setErroVenda(errorData.erro || 'Ocorreu um erro ao processar sua solicitação de venda.');
-                 // Não fecha o modal para o usuário ver o erro
-            }
-
-        } catch (error) {
-             // Erro de rede ou outro erro inesperado
-             console.error('Erro de rede ao vender férias:', error);
-             setErroVenda('Erro ao conectar com o servidor para vender férias.');
-              // Não fecha o modal
-        }
-         // *** FIM DA INTEGRAÇÃO COM API ***
+        } catch (error: any) {
+             console.error("Erro ao vender férias:", error);
+             setErroVenda(error.response?.data?.erro || 'Falha na comunicação ao vender.');
+        } finally { setIsLoadingAction(false); }
     };
 
+    const incrementDias = () => { /* ... */ };
+    const decrementDias = () => { /* ... */ };
 
-    // --- Funções de incremento/decremento (ajustadas) ---
-    const incrementDias = () => {
-        // Validação simples no front, mas a real é no backend
-        if (saldoDisponivel !== null && saldoDisponivel > diasVendidos) {
-             // Remove validação de 10 dias aqui, deixa para o backend
-            setDiasVendidos(diasVendidos + 1);
-            setErroVenda(''); // Limpa erro ao incrementar com sucesso
-        } else if (saldoDisponivel !== null && saldoDisponivel <= diasVendidos) {
-             setErroVenda('Saldo insuficiente para vender mais dias.');
-        }
-    };
-
-    const decrementDias = () => {
-        if (diasVendidos > 0) {
-            setDiasVendidos(diasVendidos - 1);
-            setErroVenda(''); // Limpa erro ao decrementar
-        }
-    };
-
-    // --- Cálculos para exibição (sem alterações críticas) ---
     const diasSelecionados = dataInicio && dataFim ? calcularDiasFerias(dataInicio, dataFim) : 0;
-    const saldoNegativoVenda = diasVendidos > 0 ? diasVendidos : 0; // Usado no modal? Parece redundante
-    const saldoAposSelecao = saldoDisponivel !== null ? saldoDisponivel - diasSelecionados - saldoNegativoVenda : 0; // Saldo projetado
-
-    // --- Data mínima para o calendário ---
-    const hoje = new Date();
-    // Para garantir que apenas o dia seja considerado (ignora horas/minutos)
-    hoje.setHours(0, 0, 0, 0); 
+    const saldoProjetadoFerias = saldoDisponivel !== null && diasSelecionados > 0 ? saldoDisponivel - diasSelecionados : saldoDisponivel;
+    const saldoProjetadoVenda = saldoDisponivel !== null && diasVendidos > 0 ? saldoDisponivel - diasVendidos : saldoDisponivel;
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
 
     return (
         <TemplateWithFilter filter={undefined}>
             <main className='w-full flex-col px-4 overflow-hidden max-w-screen-md mx-auto pb-20'>
-                <h1 className="text-xl font-bold text-left md:text-center mb-4">Férias</h1>
-                {/* Exibição do Saldo */}
-                <div className="flex flex-col items-center justify-center mb-4 gap-2">
-                    <div className="text-center">
-                        <h2 className="text-lg font-semibold">Saldo disponível</h2>
-                        {saldoDisponivel === null ? (
-                            <p className="text-xl text-gray-500">Carregando...</p>
-                        ) : (
-                            <p className={`text-xl ${saldoDisponivel <= 0 ? 'text-red-500' : 'text-[#007D26]'}`}>{saldoDisponivel}d</p>
-                        )}
-                    </div>
-                    {/* Exibição de dias a serem descontados (visual) */}
-                    {(diasSelecionados > 0 || saldoNegativoVenda > 0) && saldoDisponivel !== null && (
-                         <div className="text-center">
-                           <p className="text-red-500 text-xl">-{diasSelecionados + saldoNegativoVenda}d</p>
-                           <p className="text-sm text-gray-600">(Saldo ficaria: {saldoAposSelecao}d)</p>
-                         </div>
-                     )}
+                <h1 className="text-xl font-bold text-left md:text-center mb-4">Minhas Férias</h1>
+
+                {errorPage && <p className="text-red-600 text-center mb-4 p-2 bg-red-100 border border-red-300 rounded-md">{errorPage}</p>}
+
+                <div className="mb-4 p-4 bg-gray-100 rounded-lg shadow text-center">
+                    <h2 className="text-lg font-semibold text-gray-700">Saldo disponível</h2>
+                     {isLoadingSaldo ? ( <p className="text-xl text-gray-500">...</p> )
+                      : ( <p className={`text-3xl font-bold ${saldoDisponivel !== null && saldoDisponivel <= 0 ? 'text-red-600' : 'text-green-600'}`}>{saldoDisponivel ?? '-'}d</p> )}
                 </div>
 
-                {/* Calendário */}
-                <div className="mb-4 bg-white shadow-md rounded-lg p-4 w-full md:w-fit mx-auto">
-                    <Calendar
-                        onChange={(value) => {
-                             // O valor pode ser Date, [Date, null], [null, Date] ou [Date, Date]
-                             if (Array.isArray(value)) {
-                                 setDataInicio(value[0]);
-                                 setDataFim(value[1]);
-                             } else {
-                                 // Caso selecione uma única data (se selectRange falhar ou for desabilitado)
-                                 setDataInicio(value);
-                                 setDataFim(null); // Reseta data fim se só uma data for selecionada
-                             }
-                             setErroSolicitacao(''); // Limpa erro ao mudar data
-                         }}
-                        selectRange={true}
-                        value={dataInicio && dataFim ? [dataInicio, dataFim] : dataInicio ? [dataInicio, null] : null} // Ajusta value para range
-                        // *** MUDANÇA: Bloquear datas passadas ***
-                        minDate={hoje}
-                        className="border rounded-lg p-2 w-full"
-                    />
-                </div>
-
-                {/* *** NOVO CAMPO DE OBSERVAÇÃO *** */}
-                <div className="mb-4 w-full max-w-md mx-auto">
-                     <label htmlFor="observacao" className="block text-sm font-medium text-gray-700 mb-1">
-                         Observação (opcional):
-                     </label>
-                     <textarea
-                         id="observacao"
-                         rows={3}
-                         className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md p-2"
-                         placeholder="Adicione uma observação para sua solicitação..."
-                         value={observacao}
-                         onChange={(e) => setObservacao(e.target.value)}
-                     />
+                 <div className="mb-6 p-4 border rounded-lg shadow bg-white">
+                     <h2 className="text-lg font-semibold mb-3 text-center text-gray-800">Solicitar Novas Férias</h2>
+                     <div className="mb-4 flex justify-center"><Calendar minDate={hoje} selectRange={true} value={dataInicio && dataFim ? [dataInicio, dataFim] : null} onChange={(d: any) => { if(Array.isArray(d)){setDataInicio(d[0]); setDataFim(d[1]);} setErroSolicitacao('');}} /></div>
+                     {diasSelecionados > 0 && saldoDisponivel !== null && (<p className="text-sm text-center text-blue-600 mb-3">({diasSelecionados} dias selecionados. Saldo ficaria: {saldoProjetadoFerias}d se aprovado)</p>)}
+                     <div className="mb-4"><label htmlFor="observacao" className="block text-sm font-medium text-gray-700 mb-1">Observação (opcional):</label><textarea id="observacao" rows={3} className="shadow-sm block w-full sm:text-sm border border-gray-300 rounded-md p-2" placeholder="Sua observação..." value={observacao} onChange={(e) => setObservacao(e.target.value)} /></div>
+                     <div className="flex justify-center"><button onClick={handleSolicitarFerias} className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 px-6 py-2 rounded-lg disabled:opacity-50" disabled={!dataInicio || !dataFim || isLoadingAction}>Abrir Confirmação</button></div>
+                     {erroSolicitacao && !isRequestModalVisible && <p className="text-red-600 mt-3 text-center">{erroSolicitacao}</p>}
                  </div>
-                 {/* ******************************* */}
 
-
-                <div className="mb-8 flex justify-center">
-                    <button onClick={handleSolicitarFerias} className="bg-[#BCC6E9] text-black h-9 px-6 py-2 rounded-lg">Solicitar Férias</button>
-                </div>
-
-                {/* Exibição de Erro da Solicitação */}
-                {erroSolicitacao && <p className="text-red-500 mt-2 text-center mb-4">{erroSolicitacao}</p>}
-
-                {/* Lista de Férias Agendadas (ou Solicitações) */}
-                 {feriasAgendadas.length > 0 && (
-                     <div className="mt-4 bg-white shadow-md rounded-lg p-4 w-full max-w-md mx-auto">
-                         <h3 className="text-lg font-semibold mb-2">Solicitações Enviadas:</h3>
-                         <ul>
-                            {/* Ajustar aqui se 'feriasAgendadas' guardar objetos */}
-                             {feriasAgendadas.map((item, index) => (
-                                <li key={item.id || index} className="mb-1 p-2 border border-gray-300 rounded-lg">
-                                    {item.periodo || item} {/* Exibe o período ou o objeto */}
-                                    {/* Poderia adicionar status aqui se item for o objeto completo */}
-                                    {item.status && <span className={`ml-2 text-xs font-semibold px-2 py-0.5 rounded ${item.status === 'PENDENTE' ? 'bg-yellow-200 text-yellow-800' : item.status === 'APROVADO' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>{item.status}</span>}
-                                </li>
-                             ))}
-                         </ul>
+                 <div className="mb-6 p-4 border rounded-lg shadow bg-white">
+                     <h2 className="text-lg font-semibold mb-3 text-center text-gray-800">Vender Dias</h2>
+                     <div className="w-full sm:w-52 h-10 flex items-center justify-between shadow-md mx-auto mb-4 border border-gray-300 rounded-lg bg-gray-50 p-2">
+                         <button onClick={decrementDias} className="bg-main-blue-color text-black font-bold px-4 py-1 rounded-md text-lg">-</button>
+                         <span className="text-xl font-semibold mx-4">{diasVendidos}</span>
+                         <button onClick={incrementDias} className="bg-main-blue-color text-black font-bold px-4 py-1 rounded-md text-lg">+</button>
                      </div>
-                 )}
+                     {diasVendidos > 0 && saldoDisponivel !== null && (<p className="text-sm text-center text-orange-600 mb-3">(Saldo ficaria: {saldoProjetadoVenda}d se aprovado)</p>)}
+                     <div className="flex justify-center"><button onClick={openVendaModal} className="bg-orange-500 hover:bg-orange-600 text-white font-bold h-10 px-6 py-2 rounded-lg disabled:opacity-50" disabled={diasVendidos <= 0 || isLoadingAction}>Solicitar Venda</button></div>
+                     {erroVenda && !isVendaModalVisible && <p className="text-red-600 mt-3 text-center">{erroVenda}</p>}
+                 </div>
 
+                 <div className="mb-6 p-4 border rounded-lg shadow bg-white">
+                     <h3 className="text-lg font-semibold mb-2 text-gray-800">Minhas Solicitações de Férias</h3>
+                     {isLoadingList && <p className='text-gray-500'>Carregando...</p>}
+                     {errorPage && !isLoadingList && <p className='text-red-500'>Erro ao carregar histórico.</p>}
+                     {!isLoadingList && minhasSolicitacoes.length === 0 && !errorPage && ( <p className='text-gray-500'>Nenhuma solicitação enviada.</p> )}
+                     {minhasSolicitacoes.length > 0 && (
+                         <ul className="list-none pl-0 space-y-2">
+                             {minhasSolicitacoes.map((item) => {
+                                 const isPendente = item.status === 'PENDENTE' || item.status === 'Pendente';
+                                 const isClickable = !isPendente; 
+                                 let statusBgColor = 'bg-gray-100 border-gray-300';
+                                 let statusTextColor = 'text-gray-700';
+                                 if (item.status === 'APROVADO') { statusBgColor = 'bg-green-100 border-green-300'; statusTextColor = 'text-green-800'; }
+                                 else if (item.status === 'REJEITADO') { statusBgColor = 'bg-red-100 border-red-300'; statusTextColor = 'text-red-800'; }
+                                 else if (isPendente) { statusBgColor = 'bg-yellow-100 border-yellow-300'; statusTextColor = 'text-yellow-800'; }
 
-                {/* Seção de Abonar/Vender Férias */}
-                <h1 className="text-xl font-bold text-left md:text-center mt-8 mb-4">Abonar Férias (Vender)</h1>
+                                 return (
+                                     <li
+                                         key={item.id}
+                                         className={`p-2 border rounded-md flex justify-between items-center ${statusBgColor} ${isClickable ? 'cursor-pointer hover:shadow-md hover:border-blue-400' : ''}`}
+                                         onClick={isClickable ? () => openDecisaoModal(item) : undefined}
+                                         title={isClickable ? "Clique para ver detalhes da decisão" : ""}
+                                     >
+                                         <span className='text-sm font-medium text-gray-900'>{item.periodo}</span>
+                                         {item.status && <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusTextColor}`}>{item.status}</span>}
+                                     </li>
+                                 );
+                            })}
+                         </ul>
+                     )}
+                 </div>
 
-                <div className="w-full md:w-64 h-9 flex items-center justify-between shadow-md mx-auto mb-4 border border-gray-300 rounded-lg bg-white p-2">
-                    {/* Use a classe de cor que você tinha/preferir */}
-                    <button onClick={decrementDias} className="bg-main-blue-color text-black px-4 py-2 rounded-lg">-</button>
-                    <span className="text-xl">{diasVendidos}</span>
-                    {/* Restaurando o disabled e a classe de cor */}
-                    <button
-                        onClick={incrementDias}
-                        className="bg-main-blue-color text-black px-4 py-2 rounded-lg"
-                        // Você pode manter ou remover este disabled, a lógica no onClick já valida o saldo
-                        // disabled={saldoDisponivel !== null && diasVendidos >= saldoDisponivel}
-                        >
-                        +
-                    </button>
-                </div>
-
-                 {/* Exibição do Saldo ao Vender (repetido, pode simplificar) */}
-                 {/* <div className="mt-4 flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
-                     ... (pode remover essa repetição de saldo) ...
-                 </div> */}
-
-                {erroVenda && <p className="text-red-500 mt-2 text-center">{erroVenda}</p>}
-
-                <div className="flex justify-center mb-8">
-                     {/* Desabilitar botão se não selecionou dias > 0 */}
-                    <button onClick={openModal} className="bg-[#BCC6E9] text-black h-9 px-6 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled={diasVendidos <= 0}>Solicitar Venda</button>
-                </div>
             </main>
+             {isRequestModalVisible && dataInicio && dataFim && (
+                 <Modal title='Confirmar Solicitação de Férias' onClose={closeRequestModal}>
+                     <div className='mb-6 text-left space-y-2'>
+                         <p><strong>Período:</strong> {formatDate(dataInicio)} - {formatDate(dataFim)}</p>
+                         <p><strong>Dias Solicitados:</strong> {diasSelecionados} dia(s)</p>
+                         {observacao && <p><strong>Observação:</strong> {observacao}</p>}
+                         <p className='pt-3 font-semibold'>Confirmar envio da solicitação?</p>
+                         {erroSolicitacao && <p className="text-red-600 mt-4 text-center font-semibold">{erroSolicitacao}</p>}
+                     </div>
+                     <div className='flex justify-center'>
+                         <button className='main-func-color px-8 py-2 rounded-lg mr-4 cursor-pointer disabled:opacity-70 main-white-text' onClick={confirmarSolicitarFerias} disabled={isLoadingAction}>{isLoadingAction ? 'Enviando...' : 'Confirmar'}</button>
+                         <button className='sec-func-color px-8 py-2 rounded-lg cursor-pointer disabled:opacity-70 main-white-text' onClick={closeRequestModal} disabled={isLoadingAction}>Cancelar</button>
+                     </div>
+                 </Modal>
+             )}
 
-            {isModalVisible && (
-                <Modal title='Confirmar Venda de Dias de Férias' onClose={closeModal}>
-                    <div className='mb-[60px]'>
-                        <p>Deseja vender {diasVendidos} dias de férias?</p>
-                    </div>
-                    <div className='text-white'>
-                        <button className='main-func-color px-8 py-2 rounded-lg mr-4 cursor-pointer' onClick={handleVenderDias}>Confirmar</button>
-                        <button className='sec-func-color px-8 py-2 rounded-lg cursor-pointer' onClick={closeModal}>Cancelar</button>
-                    </div>
-                </Modal>
+             {isVendaModalVisible && (
+                <Modal title='Confirmar Venda de Dias' onClose={closeVendaModal}>
+                     <div className='mb-6 text-center'>
+                         <p>Deseja realmente solicitar a venda de <strong className='text-xl'>{diasVendidos}</strong> dia(s) de férias?</p>
+                         {erroVenda && <p className="text-red-600 mt-4 text-center font-semibold">{erroVenda}</p>}
+                     </div>
+                     <div className='flex justify-center'>
+                         <button className='main-func-color px-8 py-2 rounded-lg mr-4 cursor-pointer disabled:opacity-70 main-white-text' onClick={handleVenderDias} disabled={isLoadingAction}>{isLoadingAction ? 'Enviando...' : 'Confirmar'}</button>
+                         <button className='sec-func-color px-8 py-2 rounded-lg cursor-pointer disabled:opacity-70 main-white-text' onClick={closeVendaModal} disabled={isLoadingAction}>Cancelar</button>
+                     </div>
+                 </Modal>
             )}
 
-            {/* Navegação (sem alterações funcionais) */}
-            <nav className="fixed bottom-0 w-full bg-main-blue-color text-white p-4">
-                {/* ... botões de navegação ... */}
-            </nav>
+             {isDecisaoModalVisible && selectedDecisao && (
+                 <Modal title="Detalhes da Decisão da Solicitação" onClose={closeDecisaoModal}>
+                     <div className='mb-6 text-left space-y-2'>
+                         <p><strong>Período:</strong> {selectedDecisao.periodo}</p>
+                         <p><strong>Status:</strong>
+                            <span className={`ml-2 font-semibold ${selectedDecisao.status === 'APROVADO' ? 'text-green-700' : selectedDecisao.status === 'REJEITADO' ? 'text-red-700' : 'text-gray-700'}`}>
+                                {selectedDecisao.status}
+                            </span>
+                         </p>
+                         {selectedDecisao.observacao && <p className='text-sm text-gray-600'><strong>Sua Observação Enviada:</strong> {selectedDecisao.observacao}</p>}
+                         <div className='mt-3 pt-3 border-t'>
+                            <p className='text-sm font-medium text-gray-800 mb-1'>Comentário do Gestor:</p>
+                            {selectedDecisao.comentarioGestor ? (
+                                <p className='text-sm text-gray-700 whitespace-pre-wrap'>{selectedDecisao.comentarioGestor}</p>
+                            ) : (
+                                <p className='text-sm text-gray-500 italic'>Nenhum comentário adicionado.</p>
+                            )}
+                         </div>
+                     </div>
+                     <div className='flex justify-end'>
+                         <button className='sec-func-color px-6 py-2 rounded-lg cursor-pointeruserId main-white-text' onClick={closeDecisaoModal}> Fechar </button>
+                     </div>
+                 </Modal>
+             )}
         </TemplateWithFilter>
     );
 }
 
-export default Ferias;
+export default Ferias; // Exporta como Ferias
