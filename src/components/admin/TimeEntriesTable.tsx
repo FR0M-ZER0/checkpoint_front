@@ -13,7 +13,7 @@ import { BatteryPlus, ChevronLeft, ChevronRight, Coffee, DoorOpen, Edit, LogOut,
 import { EditTimeEntryDialog } from "./EditTimeEntryDialog"
 import { DeleteTimeEntryDialog } from "./DeleteTimeEntryDialog"
 import api from "@/services/api"
-import { formatUSDateToBR, formatUSTimeToBR } from "@/utils/formatter"
+import { formatUSDateToBR, formatUSTimeToBR, formatDate } from "@/utils/formatter"
 
 export type EntryType = "entrada" | "saida_almoco" | "retorno_almoco" | "saida"
 
@@ -209,7 +209,7 @@ export function TimeEntriesTable({ searchQuery, date, markingType, colaborador }
 												<span>{name}</span>
 											</div>
 										</TableCell>
-										<TableCell>{formatUSDateToBR(entry.date)}</TableCell>
+										<TableCell>{formatDate(entry.date)}</TableCell>
 										<TableCell>{formatUSTimeToBR(entry.time)}</TableCell>
 										<TableCell className="text-right">
 											<DropdownMenu>
