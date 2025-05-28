@@ -472,7 +472,7 @@ export default function RelatoriosPage() {
 										) : (
 											faltasTableData.map((falta) => (
 												<TableRow key={falta.id}>
-													<TableCell className="font-medium">{falta.colaborador?.nome ?? "Desconhecido"}</TableCell>
+													<TableCell className="font-medium">{falta.nomeColaborador ?? "Desconhecido"}</TableCell>
 													<TableCell>{new Date(falta.criadoEm).toLocaleDateString()}</TableCell>
 													<TableCell>
 														<Badge variant={falta.tipo === "Ausencia" ? "destructive" : "outline"}>
