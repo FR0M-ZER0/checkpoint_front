@@ -90,54 +90,6 @@ function getEntryTypeInfo(type: EntryType) {
 	}
 }
 
-const feriasTableData = [
-	{
-		id: 1,
-		employee: "Ana Silva",
-		startDate: "01/06/2025",
-		endDate: "20/06/2025",
-		days: 20,
-		status: "Agendada",
-		type: "Futura",
-	},
-	{
-		id: 2,
-		employee: "Carlos Oliveira",
-		startDate: "15/03/2025",
-		endDate: "29/03/2025",
-		days: 15,
-		status: "Concluída",
-		type: "Passada",
-	},
-	{
-		id: 3,
-		employee: "Mariana Santos",
-		startDate: "05/08/2025",
-		endDate: "19/08/2025",
-		days: 15,
-		status: "Agendada",
-		type: "Futura",
-	},
-	{
-		id: 4,
-		employee: "Pedro Costa",
-		startDate: "10/02/2025",
-		endDate: "24/02/2025",
-		days: 15,
-		status: "Concluída",
-		type: "Passada",
-	},
-	{
-		id: 5,
-		employee: "Juliana Lima",
-		startDate: "15/07/2025",
-		endDate: "29/07/2025",
-		days: 15,
-		status: "Agendada",
-		type: "Futura",
-	},
-]
-
 const folgasTableData = [
 	{
 		id: 1,
@@ -187,7 +139,8 @@ export default function RelatoriosPage() {
 	const [reportType, setReportType] = useState<string>("")
 
 	const [presencaDate, setPresencaDate] = useState<Date>()
-	const [feriasDate, setFeriasDate] = useState<Date>()
+	const [feriasStartDate, setFeriasStartDate] = useState<Date>()
+	const [feriasEndDate, setFeriasEndDate] = useState<Date>()	
 	const [folgasDate, setFolgasDate] = useState<Date>()
 
 	const [faltasDate, setFaltasDate] = useState<Date>()
@@ -196,6 +149,9 @@ export default function RelatoriosPage() {
 	const [faltasTableData, setFaltasTableData] = useState<any[]>([])
 
 	const [attendanceData, setAttendanceData] = useState<Employee[]>([])
+
+	const [feriasStatus, setFeriasStatus] = useState("todos")
+	const [feriasTableData, setFeriasTableData] = useState([])
 
 	const fetchAttendanceData = async (date?: Date) => {
 		try {
@@ -228,6 +184,35 @@ export default function RelatoriosPage() {
 		}
 	}
 
+	const fetchFeriasData = async () => {
+		try {
+			const params: any = {}
+
+			if (feriasStartDate && feriasEndDate) {
+				params.dataInicio = feriasStartDate.toISOString().split("T")[0]
+				params.dataFim = feriasEndDate.toISOString().split("T")[0]
+			}
+
+			if (feriasStatus !== "todos") {
+				if (feriasStatus === "agendadas") params.statusFiltro = "AGENDADA"
+				if (feriasStatus === "concluidas") params.statusFiltro = "CONCLUIDA"
+			}
+
+			const response = await api.get("/api/ferias/todas", { params })
+			const mapped = response.data.map((item: any) => ({
+				id: item.id || item.nomeColaborador + item.dataInicio,
+				employee: item.nomeColaborador,
+				startDate: format(new Date(item.dataInicio), "dd/MM/yyyy"),
+				endDate: format(new Date(item.dataFim), "dd/MM/yyyy"),
+				days: item.diasTotais,
+				status: item.status.charAt(0).toUpperCase() + item.status.slice(1).toLowerCase(),
+				type: item.status === "CONCLUIDA" ? "Passada" : "Futura",
+			}))
+			setFeriasTableData(mapped)
+		} catch (err) {
+			console.error("Erro ao buscar dados de férias:", err)
+		}
+	}
 
 	useEffect(() => {
 		fetchAttendanceData(presencaDate)
@@ -241,6 +226,12 @@ export default function RelatoriosPage() {
 		setReportType(type)
 		setIsReportDialogOpen(true)
 	}
+
+	useEffect(() => {
+		if (feriasStartDate && feriasEndDate) {
+			fetchFeriasData()
+		}
+	}, [feriasStartDate, feriasEndDate, feriasStatus])
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -513,45 +504,52 @@ export default function RelatoriosPage() {
 						<CardContent>
 							<div className="mb-6 grid gap-4 md:grid-cols-4">
 								<div className="flex flex-col gap-2">
-									<label className="text-sm font-medium">Data</label>
+									<label className="text-sm font-medium">Data Início</label>
 									<Popover>
 										<PopoverTrigger asChild>
 											<Button
 												variant="outline"
-												className={cn(
-													"w-full justify-start text-left font-normal",
-													!feriasDate && "text-muted-foreground",
-												)}
+												className={cn("w-full justify-start text-left font-normal", !feriasStartDate && "text-muted-foreground")}
 											>
 												<CalendarIcon className="mr-2 h-4 w-4" />
-												{feriasDate ? format(feriasDate, "PPP", { locale: ptBR }) : "Selecionar data"}
+												{feriasStartDate ? format(feriasStartDate, "PPP", { locale: ptBR }) : "Selecionar data de início"}
 											</Button>
 										</PopoverTrigger>
 										<PopoverContent className="w-auto p-0">
 											<Calendar
 												mode="single"
-												selected={feriasDate}
-												onSelect={setFeriasDate}
+												selected={feriasStartDate}
+												onSelect={setFeriasStartDate}
 												initialFocus
 												locale={ptBR}
 											/>
 										</PopoverContent>
 									</Popover>
 								</div>
+
 								<div className="flex flex-col gap-2">
-									<label className="text-sm font-medium">Período</label>
-									<Select defaultValue="todos">
-										<SelectTrigger>
-											<SelectValue placeholder="Selecione o período" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="todos">Todos</SelectItem>
-											<SelectItem value="agendadas">Agendadas</SelectItem>
-											<SelectItem value="concluidas">Concluídas</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-							</div>
+									<label className="text-sm font-medium">Data Fim</label>
+									<Popover>
+										<PopoverTrigger asChild>
+											<Button
+												variant="outline"
+												className={cn("w-full justify-start text-left font-normal", !feriasEndDate && "text-muted-foreground")}
+											>
+												<CalendarIcon className="mr-2 h-4 w-4" />
+												{feriasEndDate ? format(feriasEndDate, "PPP", { locale: ptBR }) : "Selecionar data de fim"}
+											</Button>
+										</PopoverTrigger>
+										<PopoverContent className="w-auto p-0">
+											<Calendar
+												mode="single"
+												selected={feriasEndDate}
+												onSelect={setFeriasEndDate}
+												initialFocus
+												locale={ptBR}
+											/>
+										</PopoverContent>
+									</Popover>
+								</div>							</div>
 							<div className="space-y-6">
 								<div>
 									<div className="flex items-center gap-2 mb-4">
